@@ -3,17 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ZSAGames — Zespół Szkół Akademickich w Łomży</title>
+  <title>ZSAGames — Zespół Szkół Akademickich w Łomży (PS4 System Menu)</title>
   <style>
     :root {
-      --xmb-white: #f4f7ff;
-      --xmb-dim: rgba(230, 238, 255, 0.48);
-      --xmb-gold: #e6c15a;
-      --cat-spacing: 138px;
-      --item-spacing: 92px;
-      --active-item-gap: 34px;
-      --cross-x: 27vw;
-      --cross-y: 36vh;
+      --ps4-white: #ffffff;
+      --ps4-plus-gold: #f5c418;
+      --ps4-blue-dot: #2ea8ff;
+      --ps4-accent: #3aa6ff;
+      --ps4-focus-cyan: #7ec8ff;
+      --ps4-rest-orange: #ff8c1a;
+
+      /* Wymiary kafelków 1:1 jak na PS4 */
+      --tile-size: 168px;
+      --tile-active-size: 248px;
+      --tile-bottom-bar: 46px;
+      --tile-gap: 10px;
+
+      /* Pozycja zakotwiczenia aktywnego kafelka (Focus Slot) */
+      --focus-x: 240px;
+      --ribbon-y: 162px;
+
+      /* Podgląd małych kafelków pod folderem */
+      --preview-tile-size: 138px;
     }
 
     * {
@@ -29,13 +40,15 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background-color: #061024;
-      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-      color: var(--xmb-white);
+      background-color: #001c52;
+      font-family: "Segoe UI", "SST", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ps4-white);
       touch-action: none;
+      -webkit-font-smoothing: antialiased;
     }
 
-    #xmb-wave-canvas {
+    /* ================= TŁO CANVAS XMB/PS4 + CUSTOM GAME THEME (IMG / GIF / VIDEO) ================= */
+    #ps4-wave-canvas {
       position: fixed;
       inset: 0;
       width: 100%;
@@ -44,346 +57,1028 @@
       pointer-events: none;
     }
 
-    .ps3-vignette {
+    .game-theme-backdrop {
       position: fixed;
       inset: 0;
       z-index: 1;
       pointer-events: none;
-      background:
-        radial-gradient(circle at 65% 42%, rgba(42, 98, 196, 0.16) 0%, transparent 60%),
-        radial-gradient(circle at 50% 50%, transparent 55%, rgba(2, 5, 14, 0.72) 100%);
-    }
-
-    .top-bar {
-      position: fixed;
-      top: 26px;
-      left: 38px;
-      right: 38px;
-      z-index: 20;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      pointer-events: none;
-    }
-
-    .zsa-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      pointer-events: auto;
-      text-decoration: none;
-      color: var(--xmb-white);
-      opacity: 0.9;
-      transition: opacity 0.2s ease;
-    }
-
-    .zsa-brand:hover {
-      opacity: 1;
-    }
-
-    .zsa-crest {
-      width: 34px;
-      height: 34px;
-      border-radius: 7px;
-      background: linear-gradient(145deg, #1b3b73, #0b1936);
-      border: 1px solid rgba(230, 193, 90, 0.65);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.75rem;
-      letter-spacing: 0.5px;
-      color: var(--xmb-gold);
-    }
-
-    .zsa-brand-text {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .zsa-brand-title {
-      font-size: 0.95rem;
-      font-weight: 400;
-      letter-spacing: 1.4px;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
-    }
-
-    .zsa-brand-sub {
-      font-size: 0.66rem;
-      color: rgba(230, 238, 255, 0.65);
-      letter-spacing: 0.8px;
-    }
-
-    .ps3-clock-pill {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 5px 16px 5px 18px;
-      border-radius: 20px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      font-size: 0.92rem;
-      font-weight: 300;
-      letter-spacing: 1.2px;
-      color: #ffffff;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
-    }
-
-    .ps3-clock-spinner {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      border: 1.6px solid rgba(255, 255, 255, 0.85);
-      border-top-color: transparent;
-      animation: ps3Spin 4s linear infinite;
-    }
-
-    @keyframes ps3Spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .xmb-viewport {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      z-index: 10;
-    }
-
-    .xmb-categories-track {
-      position: absolute;
-      top: var(--cross-y);
-      left: var(--cross-x);
-      display: flex;
-      align-items: center;
-      will-change: transform;
-      transition: transform 0.32s cubic-bezier(0.2, 0.85, 0.25, 1);
-    }
-
-    .xmb-category {
-      width: var(--cat-spacing);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      opacity: 0.42;
-      transform: translate3d(0, 0, 0) scale(0.84);
-      transition: opacity 0.26s ease, transform 0.28s cubic-bezier(0.2, 0.85, 0.25, 1);
-    }
-
-    .xmb-category.active {
-      opacity: 1;
-      transform: translate3d(0, -6px, 0) scale(1.08);
-    }
-
-    .cat-icon {
-      width: 54px;
-      height: 54px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.75));
-    }
-
-    .xmb-category.active .cat-icon {
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.75));
-    }
-
-    .cat-icon svg {
-      width: 40px;
-      height: 40px;
-      stroke: currentColor;
-      stroke-width: 1.6;
-      fill: rgba(255, 255, 255, 0.12);
-    }
-
-    .cat-label {
-      margin-top: 6px;
-      font-size: 0.78rem;
-      font-weight: 400;
-      letter-spacing: 0.6px;
-      text-align: center;
-      white-space: nowrap;
       opacity: 0;
-      transform: translateY(-4px);
-      transition: opacity 0.22s ease, transform 0.22s ease;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transform: translate3d(0, 0, 0) scale(1.03);
+      will-change: opacity, transform;
+      transition: opacity 0.48s ease, transform 0.58s cubic-bezier(0.2, 0.85, 0.25, 1);
+      overflow: hidden;
     }
 
-    .xmb-category.active .cat-label {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .xmb-column {
+    /* Element wideo dla tła gry (MP4 / WebM) — zawsze wyciszony */
+    .game-theme-video {
       position: absolute;
-      left: var(--cross-x);
-      top: 0;
-      width: 0;
-      height: 100vh;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
       pointer-events: none;
     }
 
-    .xmb-item {
-      position: absolute;
-      left: 26px;
-      top: 0;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      width: 460px;
-      cursor: pointer;
-      pointer-events: auto;
-      will-change: transform, opacity;
-      transition:
-        transform 0.32s cubic-bezier(0.2, 0.85, 0.25, 1),
-        opacity 0.26s ease;
+    .game-theme-video.visible {
+      display: block;
     }
 
-    .item-thumb-wrap {
-      position: relative;
-      width: 112px;
-      height: 64px;
-      border-radius: 6px;
-      overflow: hidden;
-      flex-shrink: 0;
-      background: #102042;
-      border: 1.5px solid rgba(255, 255, 255, 0.24);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.65);
-      transition: transform 0.26s ease, border-color 0.26s ease, box-shadow 0.26s ease;
-    }
-
-    .item-thumb-wrap::after {
+    .game-theme-backdrop::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(165deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.04) 45%, transparent 50%);
+      background:
+        radial-gradient(circle at 30% 35%, rgba(0, 12, 32, 0.38) 0%, rgba(0, 6, 18, 0.86) 85%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 8, 22, 0.52) 45%, rgba(0, 5, 14, 0.94) 100%);
       pointer-events: none;
     }
 
-    .item-thumb {
+    body.state-submenu .game-theme-backdrop {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    /* ================= TRYB SPOCZYNKU / SLEEP MODE OVERLAY (ZOPTYMALIZOWANY POD LOW-END PC) ================= */
+    .ps4-sleep-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      background: radial-gradient(circle at 50% 45%, rgba(7, 15, 32, 0.96) 0%, rgba(1, 4, 10, 0.99) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      will-change: opacity;
+      transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      cursor: pointer;
+    }
+
+    body.state-sleep .ps4-sleep-overlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    body.state-sleep .ps4-stage,
+    body.state-sleep .ps4-top-bar,
+    body.state-sleep .ps4-bottom-prompts {
+      opacity: 0.15;
+      transform: translate3d(0, 0, 0) scale(0.985);
+      pointer-events: none;
+    }
+
+    /* Pomarańczowy pasek świetlny PS4 Rest Mode */
+    .sleep-lightbar {
+      width: min(520px, 72vw);
+      height: 4px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, transparent 0%, var(--ps4-rest-orange) 50%, transparent 100%);
+      box-shadow: 0 0 22px var(--ps4-rest-orange), 0 0 44px rgba(255, 140, 26, 0.6);
+      margin-bottom: 34px;
+      animation: ps4RestPulse 3.2s ease-in-out infinite;
+    }
+
+    body.tab-hidden .sleep-lightbar,
+    body.tab-hidden .sleep-prompt {
+      animation-play-state: paused;
+    }
+
+    @keyframes ps4RestPulse {
+      0%, 100% { opacity: 0.28; transform: scaleX(0.88); }
+      50% { opacity: 1; transform: scaleX(1.04); }
+    }
+
+    .sleep-power-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 140, 26, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      color: var(--ps4-rest-orange);
+      box-shadow: 0 0 24px rgba(255, 140, 26, 0.25);
+    }
+
+    .sleep-power-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    .sleep-status-tag {
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 2.2px;
+      color: var(--ps4-rest-orange);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .sleep-active-app {
+      font-size: 1.45rem;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.92);
+      margin-bottom: 28px;
+      letter-spacing: 0.5px;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .sleep-prompt {
+      font-size: 1.25rem;
+      font-weight: 400;
+      letter-spacing: 0.8px;
+      color: #ffffff;
+      padding: 12px 32px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+      animation: promptBreathe 2.6s ease-in-out infinite;
+      transition: background 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+    }
+
+    .ps4-sleep-overlay:hover .sleep-prompt {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: #ffffff;
+      transform: scale(1.03);
+    }
+
+    @keyframes promptBreathe {
+      0%, 100% { opacity: 0.72; }
+      50% { opacity: 1; }
+    }
+
+    /* ================= GÓRNY PASEK STATUSU PS4 ================= */
+    .ps4-top-bar {
+      position: fixed;
+      top: 34px;
+      left: 64px;
+      right: 64px;
+      height: 42px;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 300;
+      letter-spacing: 0.4px;
+      will-change: transform, opacity;
+      transition: transform 0.42s cubic-bezier(0.2, 0.85, 0.25, 1), opacity 0.34s ease;
+    }
+
+    body.state-folder .ps4-top-bar {
+      opacity: 0.42;
+    }
+
+    body.state-submenu .ps4-top-bar {
+      transform: translate3d(0, -80px, 0);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .top-left-icons {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .ps-plus-icon {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .ps-plus-icon:hover {
+      transform: scale(1.12);
+    }
+
+    .ps-plus-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ps-notif-circle {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #ffffff;
+      color: #003791;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.92rem;
+      font-family: Georgia, serif;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.28);
+    }
+
+    .top-center-status {
+      display: flex;
+      align-items: center;
+      gap: 64px;
+    }
+
+    .status-friends {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #ffffff;
+    }
+
+    .friends-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      margin-bottom: 2px;
+    }
+
+    .online-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ps4-blue-dot);
+      box-shadow: 0 0 6px var(--ps4-blue-dot);
+    }
+
+    .friends-glyph {
+      width: 24px;
+      height: 24px;
+      fill: #ffffff;
+    }
+
+    .status-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+    }
+
+    .status-user:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .user-avatar-wrap {
+      width: 32px;
+      height: 32px;
+      border-radius: 2px;
+      overflow: hidden;
+      background: #0b1d48;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .user-avatar-wrap img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
 
-    .xmb-item.active .item-thumb-wrap {
-      transform: scale(1.16);
-      border-color: #ffffff;
-      box-shadow:
-        0 0 16px rgba(255, 255, 255, 0.65),
-        0 8px 22px rgba(0, 0, 0, 0.8);
+    .user-name {
+      font-size: 1.08rem;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.94);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
     }
 
-    .item-meta {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-width: 0;
+    .ps-plus-mini {
+      width: 17px;
+      height: 17px;
     }
 
-    .item-title {
-      font-size: 1.05rem;
-      font-weight: 400;
-      letter-spacing: 0.4px;
-      color: var(--xmb-white);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
-      transition: font-size 0.22s ease;
+    .top-right-clock {
+      font-size: 1.24rem;
+      font-weight: 300;
+      letter-spacing: 0.6px;
+      color: rgba(255, 255, 255, 0.96);
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
     }
 
-    .xmb-item.active .item-title {
-      font-size: 1.28rem;
-      font-weight: 500;
-      color: #ffffff;
+    /* ================= GŁÓWNA SCENA I WSTĘGI KAFELKÓW ================= */
+    .ps4-stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10;
+      transition: transform 0.45s cubic-bezier(0.2, 0.85, 0.25, 1), opacity 0.45s ease;
     }
 
-    .item-sub {
-      font-size: 0.78rem;
-      color: rgba(220, 232, 255, 0.72);
-      margin-top: 3px;
-      letter-spacing: 0.3px;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+    .ps4-top-guide {
+      position: absolute;
+      top: var(--ribbon-y);
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.28) 16%, rgba(255,255,255,0.2) 84%, transparent 100%);
+      pointer-events: none;
+      transition: opacity 0.35s ease;
     }
 
-    .info-side-card {
-      position: fixed;
-      left: calc(var(--cross-x) + 410px);
-      top: calc(var(--cross-y) + 92px);
-      width: 285px;
-      padding: 14px 16px;
-      border-radius: 8px;
-      background: linear-gradient(160deg, rgba(16, 32, 66, 0.94) 0%, rgba(7, 15, 34, 0.96) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.75);
-      z-index: 25;
+    body.state-submenu .ps4-top-guide {
+      opacity: 0;
+    }
+
+    /* Zoptymalizowane warstwy wstęg (bez kosztownego filter: brightness na całym drzewie DOM) */
+    .main-ribbon-layer {
+      position: absolute;
+      top: var(--ribbon-y);
+      left: 0;
+      width: 100%;
+      z-index: 15;
+      will-change: transform, opacity;
+      transition:
+        transform 0.4s cubic-bezier(0.2, 0.85, 0.25, 1),
+        opacity 0.35s ease;
+    }
+
+    body.state-folder .main-ribbon-layer {
+      transform: translate3d(0, -148px, 0);
+      opacity: 0.38;
+    }
+
+    body.state-submenu:not(.from-folder) .main-ribbon-layer {
+      transform: translate3d(0, -252px, 0);
+      opacity: 0.35;
+    }
+
+    body.state-submenu.from-folder .main-ribbon-layer {
+      transform: translate3d(0, -390px, 0);
       opacity: 0;
       pointer-events: none;
-      transform: translate3d(-10px, 0, 0);
-      transition: opacity 0.24s ease, transform 0.24s ease;
     }
 
-    .info-side-card.visible {
+    .ribbon-track {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--tile-gap);
+      will-change: transform;
+      backface-visibility: hidden;
+      transition: transform 0.3s cubic-bezier(0.2, 0.88, 0.25, 1);
+    }
+
+    /* ================= POJEDYNCZY KAFELEK PS4 (ACCURATE PS4 EFFECTS) ================= */
+    @keyframes ps4FocusPulse {
+      0%, 100% {
+        box-shadow:
+          0 0 16px rgba(255, 255, 255, 0.45),
+          0 0 30px rgba(80, 180, 255, 0.28),
+          0 18px 36px rgba(0, 0, 0, 0.65);
+        border-color: #ffffff;
+      }
+      50% {
+        box-shadow:
+          0 0 24px rgba(255, 255, 255, 0.82),
+          0 0 42px rgba(102, 198, 255, 0.55),
+          0 18px 36px rgba(0, 0, 0, 0.65);
+        border-color: #f2f9ff;
+      }
+    }
+
+    @keyframes ps4TileSheen {
+      0% { transform: translate3d(-135%, 0, 0) skewX(-24deg); opacity: 0; }
+      25% { opacity: 0.55; }
+      100% { transform: translate3d(220%, 0, 0) skewX(-24deg); opacity: 0; }
+    }
+
+    .ps4-tile {
+      position: relative;
+      width: var(--tile-size);
+      height: var(--tile-size);
+      flex-shrink: 0;
+      cursor: pointer;
+      background: #003791;
+      backface-visibility: hidden;
+      transition:
+        width 0.26s cubic-bezier(0.2, 0.85, 0.25, 1),
+        height 0.26s cubic-bezier(0.2, 0.85, 0.25, 1),
+        transform 0.16s ease,
+        background 0.22s ease;
+    }
+
+    .ps4-tile:not(.active):hover {
+      transform: translate3d(0, -3px, 0);
+    }
+
+    .ps4-tile-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: linear-gradient(180deg, #0047b3 0%, #002b75 100%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    /* Subtelny szklany połysk PS4 na kafelku po najechaniu */
+    .ps4-tile-inner::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 48%;
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.32) 50%, transparent 100%);
+      transform: translate3d(-135%, 0, 0) skewX(-24deg);
+      pointer-events: none;
+    }
+
+    .ps4-tile.active .ps4-tile-inner::after {
+      animation: ps4TileSheen 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .ps4-tile.active {
+      width: var(--tile-active-size);
+      height: calc(var(--tile-active-size) + var(--tile-bottom-bar));
+      z-index: 20;
+      background: linear-gradient(180deg, rgba(16, 78, 185, 0.62) 0%, rgba(0, 42, 122, 0.78) 100%);
+      border: 3px solid #ffffff;
+      padding: 5px 5px 0 5px;
+      display: flex;
+      flex-direction: column;
+      animation: ps4FocusPulse 2.6s ease-in-out infinite;
+    }
+
+    /* Efekt wciśnięcia przycisku X / Enter na aktywnym kafelku */
+    .ps4-tile.active.pressed {
+      transform: scale(0.965);
+    }
+
+    body.state-folder .main-ribbon-layer .ps4-tile.active,
+    body.state-submenu .ps4-tile.active {
+      animation: none;
+      border-color: rgba(255, 255, 255, 0.35);
+      box-shadow: none;
+    }
+
+    body.state-folder .main-ribbon-layer .ps4-tile.active .tile-side-title,
+    body.state-submenu .ps4-tile.active .tile-side-title {
+      opacity: 0;
+    }
+
+    .ps4-tile.active .ps4-tile-inner {
+      width: 100%;
+      height: calc(var(--tile-active-size) - 10px);
+      border: none;
+    }
+
+    /* Dolny pasek aktywnego kafelka (Start / Strzałka w dół) */
+    .tile-bottom-bar {
+      display: none;
+      height: var(--tile-bottom-bar);
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      gap: 8px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.16) 100%);
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+      transition: background 0.18s ease;
+    }
+
+    .ps4-tile.active:hover .tile-bottom-bar {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.26) 100%);
+    }
+
+    .ps4-tile.active .tile-bottom-bar {
+      display: flex;
+    }
+
+    .down-arrow-glyph {
+      width: 19px;
+      height: 19px;
+      fill: #ffffff;
+      filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+    }
+
+    .tile-side-title {
+      display: none;
+      position: absolute;
+      left: calc(100% + 18px);
+      bottom: 4px;
+      white-space: nowrap;
+      font-size: 2.55rem;
+      font-weight: 300;
+      letter-spacing: 0.3px;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+      pointer-events: none;
+      z-index: 30;
+      transition: opacity 0.22s ease;
+    }
+
+    .ps4-tile.active .tile-side-title {
+      display: block;
+    }
+
+    .tile-cover-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .tile-system-art {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #0b4ec2 0%, #05338c 100%);
+      color: #ffffff;
+      position: relative;
+    }
+
+    .tile-system-art svg {
+      width: 56%;
+      height: 56%;
+      filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
+    }
+
+    .tile-system-label {
+      position: absolute;
+      bottom: 10px;
+      left: 12px;
+      right: 12px;
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    /* Siatka 2x2 wewnątrz kafelka Folder */
+    .folder-grid-2x2 {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 4px;
+      padding: 5px;
+      background: #062b73;
+    }
+
+    .folder-cell {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #041f56;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .folder-icon-cell {
+      background: #072d78;
+    }
+
+    .folder-icon-cell svg {
+      width: 56%;
+      height: 56%;
+      fill: #ffffff;
+    }
+
+    /* ================= WARSTWA FOLDERU (WCHODZI NA TEN SAM LEVEL) ================= */
+    .folder-ribbon-layer {
+      position: absolute;
+      top: var(--ribbon-y);
+      left: 0;
+      width: 100%;
+      z-index: 18;
+      pointer-events: none;
+      opacity: 0;
+      will-change: transform, opacity;
+      transform: translate3d(0, 325px, 0);
+      transition:
+        transform 0.4s cubic-bezier(0.2, 0.85, 0.25, 1),
+        opacity 0.32s ease;
+    }
+
+    body.folder-preview .folder-ribbon-layer {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate3d(0, 325px, 0);
+    }
+
+    body.folder-preview .folder-ribbon-layer .ps4-tile {
+      width: var(--preview-tile-size);
+      height: var(--preview-tile-size);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+      animation: none;
+    }
+
+    body.folder-preview .folder-ribbon-layer .ps4-tile .ps4-tile-inner {
+      height: 100%;
+    }
+
+    body.folder-preview .folder-ribbon-layer .ps4-tile .tile-bottom-bar,
+    body.folder-preview .folder-ribbon-layer .ps4-tile .tile-side-title {
+      display: none !important;
+    }
+
+    body.state-folder .folder-ribbon-layer {
       opacity: 1;
       pointer-events: auto;
       transform: translate3d(0, 0, 0);
     }
 
-    .info-card-header {
+    body.state-submenu.from-folder .folder-ribbon-layer {
+      opacity: 0.35;
+      transform: translate3d(0, -252px, 0);
+      pointer-events: none;
+    }
+
+    /* ================= PS4 SUB-MENU / INFORMACJE O GRZE & CO NOWEGO ================= */
+    .ps4-game-submenu {
+      position: absolute;
+      top: 108px;
+      left: 118px;
+      right: 118px;
+      bottom: 42px;
+      z-index: 25;
+      display: grid;
+      grid-template-columns: 295px 1fr;
+      gap: 48px;
+      opacity: 0;
+      pointer-events: none;
+      will-change: transform, opacity;
+      transform: translate3d(0, 140px, 0);
+      transition:
+        transform 0.42s cubic-bezier(0.2, 0.85, 0.25, 1),
+        opacity 0.34s ease;
+    }
+
+    body.state-submenu .ps4-game-submenu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate3d(0, 0, 0);
+    }
+
+    /* Lewa kolumna Sub-Menu */
+    .submenu-left-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .submenu-cover-box {
+      width: 295px;
+      height: 295px;
+      background: #07193a;
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.78);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    /* Przycisk Start w Sub-Menu — Accurate PS4 Focus Box */
+    .submenu-start-row {
+      position: relative;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      font-size: 1.25rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+      background: linear-gradient(180deg, rgba(20, 92, 205, 0.48) 0%, rgba(8, 42, 112, 0.68) 100%);
+      border: 2.5px solid #ffffff;
+      animation: ps4FocusPulse 2.6s ease-in-out infinite;
+      transition: transform 0.14s ease, background 0.2s ease;
+    }
+
+    .submenu-start-row:hover {
+      background: linear-gradient(180deg, rgba(38, 118, 235, 0.65) 0%, rgba(12, 58, 145, 0.82) 100%);
+    }
+
+    .submenu-start-row:active,
+    .submenu-start-row.pressed {
+      transform: scale(0.965);
+    }
+
+    .submenu-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .submenu-nav-item {
+      height: 42px;
+      padding: 0 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 6px;
-      padding-bottom: 5px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.72);
+      border-radius: 2px;
     }
 
-    .info-card-tag {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--xmb-gold);
-      font-weight: 600;
-    }
-
-    .info-card-title {
-      font-size: 0.96rem;
-      font-weight: 600;
+    .submenu-nav-item.active {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.04) 100%);
+      border-left: 3px solid #ffffff;
       color: #ffffff;
-      margin-bottom: 5px;
+      font-weight: 400;
     }
 
-    .info-card-desc {
-      font-size: 0.8rem;
-      line-height: 1.42;
-      color: rgba(235, 242, 255, 0.86);
-      margin-bottom: 12px;
+    /* Prawa kolumna Sub-Menu */
+    .submenu-right-col {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      height: 100%;
+      overflow: hidden;
     }
 
-    .info-card-play {
+    .submenu-header-bar {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .submenu-game-title {
+      font-size: 2.35rem;
+      font-weight: 300;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .submenu-overview-label {
+      font-size: 1.35rem;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.88);
+      margin-left: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Widok 1: Czyste Informacje o Grze */
+    .game-info-view {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .info-main-box {
+      padding: 24px 28px;
+      background: rgba(5, 14, 32, 0.78);
+      border: 2px solid #66beff;
+      box-shadow:
+        0 0 18px rgba(58, 166, 255, 0.42),
+        inset 0 0 14px rgba(58, 166, 255, 0.15);
+    }
+
+    .info-subtitle-tag {
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--ps4-plus-gold);
+      margin-bottom: 10px;
+    }
+
+    .info-description-text {
+      font-size: 1.15rem;
+      line-height: 1.62;
+      color: rgba(242, 247, 255, 0.95);
+      font-weight: 300;
+    }
+
+    .info-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .info-meta-card {
+      background: rgba(10, 22, 46, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .info-meta-card:hover {
+      border-color: rgba(102, 190, 255, 0.6);
+      background: rgba(14, 30, 62, 0.9);
+    }
+
+    .meta-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .meta-value {
+      font-size: 1.02rem;
+      color: #ffffff;
+      font-weight: 400;
+      word-break: break-word;
+    }
+
+    /* Widok 2: Aktualności na żywo z https://zsa.mans.edu.pl/2026/ */
+    .zsa-news-view {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .zsa-news-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .zsa-news-status {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.75);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .zsa-refresh-btn {
+      padding: 7px 16px;
+      background: linear-gradient(180deg, rgba(58, 166, 255, 0.28) 0%, rgba(16, 72, 158, 0.45) 100%);
+      border: 1.5px solid rgba(130, 205, 255, 0.85);
+      color: #ffffff;
+      font-size: 0.86rem;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(58, 166, 255, 0.3);
+      transition: background 0.18s ease, transform 0.14s ease, box-shadow 0.18s ease;
+    }
+
+    .zsa-refresh-btn:hover {
+      background: linear-gradient(180deg, rgba(78, 182, 255, 0.48) 0%, rgba(24, 92, 188, 0.65) 100%);
+      box-shadow: 0 0 16px rgba(102, 190, 255, 0.6);
+    }
+
+    .zsa-refresh-btn:active {
+      transform: scale(0.95);
+    }
+
+    .zsa-news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      padding-right: 8px;
+      max-height: calc(100vh - 260px);
+    }
+
+    .zsa-news-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .zsa-news-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 3px;
+    }
+
+    .zsa-news-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: rgba(6, 16, 36, 0.84);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-left: 4px solid #66beff;
+      padding: 16px 20px;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .zsa-news-card:hover {
+      background: rgba(16, 38, 78, 0.94);
+      border-color: #ffffff;
+      box-shadow: 0 0 16px rgba(80, 180, 255, 0.35);
+      transform: translate3d(4px, 0, 0);
+    }
+
+    .zsa-news-date {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--ps4-plus-gold);
+      margin-bottom: 6px;
+    }
+
+    .zsa-news-title {
+      font-size: 1.18rem;
+      font-weight: 500;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .zsa-news-excerpt {
+      font-size: 0.94rem;
+      line-height: 1.48;
+      color: rgba(230, 240, 255, 0.84);
+    }
+
+    /* Fallback okładki gdy brak pliku PNG */
+    .fallback-cover {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: 0.6px;
+      color: #ffffff;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+    }
+
+    /* ================= AUTENTYCZNE IKONY PRZYCISKÓW DUALSHOCK 4 NA DOLE ================= */
+    .ps4-bottom-prompts {
+      position: fixed;
+      bottom: 18px;
+      right: 48px;
+      z-index: 45;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+      pointer-events: none;
+      transition: opacity 0.45s ease;
+    }
+
+    .ps4-prompt-item {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      padding: 6px 14px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.16);
-      border: 1px solid rgba(255, 255, 255, 0.45);
+    }
+
+    .ds4-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 5px;
+      border-radius: 11px;
+      background: rgba(8, 22, 54, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.78);
+      font-size: 0.72rem;
+      font-weight: 700;
       color: #ffffff;
-      font-size: 0.76rem;
-      letter-spacing: 0.6px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background 0.18s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     }
 
-    .info-card-play:hover {
-      background: rgba(255, 255, 255, 0.28);
+    .ds4-badge.cross {
+      color: #7ab8ff;
+      border-color: #7ab8ff;
     }
 
+    .ds4-badge.circle {
+      color: #ff7a7a;
+      border-color: #ff7a7a;
+    }
+
+    /* Kontrolki mobilne */
     .mobile-controls {
       display: none;
     }
@@ -394,7 +1089,7 @@
       bottom: 18px;
       left: 18px;
       right: 18px;
-      z-index: 30;
+      z-index: 50;
       justify-content: space-between;
       align-items: flex-end;
       pointer-events: none;
@@ -407,98 +1102,199 @@
     }
 
     .touch-btn {
-      width: 44px;
-      height: 44px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
-      background: rgba(12, 26, 54, 0.82);
-      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(0, 32, 96, 0.88);
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
       color: #ffffff;
-      font-size: 0.95rem;
+      font-size: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      transition: transform 0.12s ease, background 0.15s ease;
+    }
+
+    .touch-btn:active {
+      transform: scale(0.9);
+      background: rgba(28, 92, 205, 0.95);
     }
 
     .touch-btn.pill {
       width: auto;
-      padding: 0 15px;
-      border-radius: 22px;
-      font-size: 0.78rem;
-      letter-spacing: 0.6px;
+      padding: 0 16px;
+      border-radius: 23px;
+      font-size: 0.82rem;
     }
 
-    @media (max-width: 900px) and (orientation: portrait) {
+    @media (max-width: 1100px) {
       :root {
-        --cross-x: 18vw;
-        --cross-y: 28vh;
-        --cat-spacing: 105px;
-        --item-spacing: 82px;
+        --tile-size: 130px;
+        --tile-active-size: 190px;
+        --focus-x: 80px;
+        --ribbon-y: 120px;
+        --preview-tile-size: 104px;
       }
-      .top-bar { top: 16px; left: 18px; right: 18px; }
-      .zsa-brand-sub { display: none; }
-      .xmb-item { width: 74vw; }
-      .item-thumb-wrap { width: 92px; height: 54px; }
-      .info-side-card {
-        left: 50%;
-        top: auto;
-        bottom: 84px;
-        width: 88vw;
-        max-width: 340px;
-        transform: translate3d(-50%, 8px, 0);
+      .ps4-game-submenu {
+        left: 32px;
+        right: 32px;
+        grid-template-columns: 220px 1fr;
+        gap: 24px;
       }
-      .info-side-card.visible { transform: translate3d(-50%, 0, 0); }
-    }
-
-    @media (max-height: 540px) and (orientation: landscape) {
-      :root {
-        --cross-x: 22vw;
-        --cross-y: 33vh;
-        --cat-spacing: 112px;
-        --item-spacing: 74px;
-        --active-item-gap: 24px;
+      .submenu-cover-box {
+        width: 220px;
+        height: 220px;
       }
-      .top-bar { top: 12px; left: 22px; right: 22px; }
-      .item-thumb-wrap { width: 88px; height: 50px; }
-      .info-side-card { left: auto; right: 24px; top: calc(var(--cross-y) + 60px); width: 250px; }
+      .info-meta-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
 
-  <canvas id="xmb-wave-canvas"></canvas>
-  <div class="ps3-vignette"></div>
+  <!-- TŁO FAL XMB/PS4 + WARSTWA CUSTOM TŁA GRY (OBRAZ / GIF / WIDEO BEZ DŹWIĘKU) -->
+  <canvas id="ps4-wave-canvas"></canvas>
+  <div class="game-theme-backdrop" id="game-theme-backdrop">
+    <video class="game-theme-video" id="game-theme-video" muted loop playsinline preload="metadata"></video>
+  </div>
 
-  <header class="top-bar">
-    <a href="https://zsagames.github.io/" target="_self" rel="noopener" class="zsa-brand">
-      <div class="zsa-crest"><img class="zsa-crest" src="https://avatars.githubusercontent.com/u/349516848?v=4" alt="ZSA"></div>
-      <div class="zsa-brand-text">
-        <span class="zsa-brand-title">ZSAGames</span>
-        <span class="zsa-brand-sub">Zespół Szkół Akademickich w Łomży</span>
-      </div>
-    </a>
-
-    <div class="ps3-clock-pill">
-      <span id="ps3-datetime">05/11 21:00</span>
-      <div class="ps3-clock-spinner"></div>
+  <!-- EKRAN TRYBU SPOCZYNKU (PS4 SLEEP MODE) -->
+  <div class="ps4-sleep-overlay" id="ps4-sleep-overlay">
+    <div class="sleep-power-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2v10M18.36 6.64a9 9 0 1 1-12.73 0" stroke-linecap="round" />
+      </svg>
     </div>
+    <div class="sleep-lightbar"></div>
+    <div class="sleep-status-tag">Tryb spoczynku PS4 — Wstrzymano efekty i audio</div>
+    <div class="sleep-active-app" id="sleep-app-title">Uruchomiono aplikację w nowym oknie</div>
+    <div class="sleep-prompt">Kliknij aby powrócić do systemu</div>
+  </div>
+
+  <!-- GÓRNY PASEK STATUSU PS4 -->
+  <header class="ps4-top-bar">
+    <div class="top-left-icons">
+      <a href="https://zsagames.github.io/" target="_self" rel="noopener" class="ps-plus-icon" title="ZSAGames Plus">
+        <svg viewBox="0 0 32 32">
+          <path fill="#f5c418" d="M12.5 3h7v9.5H29v7h-9.5V29h-7v-9.5H3v-7h9.5V3z"/>
+          <path fill="#d49b00" d="M19.5 12.5V3h-2v9.5H3v2h14.5V29h2V14.5H29v-2h-9.5z" opacity="0.45"/>
+        </svg>
+      </a>
+      <div class="ps-notif-circle">i</div>
+    </div>
+
+    <div class="top-center-status">
+      <div class="status-friends">
+        <div class="friends-badge">
+          <span class="online-dot"></span>
+          <span>12</span>
+        </div>
+        <svg class="friends-glyph" viewBox="0 0 24 24">
+          <path d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 10c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4zm7.5-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm0 9c-1.2 0-2.32.22-3.28.6 1.73 1.02 2.78 2.43 2.78 4v1.4h6.5v-2c0-2.02-2.69-4-6-4z"/>
+        </svg>
+      </div>
+
+      <a href="https://zsa.mans.edu.pl" target="_blank" rel="noopener" class="status-user">
+        <span class="online-dot"></span>
+        <div class="user-avatar-wrap">
+          <img src="https://avatars.githubusercontent.com/u/349516848?v=4" alt="ZSA" />
+        </div>
+        <span class="user-name">ZSAGames</span>
+        <svg class="ps-plus-mini" viewBox="0 0 32 32">
+          <path fill="#f5c418" d="M12.5 3h7v9.5H29v7h-9.5V29h-7v-9.5H3v-7h9.5V3z"/>
+        </svg>
+      </a>
+    </div>
+
+    <div class="top-right-clock" id="ps4-clock">1:04 AM</div>
   </header>
 
-  <main class="xmb-viewport" id="xmb-viewport">
-    <div class="xmb-categories-track" id="xmb-categories"></div>
-    <div class="xmb-column" id="xmb-items"></div>
+  <!-- GŁÓWNA SCENA PS4 -->
+  <main class="ps4-stage">
+    <div class="ps4-top-guide"></div>
 
-    <aside class="info-side-card" id="info-card">
-      <div class="info-card-header">
-        <span class="info-card-tag" id="info-card-tag">ZSAGames</span>
+    <!-- Rząd 1: Główna Wstęga PS4 -->
+    <div class="main-ribbon-layer" id="main-ribbon-layer">
+      <div class="ribbon-track" id="main-ribbon-track"></div>
+    </div>
+
+    <!-- Rząd 2: Zawartość Folderu -->
+    <div class="folder-ribbon-layer" id="folder-ribbon-layer">
+      <div class="ribbon-track" id="folder-ribbon-track"></div>
+    </div>
+
+    <!-- Rząd 3: PS4 Sub-Menu (Czyste Informacje o Grze LUB Aktualności ZSA 2026) -->
+    <section class="ps4-game-submenu" id="ps4-game-submenu">
+      <!-- Lewa Kolumna -->
+      <div class="submenu-left-col">
+        <div class="submenu-cover-box" id="sub-cover-box"></div>
+        <div class="submenu-start-row focused" id="sub-start-btn">
+          <span class="ds4-badge cross">✕</span>
+          <span id="sub-start-btn-text">Start</span>
+        </div>
+        <div class="submenu-nav-list">
+          <div class="submenu-nav-item active">
+            <span id="sub-left-nav-label">Informacje</span>
+          </div>
+        </div>
       </div>
-      <div class="info-card-title" id="info-card-title"></div>
-      <p class="info-card-desc" id="info-card-desc"></p>
-      <a href="#" target="_blank" rel="noopener" class="info-card-play" id="info-card-link">
-        <span>✕</span> Uruchom
-      </a>
-    </aside>
+
+      <!-- Prawa Kolumna -->
+      <div class="submenu-right-col">
+        <div class="submenu-header-bar">
+          <h1 class="submenu-game-title" id="sub-game-title">Tytuł</h1>
+          <span class="submenu-overview-label" id="sub-header-right-label">Informacje</span>
+        </div>
+
+        <!-- WIDOK A: Czyste Informacje o Grze / Aplikacji -->
+        <div class="game-info-view" id="game-info-view">
+          <div class="info-main-box">
+            <div class="info-subtitle-tag" id="sub-desc-tag">PROJEKT • ZSAGAMES</div>
+            <p class="info-description-text" id="sub-desc-text"></p>
+          </div>
+
+          <div class="info-meta-grid">
+            <div class="info-meta-card">
+              <span class="meta-label">Wydawca / Autor</span>
+              <span class="meta-value" id="sub-meta-author">ZSAGames — ZSA w Łomży</span>
+            </div>
+            <div class="info-meta-card">
+              <span class="meta-label">Platforma</span>
+              <span class="meta-value" id="sub-meta-platform">Przeglądarka HTML5 (PC / Mobile / Pad)</span>
+            </div>
+            <div class="info-meta-card">
+              <span class="meta-label">Adres docelowy</span>
+              <span class="meta-value" id="sub-meta-url">https://zsagames.github.io</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WIDOK B: Aktualności na żywo z https://zsa.mans.edu.pl/2026/ (dla "Co nowego") -->
+        <div class="zsa-news-view" id="zsa-news-view">
+          <div class="zsa-news-toolbar">
+            <div class="zsa-news-status">
+              <span class="online-dot"></span>
+              <span id="zsa-news-status-text">Źródło: https://zsa.mans.edu.pl/2026/</span>
+            </div>
+            <button type="button" class="zsa-refresh-btn" id="zsa-refresh-btn">Odśwież wieści</button>
+          </div>
+          <div class="zsa-news-list" id="zsa-news-list"></div>
+        </div>
+      </div>
+    </section>
   </main>
 
+  <!-- PODPOWIEDZI KLAWISZY PS4 -->
+  <div class="ps4-bottom-prompts" id="bottom-prompts">
+    <span class="ps4-prompt-item"><span class="ds4-badge">◀ ▶</span> Przewijaj</span>
+    <span class="ps4-prompt-item"><span class="ds4-badge">▼</span> Informacje / Otwórz</span>
+    <span class="ps4-prompt-item"><span class="ds4-badge circle">○</span> Wróć</span>
+    <span class="ps4-prompt-item"><span class="ds4-badge cross">✕</span> Uruchom</span>
+  </div>
+
+  <!-- KONTROLKI MOBILNE -->
   <div class="mobile-controls">
     <div class="touch-dpad">
       <button class="touch-btn" id="btn-left">◀</button>
@@ -507,441 +1303,1215 @@
       <button class="touch-btn" id="btn-right">▶</button>
     </div>
     <div class="touch-actions">
-      <button class="touch-btn pill" id="btn-info">△ Opis</button>
-      <button class="touch-btn pill" id="btn-play">✕ Graj</button>
+      <button class="touch-btn pill" id="btn-back">○ Wróć</button>
+      <button class="touch-btn pill" id="btn-play">✕ Start</button>
     </div>
   </div>
 
   <script>
-    const GAMES_DATA = [
+    /* ============================================================================
+       0. USTAWIENIA OTWIERANIA APLIKACJI (_blank vs _self), WYDAJNOŚCI I AUDIO
+       ============================================================================ */
+    // true  -> otwiera gry i aplikacje w nowej karcie ("_blank") i włącza PS4 Sleep Mode
+    // false -> otwiera gry i aplikacje w tej samej karcie ("_self")
+    const OPEN_APPS_IN_NEW_TAB = true;
+
+    // Automatyczne dopasowanie skali renderowania fal Canvas dla słabszych PC (Low-End PC Optimization)
+    const IS_LOW_END_PC = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+                          (navigator.deviceMemory && navigator.deviceMemory <= 4);
+
+    const AUDIO_FADE_SETTINGS = {
+      fadeDurationMs: 500,       // Czas płynnego przejścia (fade-in / fade-out) przy zmianie muzyki w ms
+      loopCrossfadeSec: 0.115,   // Ile sekund przed końcem utworu zacząć łagodne nakładanie pętli (ukrywa cięcie)
+      systemBaseVolume: 0.62,    // Głośność docelowa muzyki systemowej
+      gameBaseVolume: 0.50       // Głośność docelowa muzyki gry
+    };
+
+    /* ============================================================================
+       1. KONFIGURACJA WŁASNYCH DŹWIĘKÓW (.WAV) I MUZYKI SYSTEMOWEJ
+       Tutaj wpisz nazwy swoich plików .wav dla efektów oraz muzyki Main Menu
+       ============================================================================ */
+    const SOUND_CONFIG = {
+      move: "move.wav",               // Dźwięk poruszania się po kafelkach (lewo/prawo/dół)
+      select: "select.wav",           // Dźwięk zatwierdzenia / uruchomienia (X / Enter)
+      back: "back.wav",               // Dźwięk powrotu w górę (▲ / O / Esc)
+      systemMusic: "system_menu.mp3"  // Muzyka Main Menu (gdy nie jesteś w sub-menu gry)
+    };
+
+    /* ============================================================================
+       2. KONFIGURACJA GIER (OKŁADKA .PNG, TŁO .PNG / .GIF / .MP4 / .WEBM, MUZYKA GRY)
+       W polu "background" możesz podać obraz (.png, .jpg), animowany .gif
+       LUB plik wideo (.mp4, .webm, .ogg) — wideo odtworzy się płynnie i bez dźwięku!
+       ============================================================================ */
+    const CUSTOM_GAMES_DATA = [
       {
+        id: "gtavi",
+        title: "Grand Theft Auto VI",
+        subtitle: "Leonida, USA",
+        url: "https://www.rockstargames.com/VI",
+
+        // ---> TWOJE PLIKI DLA GRY (background obsługuje .png, .gif, .mp4, .webm) <---
+        cover: "GTAVICover.png",
+        background: "GTAVIBackground.png", // np. "GTAVIBackground.mp4" lub "GTAVIBackground.gif"
+        music: "GTAVITheme.wav",           // może być .wav lub .mp3
+
+        fallbackBg: "linear-gradient(135deg, #2b2d83, #8b3dff, #ff4f7a, #ff8a5b)",
+        author: "Rockstar Games",
+        platform: "PS5 / XBOX Series",
+        description: "Jason and Lucia have always known the deck is stacked against them. But when an easy score goes wrong, they find themselves on the darkest side of the sunniest place in America, in the middle of a criminal conspiracy stretching across the state of Leonida – forced to rely on each other more than ever if they want to make it out alive."
+      },
+      {
+        id: "przygoda-davea",
         title: "Przygoda Dave'a",
-        description: "Rozdział 1, 2 & 3: Pokonaj Fortecę Evada, zdobądź Ostrze Rdzeniowe w Dżungli, zinfiltruj Bazę Johna i przebij się z Raygunem przez Saharę oraz Góry Johna w 125 poziomach!",
-        thumbnail: "PDCover.png",
-        url: "https://zsagames.github.io/platformer"
+        subtitle: "PROJEKT #1 • ZSAGAMES",
+        url: "https://zsagames.github.io/platformer",
+
+        // ---> TWOJE PLIKI DLA GRY #1 (background obsługuje .png, .gif, .mp4, .webm) <---
+        cover: "PDCover.png",
+        background: "PDBackground.png",
+        music: "PDTheme.mp3",
+
+        fallbackBg: "linear-gradient(135deg, #8b2cf5, #0c121e)",
+        author: "ZSAGames — ZSA Łomża",
+        platform: "Platformówka 2D (Klawiatura / Pad / Dotyk)",
+        description: "Rozdział 1, 2 & 3: Pokonaj Fortecę Evada, zdobądź Ostrze Rdzeniowe w Dżungli, zinfiltruj Bazę Johna i przebij się z Raygunem przez Saharę oraz Góry Johna w 125 poziomach!"
       },
       {
+        id: "aksamitna-otchlan",
         title: "AKSAMITNA OTCHŁAŃ",
-        description: "Obudź się w kryjówce. Sprawdź swoją dzienną Kwotę i Nocny Modyfikator. Idź ulicą Blackwater do kasyna, poznaj zasady z wbudowanym Trenerem i wróć do łóżka, zanim upłynie 6:00 na zegarze zmiany.",
-        thumbnail: "VPCover.png",
-        url: "https://zsagames.github.io/velvet"
+        subtitle: "PROJEKT #2 • ZSAGAMES",
+        url: "https://zsagames.github.io/velvet",
+
+        // ---> TWOJE PLIKI DLA GRY #2 (background obsługuje .png, .gif, .mp4, .webm) <---
+        cover: "VPCover.png",
+        background: "VPBackground.png",
+        music: "VPTheme.wav",
+
+        fallbackBg: "linear-gradient(135deg, #21c438, #115c26, #1c0436)",
+        author: "ZSAGames — ZSA Łomża",
+        platform: "Top-Down Indie (Klawiatura / Pad / Dotyk)",
+        description: "Obudź się w kryjówce. Sprawdź swoją dzienną Kwotę i Nocny Modyfikator. Idź ulicą Blackwater do kasyna, poznaj zasady z wbudowanym Trenerem i wróć do łóżka, zanim upłynie 6:00 na zegarze zmiany."
       },
       {
+        id: "ravenfield-pl",
         title: "RavenField Polska Edition",
-        description: "Ravenfield to jednoosobowa, stylizowana strzelanka pierwszoosobowa (FPS), w której gracz wraz z drużyną sterowanych przez sztuczną inteligencję botów (Niebieskimi) walczy na różnorodnych mapach przeciwko drużynie przeciwnej (Czerwonym)",
-        thumbnail: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/636480/capsule_616x353.jpg?t=1791381747",
-        url: "https://zsagames.github.io/ravenfield"
+        subtitle: "PROJEKT #3 • ZSAGAMES",
+        url: "https://zsagames.github.io/ravenfield",
+
+        // ---> TWOJE PLIKI DLA GRY #3 (background obsługuje .png, .gif, .mp4, .webm) <---
+        cover: "RFCover.png",
+        background: "RFBackground.png",
+        music: "RFTheme.wav",
+
+        fallbackBg: "linear-gradient(135deg, #2b4c7e, #0c172b)",
+        author: "ZSAGames — ZSA Łomża",
+        platform: "Singleplayer FPS (PC / Przeglądarka)",
+        description: "Ravenfield to jednoosobowa, stylizowana strzelanka pierwszoosobowa (FPS), w której gracz wraz z drużyną sterowanych przez sztuczną inteligencję botów (Niebieskimi) walczy na różnorodnych mapach przeciwko drużynie przeciwnej (Czerwonym)."
       }
     ];
 
-    const XMB_CATEGORIES = [
+    /* ============================================================================
+       3. KONFIGURACJA GŁÓWNEJ WSTĘGI PS4
+       ============================================================================ */
+    const MAIN_RIBBON_ITEMS = [
       {
-        id: "zsa",
-        label: "ZSA Łomża",
-        icon: `<svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10z"/><path d="M9 22V12h6v10"/></svg>`,
-        items: [
-          {
-            title: "Oficjalny Portal ZSA",
-            subtitle: "zsa.mans.edu.pl",
-            description: "Przejdź na oficjalną stronę Zespołu Szkół Akademickich w Łomży — aktualności, rekrutacja oraz kierunki kształcenia.",
-            thumbnail: "ZSACover.png",
-            url: "https://zsa.mans.edu.pl"
-          }
-        ]
+        id: "whats-new",
+        type: "system",
+        isWhatsNew: true,
+        title: "Co nowego",
+        subtitle: "AKTUALNOŚCI ZSA ŁOMŻA",
+        url: "https://zsa.mans.edu.pl/2026/",
+        cover: "ZSACover.png",
+        background: "https://zsa.mans.edu.pl/wp-content/uploads/2025/04/720-ZSA-w-Lomzy-film-promocyjny-2025-STRONA.mov", // może być .png, .gif lub .mp4
+        music: "",                       // Puste = w sub-menu "Co nowego" nadal gra muzyka systemowa
+        fallbackBg: "linear-gradient(135deg, #0b4ec2, #041d52)",
+        author: "Zespół Szkół Akademickich w Łomży",
+        platform: "Portal Informacyjny ZSA (zsa.mans.edu.pl/2026/)",
+        description: "Najnowsze wiadomości i wydarzenia z życia Zespołu Szkół Akademickich w Łomży pobierane na bieżąco z archiwum 2026.",
+        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3">
+                <path d="M14 22h36l-3 32H17L14 22z" fill="rgba(255,255,255,0.12)"/>
+                <path d="M23 22v-5a9 9 0 0 1 18 0v5"/>
+              </svg>`
       },
       {
-        id: "games",
-        label: "Gry",
-        icon: `<svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"/></svg>`,
-        items: GAMES_DATA.map((g, idx) => ({
-          ...g,
-          subtitle: `Projekt #${idx + 1} • ZSAGames`
-        }))
+        id: "folder-games",
+        type: "folder",
+        title: "Gry",
+        subtitle: "KOLEKCJA GIER ZSAGAMES",
+        items: CUSTOM_GAMES_DATA
       },
       {
-        id: "leaderboards",
-        label: "Rankingi",
-        icon: `<svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/></svg>`,
-        items: [
-          {
-            title: "Leaderboards",
-            subtitle: "Sieciowa tablica wyników",
-            description: "Globalny ranking naszych gier zintegrowany z API LootLocker.",
-            thumbnail: "LCover.png",
-            url: "https://zsagames.github.io/leaderboards"
-          }
-        ]
+        id: "leaderboards-tv",
+        type: "system",
+        title: "Leaderboards & Rankingi",
+        subtitle: "SIECIOWA TABLICA WYNIKÓW",
+        url: "https://zsagames.github.io/leaderboards",
+        cover: "LCoverNew.png",
+        background: "LBackground.png",   // może być .png, .gif lub .mp4
+        music: "",
+        fallbackBg: "linear-gradient(135deg, #0c3b94, #04163d)",
+        author: "ZSAGames • API LootLocker",
+        platform: "Globalny System Rankingowy Online",
+        description: "Globalny ranking naszych gier zintegrowany z API LootLocker. Porównaj swoje wyniki Speedrun WR oraz OHKO z innymi graczami ZSA!",
+        svg: `<svg viewBox="0 0 100 100" fill="none" stroke="#ffffff" stroke-width="5">
+                <rect x="14" y="22" width="72" height="46" />
+                <line x1="28" y1="76" x2="72" y2="76" stroke-width="5.5"/>
+              </svg>`
       }
     ];
 
-    function detectRealMobile() {
-      const uaMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      const coarsePointer = window.matchMedia("(pointer: coarse) and (hover: none)").matches;
-      if (uaMobile && coarsePointer) {
-        document.body.classList.add("is-mobile");
-      } else {
-        document.body.classList.remove("is-mobile");
-      }
-    }
-    detectRealMobile();
+    /* ============================================================================
+       4. SYSTEM AUDIO: SMOOTH FADE-IN / FADE-OUT + DUAL-DECK SEAMLESS LOOPER
+       ============================================================================ */
+    let isSystemSleeping = false;
+    let wakeUpCooldownUntil = 0;
+    let audioUnlocked = false;
 
-    let audioCtx = null;
-    function playXmbClick(freq = 1480) {
-      try {
-        if (!audioCtx) {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          if (!AudioContextClass) return;
-          audioCtx = new AudioContextClass();
-        }
-        if (audioCtx.state === "suspended") audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(freq * 0.65, audioCtx.currentTime + 0.045);
-        gain.gain.setValueAtTime(0.055, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.045);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.048);
-      } catch (_) {}
-    }
-
-    let activeCatIndex = 1;
-    let activeItemIndex = 0;
-    let infoTimer = null;
-
-    const catTrackEl = document.getElementById("xmb-categories");
-    const itemsColEl = document.getElementById("xmb-items");
-    const infoCardEl = document.getElementById("info-card");
-    const infoTitleEl = document.getElementById("info-card-title");
-    const infoDescEl = document.getElementById("info-card-desc");
-    const infoTagEl = document.getElementById("info-card-tag");
-    const infoLinkEl = document.getElementById("info-card-link");
-
-    function getCssSpacing(varName, fallback) {
-      const val = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(varName));
-      return Number.isFinite(val) ? val : fallback;
-    }
-
-    function hideInfoCard() {
-      clearTimeout(infoTimer);
-      infoCardEl.classList.remove("visible");
-    }
-
-    function showInfoCardForCurrent() {
-      const item = XMB_CATEGORIES[activeCatIndex].items[activeItemIndex];
-      if (!item) return;
-      infoTagEl.textContent = XMB_CATEGORIES[activeCatIndex].label;
-      infoTitleEl.textContent = item.title;
-      infoDescEl.textContent = item.description;
-      infoLinkEl.href = item.url;
-      infoCardEl.classList.add("visible");
-    }
-
-    function scheduleInfoCard(delay = 850) {
-      hideInfoCard();
-      infoTimer = setTimeout(() => {
-        showInfoCardForCurrent();
-      }, delay);
-    }
-
-    function buildCategories() {
-      catTrackEl.innerHTML = "";
-      XMB_CATEGORIES.forEach((cat, idx) => {
-        const el = document.createElement("div");
-        el.className = "xmb-category" + (idx === activeCatIndex ? " active" : "");
-        el.innerHTML = `<div class="cat-icon">${cat.icon}</div><div class="cat-label">${cat.label}</div>`;
-        el.addEventListener("click", () => {
-          if (activeCatIndex !== idx) selectCategory(idx);
-        });
-        catTrackEl.appendChild(el);
-      });
-    }
-
-    function buildItems() {
-      itemsColEl.innerHTML = "";
-      const items = XMB_CATEGORIES[activeCatIndex].items;
-      items.forEach((item, idx) => {
-        const el = document.createElement("div");
-        el.className = "xmb-item" + (idx === activeItemIndex ? " active" : "");
-        el.innerHTML = `
-          <div class="item-thumb-wrap">
-            <img class="item-thumb" src="${item.thumbnail}" alt="${item.title}" loading="lazy" />
-          </div>
-          <div class="item-meta">
-            <div class="item-title">${item.title}</div>
-            <div class="item-sub">${item.subtitle || ""}</div>
-          </div>
-        `;
-        el.addEventListener("click", () => {
-          if (activeItemIndex !== idx) selectItem(idx);
-          else window.open(item.url, "_self", "noopener");
-        });
-        itemsColEl.appendChild(el);
-      });
-      layoutXmb();
-      scheduleInfoCard(850);
-    }
-
-    function layoutXmb() {
-      const catSpacing = getCssSpacing("--cat-spacing", 138);
-      const itemSpacing = getCssSpacing("--item-spacing", 92);
-      const activeGap = getCssSpacing("--active-item-gap", 34);
-      const crossY = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--cross-y")) / 100) * window.innerHeight || window.innerHeight * 0.36;
-
-      const offsetX = -activeCatIndex * catSpacing;
-      catTrackEl.style.transform = `translate3d(${offsetX}px, 0, 0)`;
-
-      Array.from(catTrackEl.children).forEach((el, idx) => {
-        el.classList.toggle("active", idx === activeCatIndex);
-      });
-
-      Array.from(itemsColEl.children).forEach((el, idx) => {
-        const diff = idx - activeItemIndex;
-        let yPos;
-        if (diff === 0) yPos = crossY + 86;
-        else if (diff < 0) yPos = crossY - 76 + diff * (itemSpacing * 0.85);
-        else yPos = crossY + 86 + activeGap + diff * itemSpacing;
-
-        const distance = Math.abs(diff);
-        const opacity = diff === 0 ? 1 : Math.max(0.15, 0.72 - distance * 0.16);
-        const scale = diff === 0 ? 1 : 0.88;
-
-        el.classList.toggle("active", diff === 0);
-        el.style.transform = `translate3d(0, ${Math.round(yPos)}px, 0) scale(${scale})`;
-        el.style.opacity = opacity;
-      });
-    }
-
-    function selectCategory(newIndex) {
-      const clamped = Math.max(0, Math.min(XMB_CATEGORIES.length - 1, newIndex));
-      if (clamped === activeCatIndex) return;
-      hideInfoCard();
-      activeCatIndex = clamped;
-      activeItemIndex = 0;
-      playXmbClick(1620);
-      buildItems();
-    }
-
-    function selectItem(newIndex) {
-      const list = XMB_CATEGORIES[activeCatIndex].items;
-      const clamped = Math.max(0, Math.min(list.length - 1, newIndex));
-      if (clamped === activeItemIndex) return;
-      hideInfoCard();
-      activeItemIndex = clamped;
-      playXmbClick(1420);
-      layoutXmb();
-      scheduleInfoCard(850);
-    }
-
-    function launchCurrentItem() {
-      const item = XMB_CATEGORIES[activeCatIndex].items[activeItemIndex];
-      if (item && item.url) {
-        playXmbClick(1850);
-        window.open(item.url, "_blank", "noopener");
-      }
-    }
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
-        e.preventDefault(); selectCategory(activeCatIndex - 1);
-      } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
-        e.preventDefault(); selectCategory(activeCatIndex + 1);
-      } else if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
-        e.preventDefault(); selectItem(activeItemIndex - 1);
-      } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
-        e.preventDefault(); selectItem(activeItemIndex + 1);
-      } else if (e.key === "Enter") {
-        e.preventDefault(); launchCurrentItem();
-      } else if (e.key === "i" || e.key === "I") {
-        if (infoCardEl.classList.contains("visible")) hideInfoCard();
-        else showInfoCardForCurrent();
+    /* Mała pula reużywalnych obiektów Audio (brak alokacji pamięci przy każdym ruchu) */
+    const sfxChannels = {};
+    ["move", "select", "back"].forEach((key) => {
+      const path = SOUND_CONFIG[key];
+      if (path) {
+        sfxChannels[key] = {
+          index: 0,
+          players: Array.from({ length: 3 }, () => {
+            const a = new Audio(path);
+            a.preload = "auto";
+            a.volume = 0.75;
+            return a;
+          })
+        };
       }
     });
 
+    function playCustomWav(type = "move", forcePlay = false) {
+      if (isSystemSleeping && !forcePlay) return;
+      try {
+        const ch = sfxChannels[type];
+        if (!ch) return;
+        const player = ch.players[ch.index];
+        ch.index = (ch.index + 1) % ch.players.length;
+        player.currentTime = 0;
+        player.play().catch(() => {});
+      } catch (_) {}
+    }
+
+    class SmoothLoopTrack {
+      constructor(src, maxVolume) {
+        this.src = src;
+        this.maxVolume = maxVolume;
+        this.fadeFactor = 0;
+        this.targetFactor = 0;
+
+        this.deckA = new Audio(src);
+        this.deckB = new Audio(src);
+        [this.deckA, this.deckB].forEach((d) => {
+          d.preload = "auto";
+          d.loop = false;
+          d.volume = 0;
+        });
+
+        this.primary = this.deckA;
+        this.secondary = this.deckB;
+        this.isCrossfadingLoop = false;
+        this.loopMix = 0;
+      }
+
+      fadeIn() {
+        this.targetFactor = 1;
+        if (!audioUnlocked) return;
+        if (this.primary.paused) {
+          this.primary.volume = 0;
+          this.primary.play().catch(() => {});
+        }
+      }
+
+      fadeOut() {
+        this.targetFactor = 0;
+      }
+
+      tick(dtSec) {
+        if (!audioUnlocked) return;
+        if (this.fadeFactor === 0 && this.targetFactor === 0 && this.primary.paused) return;
+
+        /* 1. Interpolacja głównego współczynnika Fade-In / Fade-Out */
+        const fadeSpeed = 1000 / Math.max(120, AUDIO_FADE_SETTINGS.fadeDurationMs);
+        if (this.fadeFactor < this.targetFactor) {
+          if (this.primary.paused) {
+            this.primary.play().catch(() => {});
+          }
+          this.fadeFactor = Math.min(this.targetFactor, this.fadeFactor + fadeSpeed * dtSec);
+        } else if (this.fadeFactor > this.targetFactor) {
+          this.fadeFactor = Math.max(this.targetFactor, this.fadeFactor - fadeSpeed * dtSec);
+          if (this.fadeFactor <= 0.001 && this.targetFactor === 0) {
+            this.fadeFactor = 0;
+            this.pauseAll();
+            return;
+          }
+        }
+
+        /* 2. Bezszwowa pętla (Seamless Crossfade przed końcem ścieżki) */
+        const dur = this.primary.duration;
+        const cur = this.primary.currentTime;
+        const cfWindow = AUDIO_FADE_SETTINGS.loopCrossfadeSec;
+
+        if (Number.isFinite(dur) && dur > cfWindow * 2.2) {
+          const timeLeft = dur - cur;
+          if (timeLeft <= cfWindow) {
+            if (!this.isCrossfadingLoop) {
+              this.isCrossfadingLoop = true;
+              this.secondary.currentTime = 0;
+              this.secondary.volume = 0;
+              this.secondary.play().catch(() => {});
+            }
+            const linearProgress = Math.min(1, Math.max(0, 1 - timeLeft / cfWindow));
+            this.loopMix = 0.5 - 0.5 * Math.cos(linearProgress * Math.PI);
+
+            if (timeLeft <= 0.03 || this.primary.ended) {
+              this.completeLoopSwap();
+            }
+          } else if (this.primary.ended) {
+            this.primary.currentTime = 0;
+            this.primary.play().catch(() => {});
+          }
+        } else {
+          this.primary.loop = true;
+        }
+
+        /* 3. Ustawienie wynikowej głośności na obu deckach */
+        const effectiveMaster = this.fadeFactor * this.maxVolume;
+        if (this.isCrossfadingLoop) {
+          this.primary.volume = Math.max(0, Math.min(1, effectiveMaster * (1 - this.loopMix)));
+          this.secondary.volume = Math.max(0, Math.min(1, effectiveMaster * this.loopMix));
+        } else {
+          this.primary.volume = Math.max(0, Math.min(1, effectiveMaster));
+          if (!this.secondary.paused) {
+            this.secondary.volume = 0;
+          }
+        }
+      }
+
+      completeLoopSwap() {
+        this.primary.pause();
+        this.primary.currentTime = 0;
+        this.primary.volume = 0;
+        const temp = this.primary;
+        this.primary = this.secondary;
+        this.secondary = temp;
+        this.isCrossfadingLoop = false;
+        this.loopMix = 0;
+      }
+
+      pauseAll() {
+        this.isCrossfadingLoop = false;
+        this.loopMix = 0;
+        [this.deckA, this.deckB].forEach((d) => {
+          if (!d.paused) d.pause();
+          d.currentTime = 0;
+          d.volume = 0;
+        });
+      }
+    }
+
+    const trackRegistry = new Map();
+
+    function getOrCreateTrack(src, isSystem = false) {
+      if (!src) return null;
+      if (!trackRegistry.has(src)) {
+        const vol = isSystem ? AUDIO_FADE_SETTINGS.systemBaseVolume : AUDIO_FADE_SETTINGS.gameBaseVolume;
+        trackRegistry.set(src, new SmoothLoopTrack(src, vol));
+      }
+      return trackRegistry.get(src);
+    }
+
+    if (SOUND_CONFIG.systemMusic) {
+      getOrCreateTrack(SOUND_CONFIG.systemMusic, true);
+    }
+
+    function syncBackgroundMusic() {
+      if (isSystemSleeping) {
+        trackRegistry.forEach((track) => track.fadeOut());
+        return;
+      }
+
+      const inGameSubmenu = (navLevel === "SUBMENU");
+      const currentItem = getActiveGameItem();
+      const customGameTrackSrc = (inGameSubmenu && currentItem && currentItem.music) ? currentItem.music : "";
+      const desiredSrc = customGameTrackSrc || SOUND_CONFIG.systemMusic || "";
+
+      if (desiredSrc) {
+        getOrCreateTrack(desiredSrc, desiredSrc === SOUND_CONFIG.systemMusic);
+      }
+
+      trackRegistry.forEach((track, src) => {
+        if (src === desiredSrc) {
+          track.fadeIn();
+        } else {
+          track.fadeOut();
+        }
+      });
+    }
+
+    function unlockAudioOnInteraction() {
+      if (audioUnlocked) return;
+      audioUnlocked = true;
+      syncBackgroundMusic();
+    }
+
+    window.addEventListener("keydown", unlockAudioOnInteraction, { once: false, passive: true });
+    window.addEventListener("pointerdown", unlockAudioOnInteraction, { once: false, passive: true });
+    window.addEventListener("touchstart", unlockAudioOnInteraction, { once: false, passive: true });
+
+    /* ============================================================================
+       5. OBSŁUGA TŁA WIDEO (.MP4 / .WEBM / .OGG) ORAZ .GIF / .PNG BEZ DŹWIĘKU
+       ============================================================================ */
+    const backdropEl = document.getElementById("game-theme-backdrop");
+    const themeVideoEl = document.getElementById("game-theme-video");
+    themeVideoEl.muted = true;
+    themeVideoEl.defaultMuted = true;
+    themeVideoEl.volume = 0;
+
+    let currentVideoBgSrc = "";
+
+    function isVideoFile(path) {
+      if (!path) return false;
+      return /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(path);
+    }
+
+    function updateSubmenuBackdropMedia(item) {
+      const bgMedia = (item && (item.backgroundVideo || item.background || item.cover)) || "";
+      const fallbackGrad = (item && item.fallbackBg) || "linear-gradient(135deg, #081d4a, #020817)";
+
+      if (isVideoFile(bgMedia)) {
+        /* Tło jako plik wideo (zawsze bez dźwięku) */
+        backdropEl.style.backgroundImage = fallbackGrad;
+        themeVideoEl.classList.add("visible");
+        if (currentVideoBgSrc !== bgMedia) {
+          currentVideoBgSrc = bgMedia;
+          themeVideoEl.src = bgMedia;
+        }
+        themeVideoEl.muted = true;
+        themeVideoEl.volume = 0;
+        if (!isSystemSleeping && navLevel === "SUBMENU") {
+          themeVideoEl.play().catch(() => {});
+        }
+      } else {
+        /* Tło jako GIF / PNG / JPG */
+        pauseBackdropVideo();
+        themeVideoEl.classList.remove("visible");
+        if (bgMedia) {
+          backdropEl.style.backgroundImage = `url("${bgMedia}"), ${fallbackGrad}`;
+        } else {
+          backdropEl.style.backgroundImage = fallbackGrad;
+        }
+      }
+    }
+
+    function pauseBackdropVideo() {
+      if (!themeVideoEl.paused) {
+        themeVideoEl.pause();
+      }
+    }
+
+    /* ============================================================================
+       6. PS4 SLEEP MODE / TRYB SPOCZYNKU (PO OTWARCIU GRY W NOWYM OKNIE)
+       ============================================================================ */
+    const sleepOverlayEl = document.getElementById("ps4-sleep-overlay");
+    const sleepAppTitleEl = document.getElementById("sleep-app-title");
+
+    function enterSleepMode(appName = "") {
+      if (isSystemSleeping) return;
+      isSystemSleeping = true;
+      sleepAppTitleEl.textContent = appName
+        ? `Wstrzymano system podczas działania: ${appName}`
+        : "Wstrzymano system na czas działania aplikacji";
+      document.body.classList.add("state-sleep");
+      pauseBackdropVideo();
+      syncBackgroundMusic();
+    }
+
+    function wakeUpFromSleepMode() {
+      if (!isSystemSleeping) return;
+      isSystemSleeping = false;
+      wakeUpCooldownUntil = performance.now() + 380;
+      document.body.classList.remove("state-sleep");
+      unlockAudioOnInteraction();
+      playCustomWav("back", true);
+      if (navLevel === "SUBMENU" && themeVideoEl.classList.contains("visible")) {
+        themeVideoEl.play().catch(() => {});
+      }
+      syncBackgroundMusic();
+    }
+
+    sleepOverlayEl.addEventListener("click", (e) => {
+      e.stopPropagation();
+      wakeUpFromSleepMode();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      document.body.classList.toggle("tab-hidden", document.hidden);
+      if (document.hidden) {
+        pauseBackdropVideo();
+      } else if (!isSystemSleeping && navLevel === "SUBMENU" && themeVideoEl.classList.contains("visible")) {
+        themeVideoEl.play().catch(() => {});
+      }
+    });
+
+    /* ============================================================================
+       7. POBIERANIE NAJNOWSZYCH WIEŚCI Z https://zsa.mans.edu.pl/2026/
+       ============================================================================ */
+    const ZSA_2026_URL = "https://zsa.mans.edu.pl/2026/";
+
+    let zsaNewsArticles = [
+      {
+        title: "ZBIÓRKA KARMY DLA SCHRONISKA ARKA W ŁOMŻY",
+        date: "12 listopada 2026",
+        excerpt: "Włącz się w szkolną akcję pomocy dla podopiecznych Schroniska dla Bezdomnych Zwierząt „Arka” w Łomży.",
+        url: "https://zsa.mans.edu.pl/2026/11/12/zbiorka-karmy-dlaschroniska-arka-w-lomzy/"
+      },
+      {
+        title: "11 Listopada — Narodowe Święto Niepodległości",
+        date: "10 listopada 2026",
+        excerpt: "„Zapraszamy całą społeczność szkolną na uroczysty apel z okazji Narodowego Święta Niepodległości! Wspólnie uczcijmy rocznicę odzyskania przez Polskę niepodległości, oddając hołd tym, którzy walczyli o wolność naszej Ojczyzny”",
+        url: "https://zsa.mans.edu.pl/2026/11/10/11-listopada/"
+      },
+      {
+        title: "Niezapomniana przygoda na Węgrzech! Uczniowie naszej szkoły odkrywali uroki Budapesztu i Zakola Dunaju",
+        date: "5 listopada 2026",
+        excerpt: "W dniach 3-5 listopada 2026 roku uczniowie naszej szkoły uczestniczyli w wyjątkowej wycieczce na Węgry, podczas której mieli okazję odkrywać piękno Budapesztu, urokliwego Szentendre oraz historycznego Wyszehradu.",
+        url: "https://zsa.mans.edu.pl/2026/11/05/niezapomniana-przygoda-na-wegrzech-uczniowie-naszej-szkoly-odkrywali-uroki-budapesztu-i-zakola-dunaju/"
+      },
+      {
+        title: "WAT spotkanie on-line",
+        date: "4 listopada 2026",
+        excerpt: "Wojskowa Akademia Techniczna w Warszawie zaproponowała spotkanie w formule zdalnej dotyczące kierunków studiów, zasad rekrutacji oraz możliwości rozwoju naukowego. Nasze szkoły objęte są patronatem WAT.",
+        url: "https://zsa.mans.edu.pl/2026/11/04/wat-spotkanie-on-line/"
+      }
+    ];
+
+    function renderZsaNewsList() {
+      const listEl = document.getElementById("zsa-news-list");
+      if (!listEl) return;
+      const targetAttr = OPEN_APPS_IN_NEW_TAB ? "_blank" : "_self";
+      listEl.innerHTML = zsaNewsArticles.map((art) => `
+        <a class="zsa-news-card" href="${art.url}" target="${targetAttr}" rel="noopener" data-news-title="${art.title.replace(/"/g, "&quot;")}">
+          <div class="zsa-news-date">${art.date}</div>
+          <div class="zsa-news-title">${art.title}</div>
+          ${art.excerpt ? `<div class="zsa-news-excerpt">${art.excerpt}</div>` : ""}
+        </a>
+      `).join("");
+
+      Array.from(listEl.querySelectorAll(".zsa-news-card")).forEach((card) => {
+        card.addEventListener("click", () => {
+          if (OPEN_APPS_IN_NEW_TAB) {
+            enterSleepMode(card.getAttribute("data-news-title") || "Aktualności ZSA");
+          }
+        });
+      });
+    }
+
+    function parseZsaArchiveHtml(htmlString) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlString, "text/html");
+      const articles = Array.from(doc.querySelectorAll("article"));
+      const parsed = [];
+
+      articles.forEach((art) => {
+        const titleLink = art.querySelector("h4 a, h2 a, h3 a, .entry-title a");
+        if (!titleLink) return;
+        const title = titleLink.textContent.trim();
+        const url = titleLink.getAttribute("href") || ZSA_2026_URL;
+
+        let dateText = "2026";
+        const links = Array.from(art.querySelectorAll("a"));
+        const dateCandidate = links.find((a) => a !== titleLink && /\d{4}/.test(a.textContent));
+        if (dateCandidate) {
+          dateText = dateCandidate.textContent.trim();
+        }
+
+        const pEl = art.querySelector("p");
+        const excerpt = pEl ? pEl.textContent.trim() : "";
+
+        if (title) {
+          parsed.push({ title, date: dateText, excerpt, url });
+        }
+      });
+
+      return parsed;
+    }
+
+    async function fetchLatestZsaNews2026() {
+      const statusEl = document.getElementById("zsa-news-status-text");
+      if (statusEl) {
+        statusEl.textContent = "Sprawdzanie najnowszych wpisów z https://zsa.mans.edu.pl/2026/ ...";
+      }
+
+      const endpoints = [
+        ZSA_2026_URL,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(ZSA_2026_URL)}`,
+        `https://corsproxy.io/?${encodeURIComponent(ZSA_2026_URL)}`
+      ];
+
+      for (const endpoint of endpoints) {
+        try {
+          const res = await fetch(endpoint, { cache: "no-store" });
+          if (!res.ok) continue;
+          const html = await res.text();
+          const items = parseZsaArchiveHtml(html);
+          if (items.length > 0) {
+            zsaNewsArticles = items.slice(0, 8);
+            renderZsaNewsList();
+            if (statusEl) {
+              statusEl.textContent = `Zaktualizowano na żywo z https://zsa.mans.edu.pl/2026/ (${zsaNewsArticles.length} wpisów)`;
+            }
+            return;
+          }
+        } catch (_) {}
+      }
+
+      renderZsaNewsList();
+      if (statusEl) {
+        statusEl.textContent = "Źródło: https://zsa.mans.edu.pl/2026/ (aktualne wieści 2026)";
+      }
+    }
+
+    document.getElementById("zsa-refresh-btn").addEventListener("click", () => {
+      playCustomWav("select");
+      fetchLatestZsaNews2026();
+    });
+
+    /* Wykrywanie urządzeń mobilnych */
+    function detectRealMobile() {
+      const uaMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const coarsePointer = window.matchMedia("(pointer: coarse) and (hover: none)").matches;
+      document.body.classList.toggle("is-mobile", Boolean(uaMobile && coarsePointer));
+    }
+    detectRealMobile();
+
+    /* ============================================================================
+       8. MASZYNA STANÓW NAWIGACJI PS4 (Z CACHE'OWANIEM WYMIARÓW CSS)
+       ============================================================================ */
+    let navLevel = "MAIN";
+    let mainIndex = 0;
+    let folderIndex = 0;
+    let enteredSubmenuFromFolder = false;
+
+    let cachedTileStep = 178;
+    let cachedFocusX = 240;
+
+    function refreshLayoutMetrics() {
+      const styles = getComputedStyle(document.documentElement);
+      const tileSize = parseFloat(styles.getPropertyValue("--tile-size")) || 168;
+      const tileGap = parseFloat(styles.getPropertyValue("--tile-gap")) || 10;
+      cachedFocusX = parseFloat(styles.getPropertyValue("--focus-x")) || 240;
+      cachedTileStep = tileSize + tileGap;
+    }
+
+    const mainTrackEl = document.getElementById("main-ribbon-track");
+    const folderTrackEl = document.getElementById("folder-ribbon-track");
+
+    function createCoverMarkup(item) {
+      const safeTitle = (item.title || "").replace(/"/g, "&quot;");
+      const bg = item.fallbackBg || "linear-gradient(135deg, #0c3b94, #041942)";
+      const src = item.cover || "";
+      return `
+        <img class="tile-cover-img" src="${src}" alt="${safeTitle}" decoding="async"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        <div class="fallback-cover" style="display:none; background:${bg};">
+          <span>${item.title}</span>
+        </div>
+      `;
+    }
+
+    function createTileElement(item, index, onClick) {
+      const tile = document.createElement("div");
+      tile.className = "ps4-tile";
+
+      let innerHtml = "";
+      if (item.type === "folder") {
+        const cells = item.items.slice(0, 3).map(sub => `
+          <div class="folder-cell">${createCoverMarkup(sub)}</div>
+        `).join("");
+        innerHtml = `
+          <div class="folder-grid-2x2">
+            ${cells}
+            <div class="folder-cell folder-icon-cell">
+              <svg viewBox="0 0 24 24">
+                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+              </svg>
+            </div>
+          </div>
+        `;
+      } else if (item.type === "system") {
+        innerHtml = `
+          <div class="tile-system-art">
+            ${item.svg}
+            ${item.bottomLabel ? `<span class="tile-system-label">${item.bottomLabel}</span>` : ""}
+          </div>
+        `;
+      } else {
+        innerHtml = createCoverMarkup(item);
+      }
+
+      const bottomBarHtml = item.type === "folder"
+        ? `<svg class="down-arrow-glyph" viewBox="0 0 24 24"><path d="M12 17l-6-6h4V5h4v6h4l-6 6z"/></svg>`
+        : `<span>Start</span>`;
+
+      tile.innerHTML = `
+        <div class="ps4-tile-inner">${innerHtml}</div>
+        <div class="tile-bottom-bar">${bottomBarHtml}</div>
+        <div class="tile-side-title">${item.title}</div>
+      `;
+
+      tile.addEventListener("click", () => onClick(index, item));
+      return tile;
+    }
+
+    function buildRibbons() {
+      refreshLayoutMetrics();
+      mainTrackEl.innerHTML = "";
+      MAIN_RIBBON_ITEMS.forEach((item, idx) => {
+        const el = createTileElement(item, idx, (clickedIdx, clickedItem) => {
+          if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+          unlockAudioOnInteraction();
+          if (navLevel === "SUBMENU") {
+            navigateUp();
+            return;
+          }
+          if (navLevel === "FOLDER") {
+            navLevel = "MAIN";
+          }
+          if (mainIndex !== clickedIdx) {
+            mainIndex = clickedIdx;
+            playCustomWav("move");
+            syncUiState();
+          } else if (clickedItem.type === "folder") {
+            navigateDown();
+          } else {
+            launchActiveItem();
+          }
+        });
+        mainTrackEl.appendChild(el);
+      });
+
+      folderTrackEl.innerHTML = "";
+      CUSTOM_GAMES_DATA.forEach((game, gIdx) => {
+        const el = createTileElement({ ...game, type: "game" }, gIdx, (clickedIdx) => {
+          if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+          unlockAudioOnInteraction();
+          if (navLevel === "MAIN") {
+            navLevel = "FOLDER";
+            folderIndex = clickedIdx;
+            playCustomWav("move");
+            syncUiState();
+          } else if (navLevel === "FOLDER") {
+            if (folderIndex !== clickedIdx) {
+              folderIndex = clickedIdx;
+              playCustomWav("move");
+              syncUiState();
+            } else {
+              launchActiveItem();
+            }
+          }
+        });
+        folderTrackEl.appendChild(el);
+      });
+
+      syncUiState();
+    }
+
+    function getActiveGameItem() {
+      if (navLevel === "FOLDER" || (navLevel === "SUBMENU" && enteredSubmenuFromFolder)) {
+        return CUSTOM_GAMES_DATA[folderIndex];
+      }
+      return MAIN_RIBBON_ITEMS[mainIndex];
+    }
+
+    function populateSubmenuScreen(item) {
+      document.getElementById("sub-cover-box").innerHTML = createCoverMarkup(item);
+      document.getElementById("sub-game-title").textContent = item.title;
+
+      const gameInfoViewEl = document.getElementById("game-info-view");
+      const zsaNewsViewEl = document.getElementById("zsa-news-view");
+      const rightLabelEl = document.getElementById("sub-header-right-label");
+      const leftNavLabelEl = document.getElementById("sub-left-nav-label");
+      const startBtnTextEl = document.getElementById("sub-start-btn-text");
+
+      if (item.isWhatsNew) {
+        gameInfoViewEl.style.display = "none";
+        zsaNewsViewEl.style.display = "flex";
+        rightLabelEl.textContent = "Aktualności 2026";
+        leftNavLabelEl.textContent = "Wieści ZSA";
+        startBtnTextEl.textContent = "Portal ZSA";
+        renderZsaNewsList();
+        fetchLatestZsaNews2026();
+      } else {
+        gameInfoViewEl.style.display = "flex";
+        zsaNewsViewEl.style.display = "none";
+        rightLabelEl.textContent = "Informacje";
+        leftNavLabelEl.textContent = "Informacje o grze";
+        startBtnTextEl.textContent = "Start";
+
+        document.getElementById("sub-desc-tag").textContent = item.subtitle || "INFORMACJE • ZSAGAMES";
+        document.getElementById("sub-desc-text").textContent = item.description || "";
+        document.getElementById("sub-meta-author").textContent = item.author || "ZSAGames — ZSA w Łomży";
+        document.getElementById("sub-meta-platform").textContent = item.platform || "Przeglądarka HTML5";
+        document.getElementById("sub-meta-url").textContent = item.url || "https://zsagames.github.io";
+      }
+
+      updateSubmenuBackdropMedia(item);
+    }
+
+    function syncUiState() {
+      /* 1. Ruch głównej wstęgi */
+      const mainTranslateX = cachedFocusX - mainIndex * cachedTileStep;
+      mainTrackEl.style.transform = `translate3d(${Math.round(mainTranslateX)}px, 0, 0)`;
+
+      Array.from(mainTrackEl.children).forEach((el, idx) => {
+        el.classList.toggle("active", idx === mainIndex);
+      });
+
+      /* 2. Ruch wstęgi folderu */
+      if (navLevel === "MAIN") {
+        folderTrackEl.style.transform = `translate3d(${Math.round(cachedFocusX)}px, 0, 0)`;
+      } else {
+        const folderTranslateX = cachedFocusX - folderIndex * cachedTileStep;
+        folderTrackEl.style.transform = `translate3d(${Math.round(folderTranslateX)}px, 0, 0)`;
+      }
+
+      Array.from(folderTrackEl.children).forEach((el, idx) => {
+        el.classList.toggle("active", navLevel !== "MAIN" && idx === folderIndex);
+      });
+
+      /* 3. Klasy stanów na <body> */
+      const onFolderTile = MAIN_RIBBON_ITEMS[mainIndex]?.type === "folder";
+      document.body.classList.toggle("folder-preview", navLevel === "MAIN" && onFolderTile);
+      document.body.classList.toggle("state-folder", navLevel === "FOLDER");
+      document.body.classList.toggle("state-submenu", navLevel === "SUBMENU");
+      document.body.classList.toggle("from-folder", navLevel === "SUBMENU" && enteredSubmenuFromFolder);
+
+      /* 4. Aktualizacja Sub-Menu (oraz wideo/GIF) i muzyki */
+      if (navLevel === "SUBMENU") {
+        const activeItem = getActiveGameItem();
+        populateSubmenuScreen(activeItem);
+      } else {
+        pauseBackdropVideo();
+      }
+      syncBackgroundMusic();
+    }
+
+    function navigateLeft() {
+      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      unlockAudioOnInteraction();
+      if (navLevel === "MAIN") {
+        if (mainIndex > 0) {
+          mainIndex--;
+          playCustomWav("move");
+          syncUiState();
+        }
+      } else if (navLevel === "FOLDER") {
+        if (folderIndex > 0) {
+          folderIndex--;
+          playCustomWav("move");
+          syncUiState();
+        }
+      }
+    }
+
+    function navigateRight() {
+      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      unlockAudioOnInteraction();
+      if (navLevel === "MAIN") {
+        if (mainIndex < MAIN_RIBBON_ITEMS.length - 1) {
+          mainIndex++;
+          playCustomWav("move");
+          syncUiState();
+        }
+      } else if (navLevel === "FOLDER") {
+        if (folderIndex < CUSTOM_GAMES_DATA.length - 1) {
+          folderIndex++;
+          playCustomWav("move");
+          syncUiState();
+        }
+      }
+    }
+
+    function navigateDown() {
+      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      unlockAudioOnInteraction();
+      if (navLevel === "MAIN") {
+        const current = MAIN_RIBBON_ITEMS[mainIndex];
+        if (current.type === "folder") {
+          navLevel = "FOLDER";
+          playCustomWav("move");
+          syncUiState();
+        } else {
+          enteredSubmenuFromFolder = false;
+          navLevel = "SUBMENU";
+          playCustomWav("select");
+          syncUiState();
+        }
+      } else if (navLevel === "FOLDER") {
+        enteredSubmenuFromFolder = true;
+        navLevel = "SUBMENU";
+        playCustomWav("select");
+        syncUiState();
+      }
+    }
+
+    function navigateUp() {
+      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      unlockAudioOnInteraction();
+      if (navLevel === "SUBMENU") {
+        navLevel = enteredSubmenuFromFolder ? "FOLDER" : "MAIN";
+        playCustomWav("back");
+        syncUiState();
+      } else if (navLevel === "FOLDER") {
+        navLevel = "MAIN";
+        playCustomWav("back");
+        syncUiState();
+      }
+    }
+
+    function triggerPressAnimation() {
+      const startBtn = document.getElementById("sub-start-btn");
+      if (navLevel === "SUBMENU" && startBtn) {
+        startBtn.classList.add("pressed");
+        setTimeout(() => startBtn.classList.remove("pressed"), 160);
+      } else {
+        const activeTile = (navLevel === "FOLDER" ? folderTrackEl : mainTrackEl).querySelector(".ps4-tile.active");
+        if (activeTile) {
+          activeTile.classList.add("pressed");
+          setTimeout(() => activeTile.classList.remove("pressed"), 160);
+        }
+      }
+    }
+
+    function launchActiveItem() {
+      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      unlockAudioOnInteraction();
+      if (navLevel === "MAIN" && MAIN_RIBBON_ITEMS[mainIndex].type === "folder") {
+        navigateDown();
+        return;
+      }
+      const item = getActiveGameItem();
+      if (item && item.url) {
+        triggerPressAnimation();
+        playCustomWav("select");
+        const targetWindow = OPEN_APPS_IN_NEW_TAB ? "_blank" : "_self";
+        window.open(item.url, targetWindow, "noopener");
+
+        if (OPEN_APPS_IN_NEW_TAB) {
+          enterSleepMode(item.title);
+        }
+      }
+    }
+
+    document.getElementById("sub-start-btn").addEventListener("click", launchActiveItem);
+
+    /* Obsługa klawiatury */
+    window.addEventListener("keydown", (e) => {
+      if (isSystemSleeping) {
+        e.preventDefault();
+        wakeUpFromSleepMode();
+        return;
+      }
+      if (performance.now() < wakeUpCooldownUntil) return;
+
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        e.preventDefault(); navigateLeft();
+      } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        e.preventDefault(); navigateRight();
+      } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
+        e.preventDefault(); navigateDown();
+      } else if (e.key === "ArrowUp" || e.key === "w" || e.key === "W" || e.key === "Escape" || e.key === "Backspace") {
+        e.preventDefault(); navigateUp();
+      } else if (e.key === "Enter") {
+        e.preventDefault(); launchActiveItem();
+      }
+    });
+
+    /* Obsługa kółka myszy */
     let lastWheelTime = 0;
     window.addEventListener("wheel", (e) => {
+      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      if (navLevel === "SUBMENU" && MAIN_RIBBON_ITEMS[mainIndex]?.isWhatsNew) {
+        return;
+      }
       const now = performance.now();
-      if (now - lastWheelTime < 170) return;
-      if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
-        if (Math.abs(delta) > 10) {
+      if (now - lastWheelTime < 150) return;
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        if (Math.abs(e.deltaX) > 10) {
           lastWheelTime = now;
-          selectCategory(activeCatIndex + (delta > 0 ? 1 : -1));
+          if (e.deltaX > 0) navigateRight();
+          else navigateLeft();
         }
-      } else if (Math.abs(e.deltaY) > 10) {
+      } else if (Math.abs(e.deltaY) > 12) {
         lastWheelTime = now;
-        selectItem(activeItemIndex + (e.deltaY > 0 ? 1 : -1));
+        if (navLevel === "SUBMENU") {
+          if (e.deltaY < 0) navigateUp();
+        } else {
+          if (e.deltaY > 0) navigateRight();
+          else navigateLeft();
+        }
       }
     }, { passive: true });
 
+    /* Gesty dotykowe i przyciski mobilne */
     let touchStartX = 0;
     let touchStartY = 0;
     window.addEventListener("touchstart", (e) => {
-      if (!e.touches.length) return;
+      if (isSystemSleeping || !e.touches.length) return;
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
     }, { passive: true });
 
     window.addEventListener("touchend", (e) => {
-      if (!e.changedTouches.length) return;
+      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil || !e.changedTouches.length) return;
       const dx = e.changedTouches[0].clientX - touchStartX;
       const dy = e.changedTouches[0].clientY - touchStartY;
-      if (Math.abs(dx) < 36 && Math.abs(dy) < 36) return;
+      if (Math.abs(dx) < 34 && Math.abs(dy) < 34) return;
       if (Math.abs(dx) > Math.abs(dy)) {
-        selectCategory(activeCatIndex + (dx < 0 ? 1 : -1));
+        if (dx < 0) navigateRight();
+        else navigateLeft();
       } else {
-        selectItem(activeItemIndex + (dy < 0 ? 1 : -1));
+        if (dy < 0) navigateDown();
+        else navigateUp();
       }
     }, { passive: true });
 
-    document.getElementById("btn-left").addEventListener("click", () => selectCategory(activeCatIndex - 1));
-    document.getElementById("btn-right").addEventListener("click", () => selectCategory(activeCatIndex + 1));
-    document.getElementById("btn-up").addEventListener("click", () => selectItem(activeItemIndex - 1));
-    document.getElementById("btn-down").addEventListener("click", () => selectItem(activeItemIndex + 1));
-    document.getElementById("btn-play").addEventListener("click", () => launchCurrentItem());
-    document.getElementById("btn-info").addEventListener("click", () => {
-      if (infoCardEl.classList.contains("visible")) hideInfoCard();
-      else showInfoCardForCurrent();
-    });
+    document.getElementById("btn-left").addEventListener("click", navigateLeft);
+    document.getElementById("btn-right").addEventListener("click", navigateRight);
+    document.getElementById("btn-up").addEventListener("click", navigateUp);
+    document.getElementById("btn-down").addEventListener("click", navigateDown);
+    document.getElementById("btn-back").addEventListener("click", navigateUp);
+    document.getElementById("btn-play").addEventListener("click", launchActiveItem);
 
+    /* Obsługa kontrolera DualShock 4 / Xbox Gamepad API */
     let lastPadTime = 0;
     function pollGamepad(now) {
       const pads = navigator.getGamepads ? navigator.getGamepads() : [];
       const pad = pads[0] || pads[1] || pads[2] || pads[3];
-      if (pad && now - lastPadTime > 190) {
-        const axX = pad.axes[0] || 0;
-        const axY = pad.axes[1] || 0;
-        const up = pad.buttons[12]?.pressed || axY < -0.55;
-        const down = pad.buttons[13]?.pressed || axY > 0.55;
-        const left = pad.buttons[14]?.pressed || axX < -0.55;
-        const right = pad.buttons[15]?.pressed || axX > 0.55;
-        const crossBtn = pad.buttons[0]?.pressed;
-        const triangleBtn = pad.buttons[3]?.pressed;
+      if (!pad || now - lastPadTime <= 180) return;
 
-        if (left) { lastPadTime = now; selectCategory(activeCatIndex - 1); }
-        else if (right) { lastPadTime = now; selectCategory(activeCatIndex + 1); }
-        else if (up) { lastPadTime = now; selectItem(activeItemIndex - 1); }
-        else if (down) { lastPadTime = now; selectItem(activeItemIndex + 1); }
-        else if (crossBtn) { lastPadTime = now + 150; launchCurrentItem(); }
-        else if (triangleBtn) {
-          lastPadTime = now + 150;
-          if (infoCardEl.classList.contains("visible")) hideInfoCard();
-          else showInfoCardForCurrent();
+      const axX = pad.axes[0] || 0;
+      const axY = pad.axes[1] || 0;
+      const up = pad.buttons[12]?.pressed || axY < -0.55;
+      const down = pad.buttons[13]?.pressed || axY > 0.55;
+      const left = pad.buttons[14]?.pressed || axX < -0.55;
+      const right = pad.buttons[15]?.pressed || axX > 0.55;
+      const crossBtn = pad.buttons[0]?.pressed;
+      const circleBtn = pad.buttons[1]?.pressed;
+
+      if (isSystemSleeping) {
+        if (crossBtn || circleBtn || up || down || left || right) {
+          lastPadTime = now + 250;
+          wakeUpFromSleepMode();
         }
+        return;
       }
+
+      if (now < wakeUpCooldownUntil) return;
+
+      if (left) { lastPadTime = now; navigateLeft(); }
+      else if (right) { lastPadTime = now; navigateRight(); }
+      else if (down) { lastPadTime = now; navigateDown(); }
+      else if (up || circleBtn) { lastPadTime = now; navigateUp(); }
+      else if (crossBtn) { lastPadTime = now + 160; launchActiveItem(); }
     }
 
-    const clockEl = document.getElementById("ps3-datetime");
+    /* Zegar PS4 */
+    const clockEl = document.getElementById("ps4-clock");
     function updateClock() {
       const d = new Date();
-      const day = String(d.getDate()).padStart(2, "0");
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const hours = String(d.getHours()).padStart(2, "0");
+      let hours = d.getHours();
       const mins = String(d.getMinutes()).padStart(2, "0");
-      clockEl.textContent = `${day}/${month} ${hours}:${mins}`;
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      if (hours === 0) hours = 12;
+      clockEl.textContent = `${hours}:${mins} ${ampm}`;
     }
     updateClock();
     setInterval(updateClock, 15000);
 
-    const canvas = document.getElementById("xmb-wave-canvas");
-    const ctx = canvas.getContext("2d", { alpha: false });
-    const RENDER_SCALE = 0.6;
-    let cw = 0, ch = 0;
+    /* ============================================================================
+       9. ULEPSZONE TŁO XMB / PS4 SILK WAVE (ZOPTYMALIZOWANE POD LOW-END PC)
+       Statyczny gradient tła jest pre-renderowany do offscreen canvas (bgCacheCanvas)
+       tylko przy zmianie rozmiaru okna, a fale używają gotowych gradientów.
+       ============================================================================ */
+    const canvas = document.getElementById("ps4-wave-canvas");
+    const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
+    const bgCacheCanvas = document.createElement("canvas");
+    const bgCacheCtx = bgCacheCanvas.getContext("2d", { alpha: false });
 
-    const sparkles = Array.from({ length: 18 }, () => ({
+    const RENDER_SCALE = IS_LOW_END_PC ? 0.46 : 0.62;
+    let cw = 0, ch = 0;
+    let waveGradients = [];
+    let crestGradients = [];
+
+    /* Subtelne świetliki XMB unoszące się wzdłuż wstęg */
+    const xmbSparkles = Array.from({ length: IS_LOW_END_PC ? 10 : 18 }, () => ({
       x: Math.random(),
-      y: 0.35 + Math.random() * 0.35,
-      r: 0.9 + Math.random() * 1.4,
-      speed: 0.00018 + Math.random() * 0.00025,
+      y: 0.42 + Math.random() * 0.42,
+      r: 0.8 + Math.random() * 1.4,
+      speedX: 0.00018 + Math.random() * 0.00024,
       phase: Math.random() * Math.PI * 2
     }));
+
+    function rebuildCanvasCache() {
+      bgCacheCanvas.width = cw;
+      bgCacheCanvas.height = ch;
+
+      /* 1. Głęboki królewski błękit PS4 / XMB */
+      const bgGrad = bgCacheCtx.createLinearGradient(0, 0, cw * 0.9, ch);
+      bgGrad.addColorStop(0, "#00236b");
+      bgGrad.addColorStop(0.46, "#0044a6");
+      bgGrad.addColorStop(0.78, "#003082");
+      bgGrad.addColorStop(1, "#001442");
+      bgCacheCtx.fillStyle = bgGrad;
+      bgCacheCtx.fillRect(0, 0, cw, ch);
+
+      /* 2. Miękka poświata atmosferyczna */
+      const glow = bgCacheCtx.createRadialGradient(cw * 0.62, ch * 0.44, cw * 0.04, cw * 0.62, ch * 0.44, cw * 0.6);
+      glow.addColorStop(0, "rgba(65, 155, 255, 0.34)");
+      glow.addColorStop(0.55, "rgba(18, 92, 210, 0.14)");
+      glow.addColorStop(1, "rgba(0, 32, 96, 0)");
+      bgCacheCtx.fillStyle = glow;
+      bgCacheCtx.fillRect(0, 0, cw, ch);
+
+      /* 3. Pre-kalkulacja gradientów dla 3 jedwabistych wstęg XMB/PS4 */
+      const fillConfigs = [
+        ["rgba(0, 18, 66, 0.72)", "rgba(8, 72, 178, 0.48)", "rgba(50, 148, 255, 0.08)"],
+        ["rgba(4, 34, 102, 0.65)", "rgba(24, 108, 224, 0.42)", "rgba(110, 195, 255, 0.12)"],
+        ["rgba(12, 62, 152, 0.48)", "rgba(75, 165, 255, 0.30)", "rgba(200, 235, 255, 0.04)"]
+      ];
+
+      waveGradients = fillConfigs.map((stops) => {
+        const g = ctx.createLinearGradient(0, ch * 0.32, cw, ch * 0.98);
+        g.addColorStop(0, stops[0]);
+        g.addColorStop(0.55, stops[1]);
+        g.addColorStop(1, stops[2]);
+        return g;
+      });
+
+      crestGradients = [
+        "rgba(165, 220, 255, 0.48)",
+        "rgba(225, 245, 255, 0.62)",
+        "rgba(135, 205, 255, 0.34)"
+      ];
+    }
 
     function resizeCanvas() {
       cw = Math.max(320, Math.floor(window.innerWidth * RENDER_SCALE));
       ch = Math.max(200, Math.floor(window.innerHeight * RENDER_SCALE));
       canvas.width = cw;
       canvas.height = ch;
-      layoutXmb();
+      refreshLayoutMetrics();
+      rebuildCanvasCache();
+      drawPs4XmbWave(performance.now());
+      syncUiState();
     }
     window.addEventListener("resize", resizeCanvas);
 
-    function drawPs3Wave(time) {
-      const bgGrad = ctx.createLinearGradient(0, 0, cw, ch);
-      bgGrad.addColorStop(0, "#050d20");
-      bgGrad.addColorStop(0.5, "#0d234a");
-      bgGrad.addColorStop(1, "#040917");
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, cw, ch);
+    function drawPs4XmbWave(time) {
+      /* Szybkie skopiowanie tła z pamięci podręcznej (1 operacja GPU zamiast budowania gradientów) */
+      ctx.drawImage(bgCacheCanvas, 0, 0);
 
-      const t = time * 0.00045;
-      const step = 14;
+      const t = time * 0.00052;
+      const step = IS_LOW_END_PC ? 22 : 14;
 
-      for (let w = 0; w < 2; w++) {
+      /* Rysowanie 3 jedwabistych wstęg XMB / PS4 Flow */
+      for (let w = 0; w < 3; w++) {
+        const phaseOffset = w * 1.35;
+        const speedMult = 1 - w * 0.16;
+        const baseSlopeStart = ch * (0.92 + w * 0.045);
+        const baseSlopeEnd = ch * (0.34 + w * 0.085);
+        const ribbonThickness = ch * (0.20 - w * 0.032);
+
         ctx.beginPath();
-        const baseY = ch * (0.52 + w * 0.045);
-        const amp1 = ch * (0.065 - w * 0.015);
-        const amp2 = ch * 0.03;
 
+        /* Górna krawędź jedwabistej wstęgi */
         for (let x = 0; x <= cw + step; x += step) {
           const nx = x / cw;
-          const y = baseY + Math.sin(nx * 4.2 + t + w * 1.1) * amp1 + Math.cos(nx * 2.3 - t * 0.8 + w) * amp2;
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+          const diagY = baseSlopeStart + (baseSlopeEnd - baseSlopeStart) * Math.pow(nx, 1.15);
+          const wave1 = Math.sin(nx * 3.8 - t * speedMult + phaseOffset) * (ch * 0.048);
+          const wave2 = Math.cos(nx * 2.1 + t * 0.72 - phaseOffset) * (ch * 0.026);
+          const yTop = diagY + wave1 + wave2;
+
+          if (x === 0) ctx.moveTo(x, yTop);
+          else ctx.lineTo(x, yTop);
         }
 
+        /* Dolna krawędź jedwabistej wstęgi */
         for (let x = cw + step; x >= 0; x -= step) {
           const nx = x / cw;
-          const y = baseY + ch * 0.085 + Math.sin(nx * 3.6 - t * 0.65 + w) * (amp1 * 0.75);
-          ctx.lineTo(x, y);
+          const diagY = baseSlopeStart + (baseSlopeEnd - baseSlopeStart) * Math.pow(nx, 1.15);
+          const wave1 = Math.sin(nx * 3.2 - t * speedMult * 0.85 + phaseOffset + 0.7) * (ch * 0.042);
+          const twist = (0.55 + 0.45 * Math.sin(nx * 2.6 + t * 0.5 + w)) * ribbonThickness;
+          const yBot = diagY + wave1 + twist;
+          ctx.lineTo(x, yBot);
         }
-        ctx.closePath();
 
-        const waveGrad = ctx.createLinearGradient(0, baseY - amp1, 0, baseY + ch * 0.1);
-        waveGrad.addColorStop(0, w === 0 ? "rgba(210, 230, 255, 0.20)" : "rgba(150, 195, 255, 0.13)");
-        waveGrad.addColorStop(1, "rgba(15, 45, 95, 0.0)");
-        ctx.fillStyle = waveGrad;
+        ctx.closePath();
+        ctx.fillStyle = waveGradients[w];
         ctx.fill();
 
+        /* Lśniąca górna krawędź wstęgi (XMB Specular Crest) */
         ctx.beginPath();
         for (let x = 0; x <= cw + step; x += step) {
           const nx = x / cw;
-          const y = baseY + Math.sin(nx * 4.2 + t + w * 1.1) * amp1 + Math.cos(nx * 2.3 - t * 0.8 + w) * amp2;
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+          const diagY = baseSlopeStart + (baseSlopeEnd - baseSlopeStart) * Math.pow(nx, 1.15);
+          const wave1 = Math.sin(nx * 3.8 - t * speedMult + phaseOffset) * (ch * 0.048);
+          const wave2 = Math.cos(nx * 2.1 + t * 0.72 - phaseOffset) * (ch * 0.026);
+          const yTop = diagY + wave1 + wave2;
+
+          if (x === 0) ctx.moveTo(x, yTop);
+          else ctx.lineTo(x, yTop);
         }
-        ctx.strokeStyle = w === 0 ? "rgba(255, 255, 255, 0.36)" : "rgba(200, 225, 255, 0.18)";
-        ctx.lineWidth = 1.1;
+        ctx.strokeStyle = crestGradients[w];
+        ctx.lineWidth = w === 1 ? 1.4 : 0.95;
         ctx.stroke();
       }
 
-      ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
-      for (let i = 0; i < sparkles.length; i++) {
-        const s = sparkles[i];
-        s.x += s.speed;
-        if (s.x > 1.02) s.x = -0.02;
-        const py = (s.y + Math.sin(t * 2 + s.phase) * 0.02) * ch;
+      /* Subtelne świetliki XMB płynące wzdłuż fali */
+      ctx.fillStyle = "rgba(220, 242, 255, 0.58)";
+      for (let i = 0; i < xmbSparkles.length; i++) {
+        const s = xmbSparkles[i];
+        s.x += s.speedX;
+        if (s.x > 1.03) s.x = -0.03;
+
+        const px = s.x * cw;
+        const py = (s.y - s.x * 0.28 + Math.sin(t * 2.2 + s.phase) * 0.018) * ch;
         ctx.beginPath();
-        ctx.arc(s.x * cw, py, s.r, 0, Math.PI * 2);
+        ctx.arc(px, py, s.r, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
-    let lastFrameTime = 0;
+    /* ============================================================================
+       10. ZJEDNOCZONA PĘTLA GŁÓWNA (AUDIO + GAMEPAD + CANVAS)
+       ============================================================================ */
+    let lastAudioTime = performance.now();
     function mainLoop(now) {
-      pollGamepad(now);
-      if (!document.hidden && now - lastFrameTime >= 32) {
-        lastFrameTime = now;
-        drawPs3Wave(now);
+      const dtSec = Math.min(0.1, (now - lastAudioTime) / 1000);
+      lastAudioTime = now;
+
+      /* Mikser audio (fade-in / fade-out / bezszwowy loop) */
+      trackRegistry.forEach((track) => track.tick(dtSec));
+
+      if (!document.hidden) {
+        pollGamepad(now);
+        /* Renderujemy fale XMB/PS4 tylko gdy nie jesteśmy w Sleep Mode ani w Sub-Menu zakrytym tapetą */
+        if (!isSystemSleeping && navLevel !== "SUBMENU") {
+          drawPs4XmbWave(now);
+        }
       }
       requestAnimationFrame(mainLoop);
     }
 
-    buildCategories();
-    buildItems();
+    buildRibbons();
     resizeCanvas();
+    fetchLatestZsaNews2026();
     requestAnimationFrame(mainLoop);
   </script>
 </body>
