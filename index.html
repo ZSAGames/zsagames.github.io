@@ -290,6 +290,57 @@
             </div>
           </div>
         </div>
+
+        <!-- WIDOK E: Plan Nauczycieli ZSA (Wykaz Godzin Lekcyjnych, Klas i Sal z PDF) -->
+        <div class="zsa-teachers-view" id="zsa-teachers-view">
+          <div class="tt-top-bar">
+            <div class="tt-breadcrumb" id="tch-breadcrumb">
+              Wybierz nauczyciela z listy (<strong>53 nauczycieli ZSA</strong>) — sprawdź godziny lekcyjne i sale
+            </div>
+            <div class="tt-top-right-group">
+              <input
+                type="text"
+                class="tch-search-input"
+                id="tch-search-input"
+                placeholder="🔍 Szukaj nauczyciela, przedmiotu lub sali (np. Polkowski, Pai, 603)..."
+                autocomplete="off"
+              />
+              <button type="button" class="tt-back-step-btn" id="tch-back-step-btn" style="display:none;">
+                <span class="ds4-badge circle">○</span> Lista nauczycieli
+              </button>
+            </div>
+          </div>
+
+          <!-- Krok 1: Siatka wyboru nauczyciela z pliku PDF -->
+          <div class="tch-grid" id="tch-list-step"></div>
+
+          <!-- Krok 2: Tabela godzin lekcyjnych i sal wybranego nauczyciela + wykaz dzienny -->
+          <div class="tt-schedule-wrap" id="tch-schedule-step" style="display:none;">
+            <div class="tch-summary-banner" id="tch-summary-banner"></div>
+
+            <table class="tt-table tch-table">
+              <thead>
+                <tr>
+                  <th class="tt-col-nr">Lek.</th>
+                  <th class="tt-col-time">Godziny</th>
+                  <th>Poniedziałek</th>
+                  <th>Wtorek</th>
+                  <th>Środa</th>
+                  <th>Czwartek</th>
+                  <th>Piątek</th>
+                </tr>
+              </thead>
+              <tbody id="tch-schedule-tbody"></tbody>
+            </table>
+
+            <!-- Szczegółowy wykaz lekcji dzień po dniu (Godzina + Przedmiot + Klasa + Sala) -->
+            <div class="tch-daily-box">
+              <div class="tt-legend-title" id="tch-daily-title">Szczegółowy wykaz godzin lekcyjnych i sal</div>
+              <div class="tch-daily-grid" id="tch-daily-grid"></div>
+            </div>
+          </div>
+        </div>
+        
       </div>
     </section>
   </main>

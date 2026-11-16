@@ -1865,3 +1865,262 @@
         align-items: stretch;
       }
     }
+
+   /* ================= WIDOK E: APLIKACJA PLAN NAUCZYCIELI (GODZINY I SALE) ================= */
+    .zsa-teachers-view {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .tch-search-input {
+      min-width: 310px;
+      padding: 6px 12px;
+      background: rgba(8, 26, 66, 0.92);
+      border: 1.5px solid rgba(102, 190, 255, 0.55);
+      border-radius: 4px;
+      color: #ffffff;
+      font-size: 0.84rem;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .tch-search-input::placeholder {
+      color: rgba(185, 218, 255, 0.65);
+    }
+
+    .tch-search-input:focus,
+    .tch-search-input.pad-focused {
+      border-color: #ffffff;
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.65), 0 0 24px rgba(58, 166, 255, 0.45);
+    }
+
+    .tch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+      gap: 12px;
+      overflow-y: auto;
+      max-height: calc(100vh - 250px);
+      padding: 4px 8px 16px 2px;
+      scroll-behavior: smooth;
+    }
+
+    .tch-grid::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    .tch-grid::-webkit-scrollbar-thumb {
+      background: rgba(126, 200, 255, 0.45);
+      border-radius: 3px;
+    }
+
+    .tch-card {
+      background: linear-gradient(145deg, rgba(10, 30, 72, 0.9) 0%, rgba(5, 16, 40, 0.95) 100%);
+      border: 1.5px solid rgba(102, 190, 255, 0.35);
+      padding: 13px 15px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .tch-card:hover,
+    .tch-card.pad-focused {
+      background: linear-gradient(145deg, rgba(24, 68, 148, 0.96) 0%, rgba(10, 32, 78, 0.98) 100%);
+      border-color: #ffffff;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 28px rgba(80, 180, 255, 0.45);
+      transform: translate3d(0, -2px, 0);
+    }
+
+    .tch-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .tch-card-code {
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      background: rgba(58, 166, 255, 0.22);
+      border: 1px solid rgba(102, 190, 255, 0.55);
+      border-radius: 3px;
+      color: #7ec8ff;
+      font-weight: 700;
+    }
+
+    .tch-card-hours {
+      font-size: 0.73rem;
+      color: var(--ps4-plus-gold);
+      font-weight: 700;
+    }
+
+    .tch-card-name {
+      font-size: 1.04rem;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.25;
+    }
+
+    .tch-card-subjects {
+      font-size: 0.78rem;
+      color: rgba(210, 232, 255, 0.84);
+      line-height: 1.35;
+    }
+
+    .tch-card-rooms {
+      font-size: 0.74rem;
+      color: #7ec8ff;
+      margin-top: 2px;
+    }
+
+    .tch-summary-banner {
+      margin: 10px 12px 12px 12px;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, rgba(12, 38, 92, 0.92) 0%, rgba(6, 20, 48, 0.96) 100%);
+      border: 1px solid rgba(102, 190, 255, 0.45);
+      border-left: 4px solid var(--ps4-plus-gold);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .tch-summary-main {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .tch-summary-name {
+      font-size: 1.22rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .tch-summary-meta {
+      font-size: 0.83rem;
+      color: rgba(215, 235, 255, 0.88);
+    }
+
+    .tch-summary-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tch-stat-pill {
+      padding: 4px 10px;
+      background: rgba(8, 24, 58, 0.9);
+      border: 1px solid rgba(102, 190, 255, 0.45);
+      border-radius: 3px;
+      font-size: 0.78rem;
+      color: #ffffff;
+    }
+
+    .tch-stat-pill strong {
+      color: var(--ps4-plus-gold);
+    }
+
+    .tch-slot-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 5px 7px;
+      margin-bottom: 4px;
+      border-radius: 3px;
+      background: rgba(20, 58, 128, 0.55);
+      border-left: 3px solid #66beff;
+    }
+
+    .tch-slot-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .tch-slot-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .tch-slot-subj {
+      font-weight: 700;
+      color: #ffffff;
+      font-size: 0.82rem;
+    }
+
+    .tch-slot-room {
+      display: inline-block;
+      padding: 1px 6px;
+      background: rgba(245, 196, 24, 0.2);
+      border: 1px solid var(--ps4-plus-gold);
+      border-radius: 3px;
+      color: var(--ps4-plus-gold);
+      font-weight: 700;
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    .tch-slot-class {
+      font-size: 0.75rem;
+      color: #8fd0ff;
+      font-weight: 500;
+    }
+
+    .tch-daily-box {
+      margin: 14px 12px 6px 12px;
+      padding: 14px 16px;
+      background: rgba(8, 24, 56, 0.88);
+      border: 1px solid rgba(102, 190, 255, 0.38);
+      border-left: 4px solid #3aa6ff;
+      border-radius: 3px;
+    }
+
+    .tch-daily-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+    }
+
+    .tch-day-card {
+      background: rgba(5, 16, 38, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 10px 12px;
+      border-radius: 3px;
+    }
+
+    .tch-day-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--ps4-plus-gold);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      padding-bottom: 5px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .tch-day-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 4px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+      font-size: 0.78rem;
+    }
+
+    .tch-day-row:last-child {
+      border-bottom: none;
+    }
+
+    .tch-day-hour {
+      color: rgba(190, 220, 255, 0.85);
+      font-weight: 600;
+      white-space: nowrap;
+    }

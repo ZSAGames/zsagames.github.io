@@ -139,6 +139,29 @@
               </svg>`
       },
       {
+        id: "teachers-app",
+        type: "system",
+        isTeachers: true,
+        title: "Plan Nauczycieli",
+        subtitle: "GODZINY LEKCYJNE I SALE (PDF)",
+        url: "https://zsa.mans.edu.pl/wp-content/uploads/2026/09/PL_UC_21092026_v2.pdf",
+        cover: "ZSACover.png",
+        background: "ZSABackground.png",
+        music: "",
+        fallbackBg: "linear-gradient(135deg, #0b508c, #041936)",
+        author: "Zespół Szkół Akademickich w Łomży",
+        platform: "Wykaz Nauczycieli, Godzin i Sal 2026",
+        description: "Pełna lista 53 nauczycieli ZSA w Łomży z oficjalnego planu PDF. Sprawdź, na jakich godzinach lekcyjnych, z jaką klasą i w jakiej sali dany nauczyciel prowadzi zajęcia.",
+        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3">
+                <circle cx="24" cy="20" r="8" fill="rgba(255,255,255,0.14)"/>
+                <path d="M10 46c0-7.5 6.3-13 14-13s14 5.5 14 13" fill="rgba(255,255,255,0.12)"/>
+                <rect x="38" y="14" width="18" height="24" rx="2" fill="rgba(255,255,255,0.12)"/>
+                <line x1="42" y1="21" x2="52" y2="21"/>
+                <line x1="42" y1="27" x2="52" y2="27"/>
+                <line x1="42" y1="33" x2="49" y2="33"/>
+              </svg>`
+      },
+      {
         id: "directions-app",
         type: "system",
         isDirections: true,
@@ -175,7 +198,7 @@
                 <rect x="14" y="22" width="72" height="46" />
                 <line x1="28" y1="76" x2="72" y2="76" stroke-width="5.5"/>
               </svg>`
-      }
+      },
     ];
 
     /* ============================================================================
@@ -1657,6 +1680,1917 @@
       }
     });
 
+    /* ============================================================================
+       7C. BAZA WSZYSTKICH 53 NAUCZYCIELI Z PLIKU PDF + LOGIKA "PLAN NAUCZYCIELI"
+       Format wpisu lekcji: [nrLekcji (1..10), "Przedmiot", "Klasa", "Sala"]
+       ============================================================================ */
+const TEACHERS_PDF_DB = [
+  {
+    code: "RBanach",
+    name: "R. Banach",
+    role: "Edukacja dla bezpieczeństwa (Edb), BHP",
+    days: {
+      Pn: [
+        [8, "Bhp", "2BC AT", "B06"],
+        [9, "Bhp", "1A AT", "B06"],
+        [10, "Bhp", "1B AT", "B06"]
+      ],
+      Wt: [
+        [1, "Edb", "1B AT", "B06"],
+        [2, "Bhp", "2A AT", "B06"],
+        [8, "Edb", "1A ALO", "B06"],
+        [10, "Edb", "1A AT", "B06"]
+      ],
+      Sr: [],
+      Czw: [],
+      Pi: [
+        [1, "Edb", "1B ALO", "B06"]
+      ]
+    }
+  },
+  {
+    code: "BBorawska",
+    name: "Beata Borawska",
+    role: "Język polski • Wychowawca 4A AT",
+    days: {
+      Pn: [
+        [7, "Jp", "4D AT", "403"],
+        [8, "Jp", "4D AT", "403"]
+      ],
+      Wt: [
+        [9, "Jp", "4BC AT", "403"]
+      ],
+      Sr: [
+        [7, "Jp", "4A AT", "108"],
+        [8, "Jp", "4A AT", "108"],
+        [9, "Zzw", "4A AT", "400"]
+      ],
+      Czw: [
+        [6, "Jp", "4BC AT", "104"]
+      ],
+      Pi: [
+        [7, "Jp", "4D AT", "400"],
+        [8, "Jp", "4BC AT", "400"],
+        [9, "Jp", "4A AT", "400"]
+      ]
+    }
+  },
+  {
+    code: "SBrzóska",
+    name: "S. Brzóska",
+    role: "Matematyka, Elektrotechnika i elektronika (EiE)",
+    days: {
+      Pn: [
+        [1, "Mat", "5A AT", "100"],
+        [2, "Mat", "5B AT", "100"],
+        [3, "Mat", "5B AT", "100"],
+        [4, "Mat", "5C AT", "100"]
+      ],
+      Wt: [
+        [9, "Mat", "5B AT", "100"],
+        [10, "Mat", "5B AT", "100"]
+      ],
+      Sr: [
+        [9, "Mat", "5A AT", "100"],
+        [10, "Mat", "5A AT", "100"]
+      ],
+      Czw: [
+        [5, "Mat", "5C AT", "108"],
+        [6, "Mech EiE", "1A AT", "108"],
+        [7, "Mech EiE", "1A AT", "108"],
+        [8, "Mat", "5C AT", "108"],
+        [9, "Mat", "5A AT", "100"],
+        [10, "Mat", "5A AT", "100"]
+      ],
+      Pi: [
+        [1, "Mat", "5C AT", "200"],
+        [2, "Mat", "5B AT", "200"],
+        [3, "Mat", "5C AT", "200"]
+      ]
+    }
+  },
+  {
+    code: "JBućkowska",
+    name: "Justyna Bućkowska",
+    role: "Przedmioty logistyczne (Opm, PL, Ppt) • Wychowawca 3B AT",
+    days: {
+      Pn: [
+        [1, "Log Opm", "3B AT", "104"],
+        [3, "Zzw", "3B AT", "104"],
+        [10, "Log Ppt", "3B AT", "104"]
+      ],
+      Wt: [
+        [1, "Log Opm", "3B AT", "104"],
+        [2, "PL", "1B AT", "104"],
+        [4, "Log Opm", "3B AT", "104"],
+        [9, "PL", "1B AT", "104"]
+      ],
+      Sr: [
+        [10, "Log Opm", "2BC AT", "104"]
+      ],
+      Czw: [],
+      Pi: [
+        [8, "Log Opm", "2BC AT", "104"],
+        [9, "Log Opm", "2BC AT", "104"],
+        [10, "Log Ppt", "2BC AT", "104"]
+      ]
+    }
+  },
+  {
+    code: "RBućkowski",
+    name: "Rafał Marcin Bućkowski",
+    role: "Fizyka • Wychowawca 4C ALO",
+    days: {
+      Pn: [
+        [8, "Fiz", "2B ALO", "108"]
+      ],
+      Wt: [
+        [6, "Fiz", "2BC AT", "108"],
+        [7, "Fiz", "1A AT", "B01"],
+        [8, "Fiz", "1B AT", "108"],
+        [10, "Mech Fiz", "2BC AT", "108"]
+      ],
+      Sr: [
+        [4, "Fiz", "3A ALO", "B01"],
+        [5, "Zzw", "4C ALO", "B01"],
+        [6, "Fiz", "3B AT", "B01"],
+        [7, "Mech Fiz", "2BC AT", "B01"],
+        [8, "Fiz", "1A AT", "B01"]
+      ],
+      Czw: [
+        [2, "Fiz", "3A AT", "B01"],
+        [3, "Fiz", "2A ALO", "B01"]
+      ],
+      Pi: [
+        [1, "Mech Fiz", "3B AT", "B01"],
+        [5, "Mech Fiz", "1A AT", "B01"],
+        [7, "Fiz", "3A ALO", "B01"],
+        [8, "Fiz", "2A AT", "B01"],
+        [9, "Fiz", "1B AT", "B01"]
+      ]
+    }
+  },
+  {
+    code: "RChodorowski",
+    name: "R. Chodorowski",
+    role: "Przedmioty mechaniczne (CAD/CAM)",
+    days: {
+      Pn: [
+        [7, "Mech Cad/CAM", "1A AT", "606"],
+        [8, "Mech Cad/CAM", "1A AT", "606"],
+        [9, "Mech Cad/CAM", "3B AT", "C09"]
+      ],
+      Wt: [],
+      Sr: [],
+      Czw: [
+        [8, "Mech Cad/CAM", "3B AT", "C09"],
+        [9, "Mech Cad/CAM", "2BC AT", "C09"],
+        [10, "Mech Cad/CAM", "2BC AT", "C09"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "WCwalina",
+    name: "W. Cwalina",
+    role: "Biologia",
+    days: {
+      Pn: [],
+      Wt: [],
+      Sr: [
+        [9, "Bio", "4BC AT", "B04"]
+      ],
+      Czw: [],
+      Pi: [
+        [8, "Bio", "3B AT", "B04"],
+        [9, "Bio", "4D AT", "B04"],
+        [10, "Bio", "3A AT", "B04"]
+      ]
+    }
+  },
+  {
+    code: "PDuchnowski",
+    name: "Paweł Duchnowski",
+    role: "Przedmioty IT (Sbd, Wiai, So, Ksiop, inf roz) • Wychowawca 4BC AT",
+    days: {
+      Pn: [
+        [5, "Ksiop z", "2A AT", "308"],
+        [6, "Prog Sbd", "2A AT", "308"],
+        [7, "Prog Wiai", "1A AT", "308"],
+        [8, "Prog Sbd", "1A AT", "308"],
+        [9, "Prog Psbd", "3B AT", "308"],
+        [10, "Zzw", "4BC AT", "308"]
+      ],
+      Wt: [
+        [8, "inf roz", "5B AT", "308"],
+        [9, "inf roz", "4D AT", "308"],
+        [10, "Prog Psbd", "2A AT", "308"]
+      ],
+      Sr: [
+        [5, "Prog Wiai", "2A AT", "308"],
+        [6, "Ksiop z", "2BC AT", "308"],
+        [7, "Prog Psbd", "3B AT", "308"],
+        [8, "inf roz", "5A AT", "308"],
+        [9, "Inf So", "1A AT", "308"],
+        [10, "Inf So", "1A AT", "308"]
+      ],
+      Czw: [
+        [5, "inf roz", "4A AT", "308"],
+        [6, "inf roz", "5C AT", "308"],
+        [7, "Prog Sbd", "1A AT", "308"],
+        [8, "Prog Wiai", "2A AT", "308"],
+        [9, "Inf So", "2A AT", "308"],
+        [10, "Inf So", "2A AT", "308"]
+      ],
+      Pi: [
+        [9, "inf roz", "4BC AT", "308"],
+        [10, "Prog Wiai", "1A AT", "308"]
+      ]
+    }
+  },
+  {
+    code: "IDudzińska",
+    name: "I. Dudzińska",
+    role: "Język angielski",
+    days: {
+      Pn: [],
+      Wt: [
+        [2, "Ja", "5A AT", "504"],
+        [3, "Ja", "5C AT", "504"],
+        [4, "Ja", "5A AT", "504"],
+        [5, "Ja", "2A ALO", "504"],
+        [6, "Ja", "2A ALO", "504"],
+        [7, "Ja", "4D AT", "504"],
+        [8, "Ja (Niemundurowi)", "2A AT", "504"]
+      ],
+      Sr: [
+        [1, "Ja", "4D AT", "504"],
+        [2, "Ja", "4D AT", "504"],
+        [3, "Ja", "5C AT", "504"],
+        [5, "Ja", "5A AT", "504"],
+        [6, "Ja", "5C AT", "504"],
+        [7, "Ja (Niemundurowi)", "2A AT", "504"],
+        [8, "Ja", "2A ALO", "504"]
+      ],
+      Czw: [],
+      Pi: []
+    }
+  },
+  {
+    code: "ADzbeńska",
+    name: "Aleksandra Dzbeńska",
+    role: "Biznes i zarządzanie, Logistyka (Zm, OKiK) • Wychowawca 1B AT",
+    days: {
+      Pn: [
+        [1, "Biz", "1B ALO", "403"],
+        [2, "Biz", "2A AT", "403"],
+        [3, "Zzw", "1B AT", "403"]
+      ],
+      Wt: [
+        [1, "Biz", "2BC AT", "403"],
+        [2, "Biz", "2A ALO", "403"],
+        [3, "Log Zm", "2BC AT", "403"]
+      ],
+      Sr: [
+        [4, "OKiK", "1B AT", "403"],
+        [5, "Biz", "2B ALO", "403"],
+        [6, "Zm", "1B AT", "403"],
+        [7, "Biz", "1A ALO", "403"],
+        [8, "OKiK", "1B AT", "403"],
+        [9, "Log Zm", "2BC AT", "403"]
+      ],
+      Czw: [],
+      Pi: []
+    }
+  },
+  {
+    code: "BDzięgielewska",
+    name: "B. Dzięgielewska",
+    role: "Geografia, Geografia logistyczna",
+    days: {
+      Pn: [
+        [1, "Geo", "3A ALO", "207"]
+      ],
+      Wt: [
+        [8, "Log Geo", "2BC AT", "102"],
+        [10, "Log Geo", "2BC AT", "102"]
+      ],
+      Sr: [
+        [5, "Geo", "1B AT", "108"],
+        [7, "Geo", "3A ALO", "500"],
+        [8, "Geo", "3A ALO", "500"],
+        [9, "Geo", "1B AT", "500"],
+        [10, "Geo", "1B AT", "500"]
+      ],
+      Czw: [],
+      Pi: []
+    }
+  },
+  {
+    code: "MFiega",
+    name: "M. Fiega",
+    role: "Matematyka, Przedmioty logistyczne (PL, PiWZ, Opt)",
+    days: {
+      Pn: [],
+      Wt: [
+        [2, "Log Opt", "3B AT", "—"],
+        [3, "Mat", "2A ALO", "100"]
+      ],
+      Sr: [
+        [1, "Log PL", "2BC AT", "—"],
+        [2, "Log PL", "2BC AT", "—"],
+        [3, "Log PL", "2BC AT", "—"],
+        [4, "Mat", "2A ALO", "200"],
+        [5, "Mat", "2A ALO", "200"],
+        [6, "Mat", "2A ALO", "200"],
+        [7, "Log Opt", "3B AT", "—"]
+      ],
+      Czw: [
+        [1, "Log PiWZ", "2BC AT", "—"],
+        [2, "Log PiWZ", "2BC AT", "—"],
+        [3, "Log PL", "2BC AT", "—"],
+        [4, "Log Opt", "3B AT", "—"]
+      ],
+      Pi: [
+        [4, "PiWZ", "1B AT", "403"],
+        [7, "PiWZ", "1B AT", "403"]
+      ]
+    }
+  },
+  {
+    code: "MFilipkowski",
+    name: "M. Filipkowski",
+    role: "Informatyka, Język polski",
+    days: {
+      Pn: [
+        [5, "Inf", "2BC AT", "509"],
+        [6, "Inf", "2A ALO", "509"],
+        [7, "Jp", "4A ALO", "500"],
+        [8, "Jp", "4A ALO", "500"]
+      ],
+      Wt: [
+        [6, "Jp", "4A ALO", "500"],
+        [7, "Jp", "4A ALO", "500"],
+        [8, "Jp", "4A ALO", "500"]
+      ],
+      Sr: [
+        [5, "Jp", "4A ALO", "500"],
+        [6, "Jp", "4A ALO", "500"],
+        [9, "Inf", "3A AT", "509"]
+      ],
+      Czw: [
+        [1, "Inf", "3A ALO", "509"],
+        [2, "Inf", "2A AT", "509"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "PFilipkowski",
+    name: "Piotr Filipkowski",
+    role: "Historia • Wychowawca 2A ALO",
+    days: {
+      Pn: [
+        [2, "His", "2A ALO", "102"],
+        [3, "His", "3A AT", "C10"],
+        [4, "His", "1B AT", "C10"],
+        [5, "His", "3B AT", "—"],
+        [6, "His", "1A AT", "C10"],
+        [7, "His", "2A AT", "102"],
+        [9, "His", "2A ALO", "102"],
+        [10, "His", "1A ALO", "100"]
+      ],
+      Wt: [
+        [3, "His", "3A ALO", "102"],
+        [4, "His", "1A ALO", "C10"],
+        [7, "His", "3A AT", "102"]
+      ],
+      Sr: [
+        [1, "Zzw", "2A ALO", "102"],
+        [5, "His", "3A ALO", "102"],
+        [6, "His", "1B ALO", "C10"]
+      ],
+      Czw: [
+        [1, "His", "1B ALO", "102"],
+        [2, "His", "1A ALO", "102"],
+        [3, "His", "4B ALO", "—"],
+        [5, "His", "1B ALO", "C10"],
+        [6, "His", "2A AT", "C10"],
+        [8, "His", "1A AT", "100"],
+        [9, "His", "4B ALO", "—"]
+      ],
+      Pi: [
+        [2, "His", "1B AT", "100"],
+        [3, "His", "3B AT", "—"],
+        [4, "His", "2A ALO", "100"]
+      ]
+    }
+  },
+  {
+    code: "MJankowska",
+    name: "M. Jankowska",
+    role: "Edukacja obywatelska (EO), Dgwbi",
+    days: {
+      Pn: [],
+      Wt: [
+        [3, "EO", "3B AT", "B01"],
+        [4, "Dgwbi", "3A AT", "B01"],
+        [6, "EO", "2A AT", "B01"]
+      ],
+      Sr: [
+        [4, "EO", "4BC AT", "104"],
+        [5, "EO", "3A AT", "104"],
+        [6, "EO", "4A AT", "104"]
+      ],
+      Czw: [
+        [4, "EO", "4D AT", "104"],
+        [5, "Dgwbi", "3A AT", "104"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "BJasińska",
+    name: "B. Jasińska",
+    role: "Edukacja obywatelska (EO)",
+    days: {
+      Pn: [
+        [6, "EO", "2B ALO", "104"],
+        [7, "EO", "2A ALO", "104"],
+        [8, "EO", "2A ALO", "104"]
+      ],
+      Wt: [],
+      Sr: [
+        [6, "EO", "3A ALO", "108"],
+        [9, "EO", "2B ALO", "507"]
+      ],
+      Czw: [],
+      Pi: []
+    }
+  },
+  {
+    code: "KJaskółka",
+    name: "Karol Jaskółka",
+    role: "Język polski • Wychowawca 3A AT",
+    days: {
+      Pn: [
+        [1, "Jp", "2B ALO", "505"],
+        [2, "Jp", "3A ALO", "505"],
+        [3, "Jp", "1A ALO", "505"],
+        [4, "Jp", "1A ALO", "505"],
+        [5, "Jp", "4C ALO", "505"],
+        [6, "Jp", "4B ALO", "505"],
+        [7, "Jp", "3B AT", "505"],
+        [8, "Jp", "4B ALO", "505"],
+        [9, "Jp", "1A ALO", "505"]
+      ],
+      Wt: [
+        [1, "Jp", "3A ALO", "505"],
+        [2, "Jp", "2B ALO", "505"],
+        [4, "Jp", "2B ALO", "505"],
+        [5, "Jp", "2B ALO", "505"],
+        [6, "Jp", "4C ALO", "505"],
+        [7, "Jp", "2A ALO", "505"],
+        [8, "Zzw", "3A AT", "505"],
+        [9, "Jp", "1A ALO", "505"]
+      ],
+      Sr: [
+        [1, "Jp", "4B ALO", "505"],
+        [2, "Jp", "2A ALO", "505"],
+        [3, "Jp", "3A AT", "505"],
+        [4, "Jp", "2B ALO", "505"],
+        [5, "Jp", "3B AT", "505"],
+        [6, "Jp", "3A AT", "505"],
+        [7, "Jp", "2A ALO", "505"],
+        [8, "Jp", "4C ALO", "505"],
+        [9, "Jp", "1A ALO", "505"],
+        [10, "Jp", "1A ALO", "505"]
+      ],
+      Czw: [
+        [2, "Jp", "2B ALO", "505"],
+        [3, "Jp", "3A ALO", "505"],
+        [5, "Jp", "2A ALO", "505"],
+        [6, "Jp", "3A ALO", "505"],
+        [7, "Jp", "4C ALO", "505"],
+        [8, "Jp", "4B ALO", "505"],
+        [9, "Jp", "3A ALO", "505"],
+        [10, "Jp", "3A AT", "505"]
+      ],
+      Pi: [
+        [1, "Jp", "2A ALO", "505"],
+        [2, "Jp (1. Grupa)", "2A ALO", "505"],
+        [3, "Jp (1. Grupa)", "2A ALO", "505"],
+        [4, "Jp", "4B ALO", "505"],
+        [5, "Jp", "3B AT", "505"],
+        [6, "Jp", "4B ALO", "505"],
+        [7, "Jp", "2B ALO", "505"],
+        [8, "Jp", "4B ALO", "505"],
+        [9, "Jp", "3A ALO", "505"]
+      ]
+    }
+  },
+  {
+    code: "KKarpik",
+    name: "K. Karpik",
+    role: "Wychowanie fizyczne (Wf)",
+    days: {
+      Pn: [
+        [1, "Wf", "1B AT", "H1"],
+        [2, "Wf", "1B ALO", "H3"],
+        [3, "Wf (Niemundurowy)", "1A AT", "H3"],
+        [4, "Wf", "3B AT", "H3"],
+        [5, "Wf", "3A AT", "H3"],
+        [6, "Wf (Niemundurowi)", "4BC AT", "H3"],
+        [7, "Wf (Niemundurowi)", "2BC AT", "H3"]
+      ],
+      Wt: [
+        [3, "Wf", "3A AT", "H3"],
+        [4, "Wf (Niemundurowy)", "1A AT", "H3"],
+        [5, "Wf", "1A ALO", "H3"],
+        [6, "Wf (Niemundurowi)", "4BC AT", "H3"],
+        [7, "Wf", "1A ALO", "H1"]
+      ],
+      Sr: [
+        [1, "Wf", "1B ALO", "H1"],
+        [2, "Wf", "1B ALO", "H1"],
+        [3, "Wf", "2A AT", "H2"],
+        [4, "Wf", "1A ALO", "H1"]
+      ],
+      Czw: [
+        [1, "Wf", "3A AT", "H3"],
+        [3, "Wf", "2A AT", "H3"],
+        [4, "Wf (Niemundurowy)", "1A AT", "H3"],
+        [5, "Wf", "1B AT", "H3"]
+      ],
+      Pi: [
+        [2, "Wf", "3B AT", "H1"],
+        [3, "Wf (Niemundurowi)", "4BC AT", "H2"],
+        [4, "Wf", "3B AT", "H2"],
+        [5, "Wf (Niemundurowi)", "2BC AT", "H2"],
+        [6, "Wf", "1B AT", "H2"]
+      ]
+    }
+  },
+  {
+    code: "AKarwowska",
+    name: "Anna Karwowska",
+    role: "Język polski, Historia • Wychowawca 5A AT",
+    days: {
+      Pn: [
+        [1, "Jp", "2BC AT", "400"],
+        [2, "Jp", "1B AT", "400"],
+        [3, "Jp", "5C AT", "400"],
+        [4, "Jp", "5A AT", "400"],
+        [7, "Jp", "5A AT", "400"],
+        [8, "Jp", "5B AT", "400"],
+        [9, "Zzw", "5A AT", "400"],
+        [10, "Jp", "5B AT", "400"]
+      ],
+      Wt: [
+        [1, "Jp", "2A AT", "400"],
+        [2, "Jp", "1A AT", "400"],
+        [3, "Jp", "1B AT", "400"],
+        [5, "His", "5A AT", "400"],
+        [6, "Jp", "5B AT", "400"]
+      ],
+      Sr: [
+        [1, "Jp", "5C AT", "400"],
+        [2, "Jp", "5C AT", "400"],
+        [3, "His", "5A AT", "400"],
+        [5, "Jp", "1A AT", "400"],
+        [7, "Jp", "5C AT", "400"]
+      ],
+      Czw: [
+        [1, "Jp", "2A AT", "400"],
+        [4, "Jp", "2BC AT", "400"],
+        [5, "Jp", "1A AT", "400"],
+        [8, "Jp", "1B AT", "400"],
+        [9, "Jp", "1B AT", "400"]
+      ],
+      Pi: [
+        [1, "Jp", "5A AT", "400"],
+        [2, "Jp", "1A AT", "400"],
+        [3, "Jp", "2BC AT", "400"],
+        [4, "Jp", "5B AT", "400"],
+        [5, "Jp", "5A AT", "400"],
+        [6, "Jp", "2A AT", "400"]
+      ]
+    }
+  },
+  {
+    code: "PKodzis",
+    name: "P. Kodzis",
+    role: "Przedmioty sieciowe i IT (Lsk, Miklsk, Inf, inf roz)",
+    days: {
+      Pn: [
+        [1, "Inf Lsk", "2A AT", "608"],
+        [2, "Inf", "2B ALO", "608"],
+        [3, "Inf Miklsk", "2A AT", "608"],
+        [4, "Miklsk", "4BC AT", "608"],
+        [8, "Inf", "1B AT", "608"],
+        [9, "Inf Lsk", "2A AT", "608"],
+        [10, "Inf Lsk", "2BC AT", "608"]
+      ],
+      Wt: [
+        [4, "Inf", "1B ALO", "509"],
+        [9, "Miklsk", "4A AT", "608"],
+        [10, "Miklsk", "4A AT", "608"]
+      ],
+      Sr: [
+        [1, "Inf Lsk", "2BC AT", "608"],
+        [2, "Inf Lsk", "2BC AT", "608"],
+        [3, "Inf Lsk", "2BC AT", "608"],
+        [9, "Miklsk", "4D AT", "608"],
+        [10, "Miklsk", "3A AT", "608"]
+      ],
+      Czw: [
+        [6, "Inf", "3B AT", "509"],
+        [7, "Inf Miklsk", "2A AT", "608"],
+        [8, "Inf Lsk", "2A AT", "608"],
+        [9, "Miklsk", "4D AT", "600"],
+        [10, "Inf", "1A AT", "509"]
+      ],
+      Pi: [
+        [4, "Inf Lsk", "2A AT", "608"],
+        [5, "Inf", "1A ALO", "608"],
+        [6, "Miklsk", "3A AT", "608"],
+        [7, "Miklsk", "4BC AT", "608"],
+        [8, "Inf Miklsk", "2BC AT", "608"],
+        [9, "Inf Miklsk", "2BC AT", "608"],
+        [10, "inf roz", "1B AT", "608"]
+      ]
+    }
+  },
+  {
+    code: "RKowalczyk",
+    name: "R. Kowalczyk",
+    role: "Wychowanie fizyczne (Wf)",
+    days: {
+      Pn: [
+        [2, "Wf", "5C AT", "H1"],
+        [3, "Wf", "4A AT", "H1"],
+        [4, "Wf", "5B AT", "H1"],
+        [6, "Wf (Mundorowi)", "4BC AT", "H1"],
+        [7, "Wf (Mundorowi)", "2BC AT", "H1"],
+        [8, "Wf", "5A AT", "H1"]
+      ],
+      Wt: [
+        [1, "Wf", "4D AT", "H1"],
+        [2, "Wf", "5C AT", "H1"],
+        [4, "Wf (Mundurowy)", "1A AT", "H1"],
+        [5, "Wf", "5B AT", "H1"],
+        [6, "Wf (Mundorowi)", "4BC AT", "H1"]
+      ],
+      Sr: [
+        [3, "Wf", "2A ALO", "H1"],
+        [4, "Wf", "5C AT", "H2"],
+        [5, "Wf", "5B AT", "H1"],
+        [6, "Wf", "4D AT", "H1"],
+        [7, "Wf", "5A AT", "H1"]
+      ],
+      Czw: [
+        [2, "Wf", "4D AT", "H2"],
+        [3, "Wf (Mundurowy)", "1A AT", "H2"],
+        [4, "Wf (Mundurowy)", "1A AT", "H2"]
+      ],
+      Pi: [
+        [3, "Wf (Mundorowi)", "4BC AT", "H3"],
+        [4, "Wf", "5A AT", "H1"],
+        [5, "Wf (Mundorowi)", "2BC AT", "H3"],
+        [6, "Wf", "4A AT", "H3"],
+        [7, "Wf", "2A ALO", "H3"],
+        [8, "Wf", "4A AT", "H3"]
+      ]
+    }
+  },
+  {
+    code: "EKownacka",
+    name: "Emilia Kownacka",
+    role: "Język angielski (Ja, JaZ) • Wychowawca 1A AT",
+    days: {
+      Pn: [
+        [7, "Ja", "1A ALO", "C10"],
+        [8, "JaZ", "3A AT", "C10"],
+        [9, "Ja", "1B AT", "C10"]
+      ],
+      Wt: [
+        [1, "Ja", "1A AT", "C10"],
+        [2, "Ja", "1A ALO", "C10"],
+        [3, "Ja", "1A AT", "C10"],
+        [4, "Ja", "1B AT", "507"],
+        [5, "JaZ", "4A AT", "507"],
+        [6, "Ja", "1B ALO", "C10"],
+        [7, "JaZ", "2A AT", "C10"],
+        [8, "JaZ", "4D AT", "C10"],
+        [9, "Ja", "1B ALO", "C10"],
+        [10, "JaZ", "1B AT", "C10"]
+      ],
+      Sr: [],
+      Czw: [
+        [1, "JaZ", "3B AT", "C10"],
+        [2, "Ja", "1B ALO", "C10"],
+        [3, "JaZ", "4BC AT", "C10"],
+        [4, "Ja", "1A ALO", "C10"]
+      ],
+      Pi: [
+        [1, "JaZ", "1A AT", "C10"],
+        [2, "Ja", "1B ALO", "C10"],
+        [3, "Ja", "1B ALO", "C10"],
+        [5, "Ja", "1B AT", "C06"],
+        [6, "Ja", "1A AT", "C06"],
+        [7, "JaZ", "2BC AT", "C10"],
+        [8, "Zzw", "1A AT", "C10"]
+      ]
+    }
+  },
+  {
+    code: "KKrzemiński",
+    name: "K. Krzemiński",
+    role: "Przedmioty mechaniczne (Ptikm)",
+    days: {
+      Pn: [],
+      Wt: [
+        [7, "Mech Ptikm", "3B AT", "C03"],
+        [8, "Mech Ptikm", "3B AT", "C03"]
+      ],
+      Sr: [],
+      Czw: [
+        [7, "Mech Ptikm", "2BC AT", "C03"],
+        [8, "Mech Ptikm", "2BC AT", "C03"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "KLisek",
+    name: "K. Lisek",
+    role: "Zajęcia z pomocy psychologiczno-pedagogicznej / Zzpd",
+    days: {
+      Pn: [],
+      Wt: [
+        [4, "Zzpd", "2A ALO", "—"]
+      ],
+      Sr: [],
+      Czw: [
+        [1, "Zzpd", "1A ALO", "—"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "ALutrzykowski",
+    name: "Adrian Lutrzykowski",
+    role: "Religia, Historia • Wychowawca 2B ALO",
+    days: {
+      Pn: [
+        [5, "Rel", "4A AT", "AW"],
+        [5, "Rel", "4BC AT", "AW"],
+        [5, "Rel", "4D AT", "AW"],
+        [6, "Rel", "1A ALO", "AW"],
+        [6, "Rel", "1B ALO", "AW"],
+        [10, "His", "2B ALO", "NA"]
+      ],
+      Wt: [
+        [4, "Rel", "3A ALO", "AW"],
+        [5, "Rel", "1A AT", "AW"],
+        [5, "Rel", "1B AT", "AW"],
+        [6, "Zzw", "2B ALO", "—"],
+        [7, "Rel", "4B ALO", "AW"],
+        [7, "Rel", "4C ALO", "AW"],
+        [9, "Rel", "2A ALO", "AW"],
+        [9, "Rel", "2B ALO", "AW"]
+      ],
+      Sr: [
+        [4, "Rel", "2A AT", "AW"],
+        [4, "Rel", "2BC AT", "AW"],
+        [10, "His", "2B ALO", "NA"]
+      ],
+      Czw: [
+        [5, "Rel", "5A AT", "NA"],
+        [5, "Rel", "5B AT", "NA"],
+        [7, "Rel", "3A AT", "AW"],
+        [7, "Rel", "3B AT", "AW"],
+        [8, "His", "2B ALO", "NA"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "AMakowski",
+    name: "A. Makowski",
+    role: "Przedmioty mechaniczne (Uism, Pih, Ppih)",
+    days: {
+      Pn: [],
+      Wt: [
+        [2, "Mech Uism", "3B AT", "C08"],
+        [3, "Mech Uism", "2BC AT", "C08"],
+        [4, "Mech Uism", "3B AT", "C08"]
+      ],
+      Sr: [
+        [7, "Mech Ppih", "3B AT", "C08"],
+        [8, "Mech Ppih", "3B AT", "C08"],
+        [9, "Mech Uism", "2BC AT", "C08"],
+        [10, "Mech Pih", "2BC AT", "C08"]
+      ],
+      Czw: [
+        [1, "Mech Uism", "2BC AT", "C08"],
+        [2, "Mech Pih", "2BC AT", "C08"],
+        [3, "Mech Pih", "2BC AT", "C08"],
+        [4, "Mech Ppih", "3B AT", "C08"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "ŻMucharska",
+    name: "Ż. Mucharska",
+    role: "Język angielski",
+    days: {
+      Pn: [
+        [7, "Ja", "4A AT", "C06"],
+        [8, "Ja", "4A AT", "C06"]
+      ],
+      Wt: [],
+      Sr: [
+        [1, "Ja", "2B ALO", "C06"],
+        [2, "Ja", "2B ALO", "C10"],
+        [3, "Ja", "2B ALO", "C10"]
+      ],
+      Czw: [
+        [6, "Ja", "2B ALO", "500"],
+        [7, "Ja", "2B ALO", "C06"],
+        [8, "Ja", "4A AT", "500"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "MMuzyk",
+    name: "M. Muzyk",
+    role: "Bazy danych (Sbd, Pbd)",
+    days: {
+      Pn: [],
+      Wt: [],
+      Sr: [],
+      Czw: [
+        [4, "Sbd", "4A AT", "608"],
+        [6, "Sbd", "5A AT", "608"],
+        [6, "Sbd", "5B AT", "608"],
+        [7, "Sbd", "4D AT", "509"],
+        [8, "Sbd", "3A AT", "509"],
+        [9, "Sbd", "5C AT", "509"]
+      ],
+      Pi: [
+        [2, "Sbd", "5C AT", "606"],
+        [3, "Sbd", "5A AT", "606"],
+        [3, "Sbd", "5B AT", "606"],
+        [4, "Sbd", "4BC AT", "606"],
+        [5, "Sbd", "3A AT", "606"],
+        [6, "Sbd", "4BC AT", "509"],
+        [7, "Sbd", "4A AT", "509"],
+        [8, "Pbd", "3A AT", "606"],
+        [9, "Pbd", "3A AT", "606"],
+        [10, "Sbd", "4D AT", "606"]
+      ]
+    }
+  },
+  {
+    code: "BNarewska",
+    name: "B. Narewska",
+    role: "Chemia (Pracownia Lab5)",
+    days: {
+      Pn: [],
+      Wt: [],
+      Sr: [
+        [5, "Chem", "1A ALO", "Lab5"],
+        [6, "Chem", "1A AT", "Lab5"],
+        [7, "Chem", "1B ALO", "Lab5"]
+      ],
+      Czw: [
+        [5, "Chem", "2B ALO", "Lab5"],
+        [6, "Chem", "2A ALO", "Lab5"],
+        [7, "Chem", "1B AT", "Lab5"]
+      ],
+      Pi: [
+        [4, "Chem", "2BC AT", "Lab5"],
+        [5, "Chem", "2B ALO", "Lab5"],
+        [6, "Chem", "2A ALO", "Lab5"],
+        [7, "Chem", "2A AT", "Lab5"]
+      ]
+    }
+  },
+  {
+    code: "JNarewski",
+    name: "J. Narewski",
+    role: "Wychowanie fizyczne (Wf)",
+    days: {
+      Pn: [
+        [9, "Wf", "4B ALO", "H2"],
+        [10, "Wf", "4B ALO", "H2"]
+      ],
+      Wt: [
+        [1, "Wf", "4C ALO", "H2"],
+        [2, "Wf", "3A ALO", "H2"],
+        [3, "Wf", "4A ALO", "H2"]
+      ],
+      Sr: [],
+      Czw: [
+        [5, "Wf", "3A ALO", "H1"],
+        [6, "Wf", "4C ALO", "H1"],
+        [7, "Wf", "4A ALO", "H1"],
+        [8, "Wf", "4A ALO", "H1"]
+      ],
+      Pi: [
+        [6, "Wf", "4C ALO", "H1"],
+        [7, "Wf", "4B ALO", "H1"],
+        [8, "Wf", "3A ALO", "H1"]
+      ]
+    }
+  },
+  {
+    code: "PNiecikowska",
+    name: "P. Niecikowska",
+    role: "Język angielski",
+    days: {
+      Pn: [],
+      Wt: [
+        [7, "Ja (1. Grupa)", "2BC AT", "C06"],
+        [8, "Ja (1. Grupa)", "4BC AT", "C06"],
+        [9, "Ja (1. Grupa)", "2BC AT", "507"],
+        [10, "Ja (1. Grupa)", "4BC AT", "C06"]
+      ],
+      Sr: [
+        [3, "Ja", "3B AT", "C06"],
+        [4, "Ja", "3B AT", "507"],
+        [5, "Ja (1. Grupa)", "4BC AT", "C06"],
+        [7, "Ja (Mundorowi)", "2A AT", "104"],
+        [8, "Ja (Mundorowi)", "2A AT", "502"]
+      ],
+      Czw: [],
+      Pi: []
+    }
+  },
+  {
+    code: "MPawłowska",
+    name: "M. Pawłowska",
+    role: "Język angielski",
+    days: {
+      Pn: [],
+      Wt: [
+        [6, "Ja", "3A ALO", "507"],
+        [7, "Ja", "3A ALO", "507"],
+        [8, "Ja", "3A ALO", "507"],
+        [9, "Ja", "3A ALO", "C06"],
+        [10, "Ja", "3A ALO", "507"]
+      ],
+      Sr: [],
+      Czw: [
+        [7, "Ja", "3A ALO", "504"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "EPiotrowska",
+    name: "E. Piotrowska",
+    role: "Przedmioty mechaniczne (PEiE, EiE, TiKM)",
+    days: {
+      Pn: [],
+      Wt: [
+        [5, "Mech PEiE", "3B AT", "C09"],
+        [6, "Mech PEiE", "3B AT", "C09"],
+        [8, "Mech PEiE", "2BC AT", "C09"]
+      ],
+      Sr: [
+        [1, "Mech EiE", "2BC AT", "C09"],
+        [2, "Mech EiE", "2BC AT", "C09"],
+        [3, "Mech PEiE", "2BC AT", "C09"]
+      ],
+      Czw: [
+        [1, "Mech PEiE", "1A AT", "C09"],
+        [2, "Mech PEiE", "1A AT", "C09"]
+      ],
+      Pi: [
+        [8, "Mech EiE", "2BC AT", "C09"],
+        [9, "Mech TiKM", "2BC AT", "C09"],
+        [10, "Mech TiKM", "2BC AT", "C09"]
+      ]
+    }
+  },
+  {
+    code: "APiotrowski",
+    name: "Andrzej Piotrowski",
+    role: "Przedmioty programistyczne (PPAI, PPIO, Pad, Pam) • Wychowawca 4D AT",
+    days: {
+      Pn: [
+        [1, "Prog PPAD", "3B AT", "—"],
+        [3, "Prog PPAI", "2A AT", "606"],
+        [9, "Prog Pio", "2A AT", "—"],
+        [10, "Prog PPAI", "3B AT", "606"]
+      ],
+      Wt: [
+        [2, "Prog Pam", "3B AT", "—"],
+        [3, "Zzw", "4D AT", "606"],
+        [4, "Prog PPAI", "3B AT", "606"],
+        [5, "Prog Pad", "3B AT", "606"],
+        [9, "Prog PPIO", "2A AT", "606"]
+      ],
+      Sr: [
+        [9, "Prog PPAI", "1A AT", "606"],
+        [10, "Prog PPIO", "1A AT", "606"]
+      ],
+      Czw: [
+        [4, "Prog PPAI", "3B AT", "606"],
+        [6, "Prog PPIO", "1A AT", "606"],
+        [7, "Prog Pad", "2A AT", "606"],
+        [8, "Prog Pza1", "3B AT", "—"],
+        [9, "Prog PPAI", "2A AT", "606"],
+        [10, "Prog PPAI", "2A AT", "606"]
+      ],
+      Pi: [
+        [1, "Prog PPAW", "3B AT", "—"],
+        [3, "Prog Pio", "2A AT", "—"],
+        [4, "Prog PPAI", "2A AT", "509"],
+        [5, "Prog PPAI", "1A AT", "509"],
+        [9, "Prog PPAM", "3B AT", "—"]
+      ]
+    }
+  },
+  {
+    code: "ŁPolkowski",
+    name: "Łukasz Polkowski",
+    role: "Przedmioty IT (Pbd, Aso, Eutk, Utk, Wiai, Pai) • Wychowawca 5C AT",
+    days: {
+      Pn: [
+        [1, "Pbd", "5C AT", "600"],
+        [2, "Pbd", "5A AT", "600"],
+        [3, "Pbd", "5A AT", "600"],
+        [4, "Pbd", "4A AT", "600"],
+        [5, "Pai", "5C AT", "600"],
+        [6, "Inf Utk", "2A AT", "600"],
+        [7, "Inf Eutk", "1A AT", "600"],
+        [8, "Inf Utk", "1A AT", "600"],
+        [9, "Inf Aso", "2BC AT", "600"],
+        [10, "Inf Utk", "1A AT", "600"]
+      ],
+      Wt: [
+        [1, "Pbd", "5A AT", "600"],
+        [2, "Pbd", "5B AT", "600"],
+        [3, "Inf Aso", "2BC AT", "600"],
+        [4, "Wiai", "5C AT", "600"],
+        [5, "Wiai", "5C AT", "600"],
+        [6, "Wiai", "5C AT", "600"],
+        [7, "Wiai", "5C AT", "600"],
+        [8, "Inf Eutk", "2BC AT", "600"],
+        [9, "Pai", "5C AT", "600"],
+        [10, "Pai", "5C AT", "600"]
+      ],
+      Sr: [
+        [1, "Inf Aso", "2A AT", "600"],
+        [2, "Inf Eutk", "2A AT", "600"],
+        [4, "Pbd", "4D AT", "600"],
+        [5, "Inf Aso", "2A AT", "600"],
+        [6, "Pbd", "5B AT", "600"],
+        [7, "Inf Aso", "2BC AT", "600"],
+        [8, "Pbd", "4BC AT", "600"],
+        [9, "Pbd", "5B AT", "600"],
+        [10, "Pbd", "5B AT", "600"]
+      ],
+      Czw: [
+        [1, "Pbd", "5C AT", "600"],
+        [2, "Pbd", "5C AT", "600"],
+        [3, "Pbd", "5C AT", "600"],
+        [4, "Pai", "5C AT", "600"],
+        [5, "Pbd", "4BC AT", "600"],
+        [6, "Inf Aso", "1A AT", "600"],
+        [7, "Inf Utk", "1A AT", "600"],
+        [8, "Pbd", "4D AT", "600"]
+      ],
+      Pi: [
+        [1, "Pbd", "4A AT", "600"],
+        [2, "Pbd", "5A AT", "600"],
+        [3, "Inf Aso", "2A AT", "600"],
+        [4, "Zzw", "5C AT", "600"],
+        [5, "Inf Aso", "1A AT", "600"]
+      ]
+    }
+  },
+  {
+    code: "EPowichrowska",
+    name: "Ewa Powichrowska",
+    role: "Matematyka, Fizyka • Wychowawca 1B ALO",
+    days: {
+      Pn: [],
+      Wt: [
+        [5, "Mat", "4A ALO", "200"],
+        [6, "Mat", "1B AT", "200"],
+        [7, "Mat", "1B AT", "200"],
+        [8, "Mat", "1B ALO", "200"],
+        [9, "Mat", "1A AT", "200"],
+        [10, "Fiz", "1B ALO", "502"]
+      ],
+      Sr: [],
+      Czw: [
+        [5, "Mat", "4A ALO", "200"],
+        [6, "Mat", "4A ALO", "200"],
+        [7, "Mat", "1B ALO", "200"],
+        [8, "Zzw", "1B ALO", "200"],
+        [9, "Mat", "1A AT", "200"],
+        [10, "Mat", "3A ALO", "200"]
+      ],
+      Pi: [
+        [5, "Mat", "1B ALO", "200"],
+        [6, "Mat", "3A ALO", "200"],
+        [7, "Mat", "1A AT", "200"],
+        [8, "Mat", "1B AT", "100"],
+        [9, "Mat", "4A ALO", "200"],
+        [10, "Mat", "3A ALO", "200"]
+      ]
+    }
+  },
+  {
+    code: "MRadlińska",
+    name: "M. Radlińska",
+    role: "Matematyka",
+    days: {
+      Pn: [
+        [5, "Mat", "2B ALO", "100"],
+        [6, "Mat", "3B AT", "100"],
+        [7, "Mat", "2B ALO", "100"],
+        [8, "Mat", "3B AT", "100"]
+      ],
+      Wt: [
+        [5, "Mat", "4BC AT", "100"],
+        [6, "Mat", "3A AT", "100"],
+        [7, "Mat", "4BC AT", "100"]
+      ],
+      Sr: [
+        [1, "Mat", "4A AT", "100"],
+        [2, "Mat", "4A AT", "100"],
+        [3, "Mat", "4A AT", "100"],
+        [4, "Mat", "3A AT", "100"],
+        [6, "Mat", "2B ALO", "100"],
+        [7, "Mat", "4BC AT", "100"],
+        [8, "Mat", "2B ALO", "100"]
+      ],
+      Czw: [
+        [5, "Mat", "3B AT", "100"],
+        [6, "Mat", "3A AT", "100"],
+        [7, "Mat", "4A AT", "100"]
+      ],
+      Pi: [
+        [5, "Mat", "4BC AT", "100"],
+        [6, "Mat", "3B AT", "100"],
+        [7, "Mat", "3A AT", "100"]
+      ]
+    }
+  },
+  {
+    code: "MRosińska",
+    name: "M. Rosińska",
+    role: "Język polski",
+    days: {
+      Pn: [
+        [3, "Jp", "1B ALO", "108"],
+        [4, "Jp", "1B ALO", "108"]
+      ],
+      Wt: [
+        [5, "Jp", "1B ALO", "108"]
+      ],
+      Sr: [],
+      Czw: [
+        [3, "Jp", "1B ALO", "108"],
+        [4, "Jp", "1B ALO", "108"]
+      ],
+      Pi: [
+        [4, "Jp", "1B ALO", "108"]
+      ]
+    }
+  },
+  {
+    code: "MiSakowski",
+    name: "Mi. Sakowski",
+    role: "Bezpieczeństwo wewnętrzne (Bw)",
+    days: {
+      Pn: [
+        [3, "Bw", "2A ALO", "AW"],
+        [4, "Bw", "3A ALO", "NA"],
+        [5, "Bw", "1A AT", "NA"]
+      ],
+      Wt: [
+        [3, "Bw", "4BC AT", "AW"],
+        [4, "Bw", "2A AT", "H2"],
+        [5, "Bw", "3A AT", "NA"],
+        [6, "Bw", "4A AT", "AW"]
+      ],
+      Sr: [
+        [3, "Bw", "1B AT", "AW"],
+        [4, "Bw", "1B ALO", "NA"],
+        [5, "Bw", "2BC AT", "AW"]
+      ],
+      Czw: [
+        [9, "Bw (Mundorowi)", "3B AT", "C07"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "ESaldat",
+    name: "E. Saldat",
+    role: "Geografia",
+    days: {
+      Pn: [],
+      Wt: [
+        [7, "Geo", "2B ALO", "207"],
+        [8, "Geo", "2B ALO", "207"]
+      ],
+      Sr: [
+        [1, "Log Geo", "3B AT", "207"],
+        [2, "Log Geo", "3B AT", "207"],
+        [3, "Geo", "1B ALO", "207"]
+      ],
+      Czw: [],
+      Pi: []
+    }
+  },
+  {
+    code: "MSalomońska",
+    name: "M. Salomońska",
+    role: "Przedmioty logistyczne (PZ, PiWZ, Drpt)",
+    days: {
+      Pn: [
+        [6, "PZ", "1B AT", "200"],
+        [7, "PZ", "1B AT", "200"],
+        [9, "Log PZ", "2BC AT", "200"],
+        [10, "Log PZ", "2BC AT", "200"]
+      ],
+      Wt: [],
+      Sr: [
+        [7, "Log PZ", "2BC AT", "200"],
+        [8, "Log PiWZ", "3B AT", "200"],
+        [9, "Log PiWZ", "3B AT", "200"],
+        [10, "Log Drpt", "3B AT", "—"]
+      ],
+      Czw: [],
+      Pi: []
+    }
+  },
+  {
+    code: "LSamluk",
+    name: "L. Samluk",
+    role: "Informatyka rozszerzona (inf roz)",
+    days: {
+      Pn: [],
+      Wt: [],
+      Sr: [],
+      Czw: [
+        [2, "inf roz", "3B AT", "308"],
+        [3, "inf roz", "3A AT", "308"],
+        [4, "inf roz", "2A AT", "308"]
+      ],
+      Pi: [
+        [9, "Inf/Prog inf roz", "1A AT", "509"],
+        [10, "Inf inf roz", "2BC AT", "509"]
+      ]
+    }
+  },
+  {
+    code: "ASkołozdrzy",
+    name: "A. Skołozdrzy",
+    role: "Bezpieczeństwo wewnętrzne (Bw)",
+    days: {
+      Pn: [
+        [4, "Bw", "2A ALO", "AW"]
+      ],
+      Wt: [],
+      Sr: [],
+      Czw: [
+        [3, "Bw", "2B ALO", "AW"],
+        [4, "Bw", "1B AT", "AW"],
+        [6, "Bw", "1A ALO", "AW"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "ESobotka",
+    name: "Ewelina Sobotka",
+    role: "Język angielski • Wychowawca 4B ALO",
+    days: {
+      Pn: [
+        [2, "Ja", "4A ALO", "502"],
+        [4, "Ja", "4A ALO", "502"],
+        [5, "Ja", "4A ALO", "502"],
+        [6, "Ja", "4A ALO", "502"],
+        [7, "Ja", "5B AT", "502"]
+      ],
+      Wt: [
+        [1, "Ja", "3A AT", "502"],
+        [2, "Ja", "4C ALO", "502"],
+        [3, "Ja", "4C ALO", "502"],
+        [4, "Ja", "4C ALO", "502"],
+        [5, "Ja", "4B ALO", "502"],
+        [6, "Zzw", "4B ALO", "502"],
+        [7, "Ja (2. Grupa)", "2BC AT", "104"],
+        [8, "Ja (2. Grupa)", "4BC AT", "104"],
+        [9, "Ja (2. Grupa)", "2BC AT", "502"],
+        [10, "Ja (2. Grupa)", "4BC AT", "104"]
+      ],
+      Sr: [
+        [1, "Ja", "4C ALO", "502"],
+        [2, "Ja", "4C ALO", "502"],
+        [3, "Ja", "5B AT", "502"],
+        [4, "Ja", "4B ALO", "C06"],
+        [5, "Ja (2. Grupa)", "4BC AT", "502"],
+        [6, "Ja", "4C ALO", "502"],
+        [7, "Ja", "3A AT", "502"]
+      ],
+      Czw: [
+        [2, "Ja", "4B ALO", "502"],
+        [3, "Ja", "4A ALO", "502"],
+        [4, "Ja", "4A ALO", "502"],
+        [5, "Ja", "4B ALO", "502"],
+        [7, "Ja", "4B ALO", "502"]
+      ],
+      Pi: [
+        [1, "Ja", "5B AT", "502"],
+        [2, "Ja (2. Grupa)", "2A ALO", "502"],
+        [3, "Ja (2. Grupa)", "2A ALO", "502"],
+        [5, "Ja", "4B ALO", "502"]
+      ]
+    }
+  },
+  {
+    code: "ASzulcW",
+    name: "Anna Szulc-Wójcicka",
+    role: "Język hiszpański (Jh) • Wychowawca 2A AT",
+    days: {
+      Pn: [
+        [1, "Jh", "1A ALO", "306"],
+        [2, "Jh", "3B AT", "306"],
+        [3, "Jh", "4C ALO", "306"],
+        [4, "Jh", "1A AT", "306"],
+        [5, "Jh", "1B ALO", "306"],
+        [6, "Jh", "3A AT", "306"],
+        [7, "Jh (2. Grupa)", "4BC AT", "306"],
+        [8, "Jh", "2A AT", "306"],
+        [9, "Jh", "5B AT", "306"],
+        [10, "Jh (2. Grupa)", "5A AT", "306"]
+      ],
+      Wt: [
+        [1, "Jh (2. Grupa)", "5C AT", "306"],
+        [2, "Jh (2. Grupa)", "4D AT", "306"],
+        [3, "Zzw", "2A AT", "306"],
+        [4, "Jh", "4A ALO", "306"],
+        [5, "Jh", "3A ALO", "306"],
+        [6, "Jh", "1A AT", "306"],
+        [7, "Jh", "5B AT", "306"],
+        [8, "Jh", "2A ALO", "306"]
+      ],
+      Sr: [
+        [3, "Jh", "3A ALO", "306"],
+        [4, "Jh", "4A ALO", "306"],
+        [5, "Jh", "1B ALO", "306"],
+        [6, "Jh (2. Grupa)", "5A AT", "306"],
+        [7, "Jh", "2B ALO", "306"]
+      ],
+      Czw: [
+        [1, "Jh", "4B ALO", "306"],
+        [2, "Jh", "2A ALO", "306"],
+        [3, "Jh", "1A ALO", "306"],
+        [4, "Jh", "4B ALO", "306"],
+        [5, "Jh", "4C ALO", "306"],
+        [6, "Jh", "1B AT", "306"],
+        [7, "Jh (2. Grupa)", "5C AT", "306"]
+      ],
+      Pi: [
+        [1, "Jh (2. Grupa)", "2BC AT", "306"],
+        [2, "Jh (2. Grupa)", "2BC AT", "306"],
+        [3, "Jh", "1B AT", "306"],
+        [4, "Jh (2. Grupa)", "4A AT", "306"],
+        [5, "Jh", "2A AT", "306"],
+        [6, "Jh", "2B ALO", "306"]
+      ]
+    }
+  },
+  {
+    code: "ATchórzewska",
+    name: "Agnieszka Tchórzewska",
+    role: "Geografia • Wychowawca 5B AT",
+    days: {
+      Pn: [
+        [4, "Geo", "4C ALO", "207"],
+        [5, "Geo", "2A ALO", "207"],
+        [6, "Geo", "4D AT", "207"],
+        [7, "Geo", "4B ALO", "207"],
+        [8, "Geo", "1A ALO", "207"],
+        [9, "Geo", "3A AT", "207"],
+        [10, "Geo", "2A AT", "207"]
+      ],
+      Wt: [
+        [1, "Geo", "2A ALO", "207"],
+        [2, "Geo", "2BC AT", "207"],
+        [3, "Geo", "1A ALO", "207"]
+      ],
+      Sr: [
+        [5, "Geo", "4B ALO", "207"],
+        [6, "Geo", "1A ALO", "207"],
+        [7, "Geo", "1A AT", "207"],
+        [8, "Zzw", "5B AT", "207"],
+        [9, "Geo", "4C ALO", "207"],
+        [10, "Geo", "4A AT", "207"]
+      ],
+      Czw: [
+        [1, "Geo", "2A ALO", "207"],
+        [3, "Geo", "3B AT", "207"],
+        [4, "Geo", "4BC AT", "207"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "ATrepanowska",
+    name: "Angelika Trepanowska",
+    role: "Matematyka, Chemia, Fizyka • Wychowawca 1A ALO",
+    days: {
+      Pn: [
+        [4, "Mat", "2A AT", "102"],
+        [5, "Zzw", "1A ALO", "102"],
+        [6, "Mat", "2BC AT", "102"],
+        [9, "Mat", "4D AT", "100"],
+        [10, "Mat", "4D AT", "102"]
+      ],
+      Wt: [
+        [1, "Fiz", "1A ALO", "102"],
+        [2, "Chem", "3A AT", "Lab6"],
+        [4, "Mat", "4D AT", "102"],
+        [5, "Mat", "2BC AT", "102"],
+        [6, "Mat", "1A ALO", "B03"]
+      ],
+      Sr: [
+        [2, "Mat", "4B ALO", "102"],
+        [3, "Mat", "4B ALO", "102"],
+        [4, "Mat", "4C ALO", "102"],
+        [5, "Chem", "4A AT", "Lab6"],
+        [6, "Mat", "2A AT", "102"],
+        [7, "Mat", "4C ALO", "102"],
+        [8, "Mat", "4D AT", "102"]
+      ],
+      Czw: [
+        [3, "Mat", "4C ALO", "102"],
+        [4, "Chem", "3A ALO", "Lab6"],
+        [5, "Mat", "1A ALO", "102"],
+        [6, "Mat", "4B ALO", "102"]
+      ],
+      Pi: [
+        [1, "Mat", "2A AT", "102"],
+        [2, "Chem", "4BC AT", "Lab6"],
+        [3, "Mat", "4B ALO", "102"],
+        [4, "Mat", "1A ALO", "102"],
+        [5, "Mat", "4C ALO", "102"],
+        [6, "Mat", "2BC AT", "102"],
+        [7, "Chem", "3B AT", "Lab6"],
+        [8, "Chem", "4D AT", "Lab6"]
+      ]
+    }
+  },
+  {
+    code: "BWiśniewska",
+    name: "B. Wiśniewska",
+    role: "Biologia, Edukacja zdrowotna (EZ)",
+    days: {
+      Pn: [
+        [2, "EZ", "1A ALO", "—"],
+        [3, "EZ", "2B ALO", "—"],
+        [4, "Bio", "2B ALO", "B04"],
+        [5, "EZ", "1B AT", "—"],
+        [7, "Bio", "1B ALO", "B04"]
+      ],
+      Wt: [
+        [3, "Bio", "2B ALO", "B04"],
+        [4, "EZ", "2BC AT", "—"],
+        [5, "Bio", "2A AT", "B04"]
+      ],
+      Sr: [
+        [4, "Bio", "4A AT", "B04"]
+      ],
+      Czw: [
+        [2, "Bio", "3A ALO", "B04"],
+        [3, "Bio", "1B AT", "B04"],
+        [4, "EZ", "2A ALO", "—"],
+        [5, "Bio", "2BC AT", "B04"],
+        [6, "EZ", "1B ALO", "—"],
+        [7, "Bio", "2A ALO", "B04"]
+      ],
+      Pi: [
+        [2, "EZ", "2A AT", "—"],
+        [3, "Bio", "1A AT", "B04"],
+        [4, "EZ", "1A AT", "—"],
+        [5, "Bio", "2A ALO", "B04"],
+        [6, "Bio", "1A ALO", "B04"]
+      ]
+    }
+  },
+  {
+    code: "AZambrzycka",
+    name: "A. Zambrzycka",
+    role: "Filozofia (Fil)",
+    days: {
+      Pn: [],
+      Wt: [
+        [7, "Fil", "1B ALO", "B04"],
+        [8, "Fil", "1A AT", "B03"]
+      ],
+      Sr: [
+        [7, "Fil", "1B AT", "B04"],
+        [8, "Fil", "1A ALO", "B04"]
+      ],
+      Czw: [],
+      Pi: []
+    }
+  },
+  {
+    code: "DZawojski",
+    name: "D. Zawojski",
+    role: "Bezpieczeństwo wewnętrzne (Bw)",
+    days: {
+      Pn: [],
+      Wt: [],
+      Sr: [],
+      Czw: [
+        [4, "Bw", "2B ALO", "H1"],
+        [5, "Bw", "2A AT", "AW"],
+        [6, "Bw", "2BC AT", "H2"],
+        [8, "Bw", "3A ALO", "AW"],
+        [9, "Bw", "3A AT", "AW"],
+        [10, "Bw (Mundorowi)", "3B AT", "AW"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "AZwierciadłowski",
+    name: "A. Zwierciadłowski",
+    role: "Wychowanie fizyczne (Wf)",
+    days: {
+      Pn: [
+        [9, "Wf", "2B ALO", "H1"]
+      ],
+      Wt: [],
+      Sr: [],
+      Czw: [
+        [9, "Wf", "2B ALO", "H1"]
+      ],
+      Pi: []
+    }
+  },
+  {
+    code: "EŻebrowski",
+    name: "Ernest Żebrowski",
+    role: "Przedmioty programistyczne (Pai, Wiai) • Wychowawca 3A ALO i 4A ALO",
+    days: {
+      Pn: [
+        [1, "Pai", "4A AT", "603"],
+        [2, "Pai", "4A AT", "603"],
+        [3, "Zzw", "3A ALO", "603"],
+        [3, "Zzw", "4A ALO", "603"],
+        [4, "Pai", "3A AT", "603"],
+        [5, "Wiai", "5A AT", "603"],
+        [5, "Wiai", "5B AT", "603"],
+        [6, "Wiai", "5A AT", "603"],
+        [6, "Wiai", "5B AT", "603"],
+        [7, "Pai", "3A AT", "603"],
+        [8, "Pai", "4BC AT", "603"],
+        [9, "Pai", "4BC AT", "603"],
+        [10, "Wiai", "3A AT", "603"]
+      ],
+      Wt: [
+        [1, "Pai", "4BC AT", "603"],
+        [2, "Pai", "4BC AT", "603"],
+        [3, "Pai", "5A AT", "603"],
+        [3, "Pai", "5B AT", "603"],
+        [4, "Pai", "4BC AT", "603"],
+        [5, "Pai", "4D AT", "603"],
+        [6, "Wiai", "4D AT", "603"],
+        [7, "Pai", "4A AT", "603"],
+        [8, "Pai", "4A AT", "603"],
+        [9, "Pai", "3A AT", "603"],
+        [10, "Pai", "3A AT", "603"]
+      ],
+      Sr: [
+        [1, "Wiai", "5A AT", "603"],
+        [1, "Wiai", "5B AT", "603"],
+        [2, "Wiai", "5A AT", "603"],
+        [2, "Wiai", "5B AT", "603"],
+        [3, "Pai", "4D AT", "603"],
+        [4, "Pai", "5A AT", "603"],
+        [4, "Pai", "5B AT", "603"],
+        [5, "Pai", "4D AT", "603"],
+        [6, "Wiai", "4BC AT", "603"],
+        [7, "Pai", "4D AT", "603"],
+        [8, "Pai", "3A AT", "603"]
+      ],
+      Czw: [
+        [1, "Pai", "4D AT", "603"],
+        [2, "Pai", "4BC AT", "603"],
+        [3, "Wiai", "4D AT", "603"],
+        [4, "Pai", "3A AT", "603"],
+        [5, "Pai", "4D AT", "603"],
+        [6, "Wiai", "4A AT", "603"],
+        [7, "Pai", "5A AT", "603"],
+        [7, "Pai", "5B AT", "603"],
+        [8, "Pai", "5A AT", "603"],
+        [8, "Pai", "5B AT", "603"]
+      ],
+      Pi: [
+        [1, "Wiai", "4BC AT", "603"],
+        [2, "Pai", "4A AT", "603"],
+        [3, "Pai", "4A AT", "603"],
+        [4, "Wiai", "3A AT", "603"],
+        [5, "Wiai", "4A AT", "603"]
+      ]
+    }
+  },
+  {
+    code: "WŻelechowski",
+    name: "Wojciech Żelechowski",
+    role: "Historia, Język niemiecki (Jn), EO • Wychowawca 2BC AT",
+    days: {
+      Pn: [
+        [1, "His", "4A ALO", "305"],
+        [2, "His", "2BC AT", "305"],
+        [3, "His", "2BC AT", "305"],
+        [4, "Zzw", "2BC AT", "305"],
+        [6, "His", "4A AT", "305"],
+        [7, "Jn (1. Grupa)", "4BC AT", "305"],
+        [9, "His", "4A ALO", "305"],
+        [10, "Jn (1. Grupa)", "5A AT", "305"]
+      ],
+      Wt: [
+        [1, "Jn (1. Grupa)", "5C AT", "305"],
+        [2, "Jn (1. Grupa)", "4D AT", "305"],
+        [4, "His", "5B AT", "305"],
+        [5, "His", "4C ALO", "305"],
+        [8, "His", "5C AT", "305"]
+      ],
+      Sr: [
+        [3, "His", "4C ALO", "305"],
+        [5, "His", "5C AT", "305"],
+        [6, "Jn (1. Grupa)", "5A AT", "305"],
+        [7, "His", "5B AT", "305"],
+        [8, "EO", "2BC AT", "104"]
+      ],
+      Czw: [
+        [1, "His", "4BC AT", "305"],
+        [2, "His", "4C ALO", "305"],
+        [4, "His", "4C ALO", "305"],
+        [6, "His", "4D AT", "305"],
+        [7, "Jn (1. Grupa)", "5C AT", "305"]
+      ],
+      Pi: [
+        [1, "Jn (1. Grupa)", "2BC AT", "305"],
+        [2, "Jn (1. Grupa)", "2BC AT", "305"],
+        [4, "Jn (1. Grupa)", "4A AT", "305"],
+        [7, "His", "4A ALO", "305"],
+        [8, "His", "4A ALO", "305"]
+      ]
+    }
+  }
+];
+
+    let tchStep = "LIST";          // "LIST" | "SCHEDULE"
+    let tchFocusArea = "MAIN";     // "MAIN" | "PDF_BTN" | "SEARCH_INPUT" | "BACK_BTN"
+    let tchFocusIdx = 0;
+    let tchSelectedCode = "";
+    let tchSearchQuery = "";
+
+    const tchListStepEl = document.getElementById("tch-list-step");
+    const tchScheduleStepEl = document.getElementById("tch-schedule-step");
+    const tchBreadcrumbEl = document.getElementById("tch-breadcrumb");
+    const tchBackStepBtnEl = document.getElementById("tch-back-step-btn");
+    const tchSearchInputEl = document.getElementById("tch-search-input");
+    const tchScheduleTbodyEl = document.getElementById("tch-schedule-tbody");
+    const tchSummaryBannerEl = document.getElementById("tch-summary-banner");
+    const tchDailyGridEl = document.getElementById("tch-daily-grid");
+
+    function getTeacherMetaStats(t) {
+      let totalLessons = 0;
+      const roomsSet = new Set();
+      const classesSet = new Set();
+      ["Pn", "Wt", "Sr", "Czw", "Pi"].forEach((d) => {
+        (t.days[d] || []).forEach((slot) => {
+          totalLessons++;
+          if (slot[2]) classesSet.add(slot[2]);
+          if (slot[3]) roomsSet.add(slot[3]);
+        });
+      });
+      return {
+        totalLessons,
+        rooms: Array.from(roomsSet),
+        classes: Array.from(classesSet)
+      };
+    }
+
+    function getFilteredTeachers() {
+      const q = tchSearchQuery.trim().toLowerCase();
+      if (!q) return TEACHERS_PDF_DB;
+      return TEACHERS_PDF_DB.filter((t) => {
+        const meta = getTeacherMetaStats(t);
+        const hay = `${t.code} ${t.name} ${t.role} ${meta.rooms.join(" ")} ${meta.classes.join(" ")}`.toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    function syncTeachersFocusVisuals() {
+      const startBtnEl = document.getElementById("sub-start-btn");
+      if (startBtnEl) startBtnEl.classList.toggle("focused", tchFocusArea === "PDF_BTN");
+      if (tchBackStepBtnEl) tchBackStepBtnEl.classList.toggle("pad-focused", tchFocusArea === "BACK_BTN");
+      if (tchSearchInputEl) tchSearchInputEl.classList.toggle("pad-focused", tchFocusArea === "SEARCH_INPUT");
+
+      if (tchListStepEl) {
+        const cards = Array.from(tchListStepEl.querySelectorAll(".tch-card"));
+        cards.forEach((card, idx) => {
+          const active = (tchStep === "LIST" && tchFocusArea === "MAIN" && idx === tchFocusIdx);
+          card.classList.toggle("pad-focused", active);
+          if (active) {
+            card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        });
+      }
+    }
+
+    function renderTeachersUI() {
+      if (!tchListStepEl || !tchScheduleStepEl) return;
+      const filtered = getFilteredTeachers();
+
+      if (tchStep === "LIST") {
+        tchListStepEl.style.display = "grid";
+        tchScheduleStepEl.style.display = "none";
+        tchBackStepBtnEl.style.display = "none";
+        tchSearchInputEl.style.display = "inline-block";
+        tchBreadcrumbEl.innerHTML = `Wybierz nauczyciela z listy (<strong>${filtered.length} z ${TEACHERS_PDF_DB.length} nauczycieli ZSA</strong>) — sprawdź godziny i sale`;
+
+        if (tchFocusIdx >= filtered.length) {
+          tchFocusIdx = Math.max(0, filtered.length - 1);
+        }
+
+        tchListStepEl.innerHTML = filtered.map((t, idx) => {
+          const stats = getTeacherMetaStats(t);
+          const mainRooms = stats.rooms.slice(0, 5).join(", ");
+          return `
+            <div class="tch-card" data-tcode="${t.code}" data-tidx="${idx}">
+              <div class="tch-card-top">
+                <span class="tch-card-code">${t.code}</span>
+                <span class="tch-card-hours">${stats.totalLessons} lek./tyg.</span>
+              </div>
+              <div class="tch-card-name">${t.name}</div>
+              <div class="tch-card-subjects">${t.role}</div>
+              <div class="tch-card-rooms">🚪 Sale: <strong>${mainRooms || "wg planu"}</strong></div>
+            </div>
+          `;
+        }).join("");
+
+        Array.from(tchListStepEl.querySelectorAll(".tch-card")).forEach((card, idx) => {
+          card.addEventListener("mouseenter", () => {
+            tchFocusArea = "MAIN";
+            tchFocusIdx = idx;
+            syncTeachersFocusVisuals();
+          });
+          card.addEventListener("click", () => {
+            tchFocusArea = "MAIN";
+            tchFocusIdx = idx;
+            tchSelectedCode = card.getAttribute("data-tcode");
+            playCustomWav("select");
+            tchStep = "SCHEDULE";
+            renderTeachersUI();
+          });
+        });
+      } else if (tchStep === "SCHEDULE") {
+        tchListStepEl.style.display = "none";
+        tchScheduleStepEl.style.display = "block";
+        tchBackStepBtnEl.style.display = "inline-flex";
+        tchSearchInputEl.style.display = "none";
+
+        const teacher = TEACHERS_PDF_DB.find((t) => t.code === tchSelectedCode) || filtered[tchFocusIdx] || TEACHERS_PDF_DB[0];
+        if (!teacher) return;
+
+        const stats = getTeacherMetaStats(teacher);
+        tchBreadcrumbEl.innerHTML = `Nauczyciel: <strong>${teacher.name} (${teacher.code})</strong> • Godziny lekcyjne i sale (▲ ▼ Przewijaj)`;
+
+        tchSummaryBannerEl.innerHTML = `
+          <div class="tch-summary-main">
+            <div class="tch-summary-name">${teacher.name} <span style="color:#7ec8ff;font-size:0.9rem;">(${teacher.code})</span></div>
+            <div class="tch-summary-meta">${teacher.role}</div>
+          </div>
+          <div class="tch-summary-badges">
+            <span class="tch-stat-pill">Godzin w tygodniu: <strong>${stats.totalLessons}</strong></span>
+            <span class="tch-stat-pill">Sale lekcyjne: <strong>${stats.rooms.join(", ") || "—"}</strong></span>
+            <span class="tch-stat-pill">Uczone klasy: <strong>${stats.classes.join(", ")}</strong></span>
+          </div>
+        `;
+
+        const dayKeys = ["Pn", "Wt", "Sr", "Czw", "Pi"];
+        tchScheduleTbodyEl.innerHTML = LESSON_HOURS.map((hourStr, hIdx) => {
+          const lessonNr = hIdx + 1;
+          const renderCell = (dayKey) => {
+            const entries = (teacher.days[dayKey] || []).filter((e) => e[0] === lessonNr);
+            if (entries.length === 0) return `<span class="tt-empty-slot">—</span>`;
+            return entries.map(([nr, subj, cls, room]) => {
+              const tip = buildLessonTooltip(subj).replace(/"/g, "&quot;");
+              return `
+                <div class="tch-slot-item" ${tip ? `title="${tip}"` : ""}>
+                  <div class="tch-slot-top">
+                    <span class="tch-slot-subj">${subj}</span>
+                    <span class="tch-slot-room">Sala ${room}</span>
+                  </div>
+                  <div class="tch-slot-class">Klasa: <strong>${cls}</strong></div>
+                </div>
+              `;
+            }).join("");
+          };
+
+          return `
+            <tr>
+              <td class="tt-col-nr">${lessonNr}.</td>
+              <td class="tt-col-time">${hourStr}</td>
+              <td>${renderCell("Pn")}</td>
+              <td>${renderCell("Wt")}</td>
+              <td>${renderCell("Sr")}</td>
+              <td>${renderCell("Czw")}</td>
+              <td>${renderCell("Pi")}</td>
+            </tr>
+          `;
+        }).join("");
+
+        const dayNamesPl = [
+          { key: "Pn", label: "Poniedziałek" },
+          { key: "Wt", label: "Wtorek" },
+          { key: "Sr", label: "Środa" },
+          { key: "Czw", label: "Czwartek" },
+          { key: "Pi", label: "Piątek" }
+        ];
+
+        tchDailyGridEl.innerHTML = dayNamesPl.map((d) => {
+          const list = (teacher.days[d.key] || []).slice().sort((a, b) => a[0] - b[0]);
+          const rowsHtml = list.length === 0
+            ? `<div class="tch-day-row"><span style="color:rgba(255,255,255,0.4);">Brak lekcji w tym dniu</span></div>`
+            : list.map(([nr, subj, cls, room]) => `
+                <div class="tch-day-row">
+                  <span class="tch-day-hour">${nr}. (${LESSON_HOURS[nr - 1]})</span>
+                  <span style="color:#ffffff;font-weight:600;">${subj} • <span style="color:#8fd0ff;">${cls}</span></span>
+                  <span class="tch-slot-room">Sala ${room}</span>
+                </div>
+              `).join("");
+
+          return `
+            <div class="tch-day-card">
+              <div class="tch-day-title">${d.label} (${list.length} lek.)</div>
+              ${rowsHtml}
+            </div>
+          `;
+        }).join("");
+
+        tchScheduleStepEl.scrollTop = 0;
+      }
+
+      syncTeachersFocusVisuals();
+    }
+
+    if (tchSearchInputEl) {
+      tchSearchInputEl.addEventListener("input", (e) => {
+        tchSearchQuery = e.target.value || "";
+        tchStep = "LIST";
+        tchFocusIdx = 0;
+        renderTeachersUI();
+      });
+      tchSearchInputEl.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          tchSearchInputEl.blur();
+          tchFocusArea = "MAIN";
+          playCustomWav("move");
+          syncTeachersFocusVisuals();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          tchSearchInputEl.blur();
+          tchFocusArea = "MAIN";
+          syncTeachersFocusVisuals();
+        }
+        e.stopPropagation();
+      });
+    }
+
+    if (tchBackStepBtnEl) {
+      tchBackStepBtnEl.addEventListener("click", () => {
+        if (tchStep === "SCHEDULE") {
+          tchStep = "LIST";
+          tchFocusArea = "MAIN";
+          playCustomWav("back");
+          renderTeachersUI();
+        }
+      });
+    }
+
     /* Wykrywanie urządzeń mobilnych */
     function detectRealMobile() {
       const uaMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -1762,7 +3696,13 @@
             mainIndex = clickedIdx;
             playCustomWav("move");
             syncUiState();
-          } else if (clickedItem.type === "folder" || clickedItem.isTimetable || clickedItem.isWhatsNew || clickedItem.isDirections) {
+          } else if (
+            clickedItem.type === "folder" ||
+            clickedItem.isTimetable ||
+            clickedItem.isWhatsNew ||
+            clickedItem.isDirections ||
+            clickedItem.isTeachers
+          ) {
             navigateDown();
           } else {
             launchActiveItem();
@@ -1807,8 +3747,9 @@
     function populateSubmenuScreen(item) {
       document.getElementById("sub-cover-box").innerHTML = createCoverMarkup(item);
       document.getElementById("sub-game-title").textContent = item.title;
-      
+
       const zsaDirectionsViewEl = document.getElementById("zsa-directions-view");
+      const zsaTeachersViewEl = document.getElementById("zsa-teachers-view");
       const gameInfoViewEl = document.getElementById("game-info-view");
       const zsaNewsViewEl = document.getElementById("zsa-news-view");
       const zsaTimetableViewEl = document.getElementById("zsa-timetable-view");
@@ -1817,14 +3758,16 @@
       const startBtnEl = document.getElementById("sub-start-btn");
       const startBtnTextEl = document.getElementById("sub-start-btn-text");
 
+      if (zsaTeachersViewEl) zsaTeachersViewEl.style.display = "none";
+
       if (item.isWhatsNew) {
         gameInfoViewEl.style.display = "none";
         zsaNewsViewEl.style.display = "flex";
         zsaTimetableViewEl.style.display = "none";
+        zsaDirectionsViewEl.style.display = "none";
         rightLabelEl.textContent = "Aktualności 2026";
         leftNavLabelEl.textContent = "Wieści ZSA";
         startBtnTextEl.textContent = "Portal ZSA";
-        zsaDirectionsViewEl.style.display = "none";
         whatsNewFocusIndex = 0;
         renderZsaNewsList();
         fetchLatestZsaNews2026();
@@ -1832,10 +3775,10 @@
         gameInfoViewEl.style.display = "none";
         zsaNewsViewEl.style.display = "none";
         zsaTimetableViewEl.style.display = "flex";
+        zsaDirectionsViewEl.style.display = "none";
         rightLabelEl.textContent = "Rozkład Zajęć 2026";
         leftNavLabelEl.textContent = "Wybór Szkoły i Klasy";
         startBtnTextEl.textContent = "Pełny PDF";
-        zsaDirectionsViewEl.style.display = "none";
         ttStep = "SCHOOL";
         ttFocusArea = "MAIN";
         renderTimetableUI();
@@ -1850,14 +3793,26 @@
         dirStep = "LIST";
         dirFocusIdx = 0;
         updateDirectionsFocusUI();
+      } else if (item.isTeachers) {
+        gameInfoViewEl.style.display = "none";
+        zsaNewsViewEl.style.display = "none";
+        zsaTimetableViewEl.style.display = "none";
+        zsaDirectionsViewEl.style.display = "none";
+        if (zsaTeachersViewEl) zsaTeachersViewEl.style.display = "flex";
+        rightLabelEl.textContent = "Godziny i Sale Nauczycieli (PDF)";
+        leftNavLabelEl.textContent = "Wykaz Nauczycieli";
+        startBtnTextEl.textContent = "Pełny PDF";
+        tchStep = "LIST";
+        tchFocusArea = "MAIN";
+        renderTeachersUI();
       } else {
         gameInfoViewEl.style.display = "flex";
         zsaNewsViewEl.style.display = "none";
         zsaTimetableViewEl.style.display = "none";
+        zsaDirectionsViewEl.style.display = "none";
         rightLabelEl.textContent = "Informacje";
         leftNavLabelEl.textContent = "Informacje o grze";
         startBtnTextEl.textContent = "Start";
-        zsaDirectionsViewEl.style.display = "none";
         startBtnEl.classList.add("focused");
 
         document.getElementById("sub-desc-tag").textContent = item.subtitle || "INFORMACJE • ZSAGAMES";
@@ -1932,6 +3887,7 @@
           }
           return;
         }
+
         if (activeItem?.isTimetable) {
           if (ttFocusArea === "BACK_BTN") {
             ttFocusArea = "PDF_BTN";
@@ -1965,6 +3921,25 @@
           }
           return;
         }
+
+        if (activeItem?.isTeachers) {
+          if (tchStep === "LIST" && tchFocusArea === "MAIN") {
+            const cards = Array.from(tchListStepEl.querySelectorAll(".tch-card"));
+            const curCard = cards[tchFocusIdx];
+            const prevCard = cards[tchFocusIdx - 1];
+            if (prevCard && curCard && Math.abs(prevCard.getBoundingClientRect().top - curCard.getBoundingClientRect().top) < 15) {
+              tchFocusIdx--;
+            } else {
+              tchFocusArea = "PDF_BTN";
+            }
+          } else {
+            tchFocusArea = "PDF_BTN";
+          }
+          playCustomWav("move");
+          syncTeachersFocusVisuals();
+          return;
+        }
+
         return;
       }
 
@@ -1989,6 +3964,7 @@
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
+
         if (activeItem?.isDirections) {
           if (dirStep === "LIST") {
             if (dirFocusIdx === -1) dirFocusIdx = 0;
@@ -2000,6 +3976,7 @@
           updateDirectionsFocusUI();
           return;
         }
+
         if (activeItem?.isWhatsNew) {
           if (whatsNewFocusIndex === -2) {
             whatsNewFocusIndex = 0;
@@ -2008,6 +3985,7 @@
           }
           return;
         }
+
         if (activeItem?.isTimetable) {
           if (ttFocusArea === "PDF_BTN") {
             ttFocusArea = "MAIN";
@@ -2029,6 +4007,25 @@
           }
           return;
         }
+
+        if (activeItem?.isTeachers) {
+          if (tchFocusArea === "PDF_BTN") {
+            tchFocusArea = "MAIN";
+            playCustomWav("move");
+            syncTeachersFocusVisuals();
+            return;
+          }
+          if (tchStep === "LIST" && tchFocusArea === "MAIN") {
+            const filtered = getFilteredTeachers();
+            if (tchFocusIdx < filtered.length - 1) {
+              tchFocusIdx++;
+              playCustomWav("move");
+              syncTeachersFocusVisuals();
+            }
+          }
+          return;
+        }
+
         return;
       }
 
@@ -2053,6 +4050,7 @@
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
+
         if (activeItem?.isDirections) {
           if (dirStep === "LIST") {
             if (dirFocusIdx === 0 || dirFocusIdx === 2) {
@@ -2070,7 +4068,7 @@
           }
           return;
         }
-        
+
         if (activeItem?.isWhatsNew) {
           if (whatsNewFocusIndex === -2) {
             whatsNewFocusIndex = 0;
@@ -2103,6 +4101,23 @@
           }
           return;
         }
+
+        if (activeItem?.isTeachers) {
+          if (tchStep === "LIST" && tchFocusArea === "MAIN") {
+            const cards = Array.from(tchListStepEl.querySelectorAll(".tch-card"));
+            const alignedBelowIdx = findVerticallyAlignedCardIndex(cards, tchFocusIdx, 1);
+            if (alignedBelowIdx !== -1) {
+              tchFocusIdx = alignedBelowIdx;
+              playCustomWav("move");
+              syncTeachersFocusVisuals();
+            }
+          } else if (tchStep === "SCHEDULE") {
+            tchScheduleStepEl.scrollBy({ top: 150, behavior: "smooth" });
+            playCustomWav("move");
+          }
+          return;
+        }
+
         return;
       }
 
@@ -2132,7 +4147,7 @@
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
-        
+
         if (activeItem?.isDirections) {
           if (dirStep === "DETAIL") {
             if (!isBackButton && dirDetailStepEl.scrollTop > 10) {
@@ -2198,6 +4213,31 @@
           }
         }
 
+        /* Nawigacja w górę / cofanie wewnątrz "Planu Nauczycieli" */
+        if (activeItem?.isTeachers) {
+          if (tchStep === "SCHEDULE") {
+            if (!isBackButton && tchScheduleStepEl.scrollTop > 10) {
+              tchScheduleStepEl.scrollBy({ top: -150, behavior: "smooth" });
+              playCustomWav("move");
+              return;
+            }
+            tchStep = "LIST";
+            tchFocusArea = "MAIN";
+            playCustomWav("back");
+            renderTeachersUI();
+            return;
+          } else if (tchStep === "LIST" && !isBackButton && tchFocusArea === "MAIN") {
+            const cards = Array.from(tchListStepEl.querySelectorAll(".tch-card"));
+            const alignedAboveIdx = findVerticallyAlignedCardIndex(cards, tchFocusIdx, -1);
+            if (alignedAboveIdx !== -1) {
+              tchFocusIdx = alignedAboveIdx;
+              playCustomWav("move");
+              syncTeachersFocusVisuals();
+              return;
+            }
+          }
+        }
+
         navLevel = enteredSubmenuFromFolder ? "FOLDER" : "MAIN";
         playCustomWav("back");
         syncUiState();
@@ -2226,10 +4266,10 @@
       if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
 
-      /* Jeśli jesteśmy na głównej wstędze, kafelki Folder, Plan Lekcji i Kierunki otwierają swój widok na dole */
+      /* Jeśli jesteśmy na głównej wstędze, kafelki Folder, Plan Lekcji, Plan Nauczycieli i Kierunki otwierają swój widok na dole */
       if (navLevel === "MAIN") {
         const curr = MAIN_RIBBON_ITEMS[mainIndex];
-        if (curr.type === "folder" || curr.isTimetable || curr.isDirections) {
+        if (curr.type === "folder" || curr.isTimetable || curr.isDirections || curr.isTeachers) {
           navigateDown();
           return;
         }
@@ -2299,6 +4339,31 @@
           renderTimetableUI();
           return;
         } else if (ttStep === "SCHEDULE") {
+          triggerPressAnimation();
+          launchUrlWithSleepDelay(item.url, "Pełny Plan Lekcji PDF (ZSA)");
+          return;
+        }
+      }
+
+      /* Obsługa zatwierdzenia X / Enter wewnątrz Sub-Menu "Plan Nauczycieli" */
+      if (navLevel === "SUBMENU" && item?.isTeachers) {
+        if (tchFocusArea === "PDF_BTN") {
+          triggerPressAnimation();
+          launchUrlWithSleepDelay(item.url, "Pełny Plan Lekcji PDF (ZSA)");
+          return;
+        }
+        if (tchStep === "LIST") {
+          const filtered = getFilteredTeachers();
+          const chosen = filtered[tchFocusIdx];
+          if (chosen) {
+            tchSelectedCode = chosen.code;
+            tchStep = "SCHEDULE";
+            tchFocusArea = "MAIN";
+            playCustomWav("select");
+            renderTeachersUI();
+          }
+          return;
+        } else if (tchStep === "SCHEDULE") {
           triggerPressAnimation();
           launchUrlWithSleepDelay(item.url, "Pełny Plan Lekcji PDF (ZSA)");
           return;
