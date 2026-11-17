@@ -1,4 +1,4 @@
-    :root {
+:root {
       --ps4-white: #ffffff;
       --ps4-plus-gold: #f5c418;
       --ps4-blue-dot: #2ea8ff;
@@ -18,6 +18,12 @@
 
       /* Podgląd małych kafelków pod folderem */
       --preview-tile-size: 138px;
+
+      /* Autentyczne krzywe fizyki PS4 Orbis OS */
+      --orbis-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --orbis-ease-quint: cubic-bezier(0.19, 1, 0.22, 1);
+      --orbis-ease-smooth: cubic-bezier(0.25, 0.9, 0.3, 1);
+      --orbis-spring: cubic-bezier(0.22, 1.12, 0.36, 1);
     }
 
     * {
@@ -33,11 +39,13 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
+      overscroll-behavior: none;
       background-color: #001c52;
       font-family: "Segoe UI", "SST", "Helvetica Neue", Arial, sans-serif;
       color: var(--ps4-white);
       touch-action: none;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     /* ================= TŁO CANVAS XMB/PS4 + CUSTOM GAME THEME (IMG / GIF / VIDEO) ================= */
@@ -48,6 +56,7 @@
       height: 100%;
       z-index: 0;
       pointer-events: none;
+      transform: translate3d(0, 0, 0);
     }
 
     .game-theme-backdrop {
@@ -59,9 +68,11 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      transform: translate3d(0, 0, 0) scale(1.03);
+      transform: translate3d(0, 0, 0) scale(1.045);
       will-change: opacity, transform;
-      transition: opacity 0.48s ease, transform 0.58s cubic-bezier(0.2, 0.85, 0.25, 1);
+      transition:
+        opacity 0.62s var(--orbis-ease-out),
+        transform 0.85s var(--orbis-ease-quint);
       overflow: hidden;
     }
 
@@ -107,7 +118,7 @@
       opacity: 0;
       pointer-events: none;
       will-change: opacity;
-      transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: opacity 0.48s var(--orbis-ease-out);
       cursor: pointer;
     }
 
@@ -120,7 +131,7 @@
     body.state-sleep .ps4-top-bar,
     body.state-sleep .ps4-bottom-prompts {
       opacity: 0.12;
-      transform: translate3d(0, 0, 0) scale(0.985);
+      transform: translate3d(0, 0, 0) scale(0.975);
       pointer-events: none;
     }
 
@@ -131,7 +142,7 @@
       background: linear-gradient(90deg, transparent 0%, var(--ps4-rest-orange) 50%, transparent 100%);
       box-shadow: 0 0 22px var(--ps4-rest-orange), 0 0 44px rgba(255, 140, 26, 0.6);
       margin-bottom: 34px;
-      animation: ps4RestPulse 3.2s ease-in-out infinite;
+      animation: ps4RestPulse 3.4s ease-in-out infinite;
     }
 
     body.tab-hidden .sleep-lightbar,
@@ -140,7 +151,7 @@
     }
 
     @keyframes ps4RestPulse {
-      0%, 100% { opacity: 0.28; transform: scaleX(0.88); }
+      0%, 100% { opacity: 0.26; transform: scaleX(0.86); }
       50% { opacity: 1; transform: scaleX(1.04); }
     }
 
@@ -194,14 +205,17 @@
       background: rgba(255, 255, 255, 0.08);
       border: 1.5px solid rgba(255, 255, 255, 0.35);
       box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
-      animation: promptBreathe 2.6s ease-in-out infinite;
-      transition: background 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+      animation: promptBreathe 2.8s ease-in-out infinite;
+      transition:
+        background 0.28s var(--orbis-ease-out),
+        border-color 0.28s var(--orbis-ease-out),
+        transform 0.28s var(--orbis-spring);
     }
 
     .ps4-sleep-overlay:hover .sleep-prompt {
       background: rgba(255, 255, 255, 0.16);
       border-color: #ffffff;
-      transform: scale(1.03);
+      transform: scale(1.035);
     }
 
     @keyframes promptBreathe {
@@ -222,16 +236,20 @@
       justify-content: space-between;
       font-weight: 300;
       letter-spacing: 0.4px;
+      transform: translate3d(0, 0, 0);
       will-change: transform, opacity;
-      transition: transform 0.42s cubic-bezier(0.2, 0.85, 0.25, 1), opacity 0.34s ease;
+      transition:
+        transform 0.52s var(--orbis-ease-quint),
+        opacity 0.42s var(--orbis-ease-out);
     }
 
     body.state-folder .ps4-top-bar {
       opacity: 0.42;
+      transform: translate3d(0, -6px, 0);
     }
 
     body.state-submenu .ps4-top-bar {
-      transform: translate3d(0, -80px, 0);
+      transform: translate3d(0, -68px, 0);
       opacity: 0;
       pointer-events: none;
     }
@@ -242,24 +260,63 @@
       gap: 28px;
     }
 
+    @keyframes zsaGoldFlashUp {
+      0% {
+        transform: translate3d(0, 36px, 0) rotate(-5deg);
+        opacity: 0;
+      }
+      15% {
+        opacity: 1;
+      }
+      85% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate3d(0, -24px, 0) rotate(-5deg);
+        opacity: 0;
+      }
+    }
+
     .ps-plus-icon {
-      width: 28px;
+      width: 42px;
       height: 28px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition:
+        transform 0.26s var(--orbis-spring),
+        filter 0.26s var(--orbis-ease-out);
     }
 
     .ps-plus-icon:hover {
       transform: scale(1.12);
+      filter:
+        drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45))
+        drop-shadow(0 0 10px rgba(245, 196, 24, 0.65));
     }
 
     .ps-plus-icon svg {
       width: 100%;
       height: 100%;
+      overflow: visible;
+    }
+
+    .ps-plus-icon .gold-line-flash {
+      transform: translate3d(0, 36px, 0) rotate(-5deg);
+      opacity: 0;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    .ps-plus-icon:hover .gold-line-flash {
+      animation: zsaGoldFlashUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .ps-plus-mini {
+      width: 24px;
+      height: 17px;
     }
 
     .ps-notif-circle {
@@ -320,11 +377,11 @@
       color: #ffffff;
       padding: 4px 10px;
       border-radius: 4px;
-      transition: background 0.2s ease;
+      transition: background 0.24s var(--orbis-ease-out);
     }
 
     .status-user:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
     }
 
     .user-avatar-wrap {
@@ -350,10 +407,7 @@
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
     }
 
-    .ps-plus-mini {
-      width: 17px;
-      height: 17px;
-    }
+
 
     .top-right-clock {
       display: flex;
@@ -382,7 +436,10 @@
       width: 100vw;
       height: 100vh;
       z-index: 10;
-      transition: transform 0.45s cubic-bezier(0.2, 0.85, 0.25, 1), opacity 0.45s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        transform 0.54s var(--orbis-ease-quint),
+        opacity 0.48s var(--orbis-ease-out);
     }
 
     .ps4-top-guide {
@@ -393,7 +450,7 @@
       height: 1px;
       background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.28) 16%, rgba(255,255,255,0.2) 84%, transparent 100%);
       pointer-events: none;
-      transition: opacity 0.35s ease;
+      transition: opacity 0.42s var(--orbis-ease-out);
     }
 
     body.state-submenu .ps4-top-guide {
@@ -406,24 +463,25 @@
       left: 0;
       width: 100%;
       z-index: 15;
+      transform: translate3d(0, 0, 0);
       will-change: transform, opacity;
       transition:
-        transform 0.4s cubic-bezier(0.2, 0.85, 0.25, 1),
-        opacity 0.35s ease;
+        transform 0.52s var(--orbis-ease-quint),
+        opacity 0.44s var(--orbis-ease-out);
     }
 
     body.state-folder .main-ribbon-layer {
-      transform: translate3d(0, -148px, 0);
-      opacity: 0.38;
+      transform: translate3d(0, -148px, 0) scale(0.985);
+      opacity: 0.36;
     }
 
     body.state-submenu:not(.from-folder) .main-ribbon-layer {
-      transform: translate3d(0, -252px, 0);
-      opacity: 0.35;
+      transform: translate3d(0, -254px, 0);
+      opacity: 0.32;
     }
 
     body.state-submenu.from-folder .main-ribbon-layer {
-      transform: translate3d(0, -390px, 0);
+      transform: translate3d(0, -395px, 0);
       opacity: 0;
       pointer-events: none;
     }
@@ -434,31 +492,33 @@
       gap: var(--tile-gap);
       will-change: transform;
       backface-visibility: hidden;
-      transition: transform 0.3s cubic-bezier(0.2, 0.88, 0.25, 1);
+      -webkit-backface-visibility: hidden;
+      /* Charakterystyczne dla PS4 Orbis OS natychmiastowe ruszenie i długie wyhamowanie wstęgi */
+      transition: transform 0.38s var(--orbis-ease-quint);
     }
 
-    /* ================= POJEDYNCZY KAFELEK PS4 (ACCURATE PS4 EFFECTS) ================= */
+    /* ================= POJEDYNCZY KAFELEK PS4 (ACCURATE ORBIS OS FEEL) ================= */
     @keyframes ps4FocusPulse {
       0%, 100% {
         box-shadow:
-          0 0 16px rgba(255, 255, 255, 0.45),
-          0 0 30px rgba(80, 180, 255, 0.28),
-          0 18px 36px rgba(0, 0, 0, 0.65);
+          0 0 14px rgba(255, 255, 255, 0.48),
+          0 0 28px rgba(80, 180, 255, 0.28),
+          0 20px 38px rgba(0, 0, 0, 0.68);
         border-color: #ffffff;
       }
       50% {
         box-shadow:
-          0 0 24px rgba(255, 255, 255, 0.82),
-          0 0 42px rgba(102, 198, 255, 0.55),
-          0 18px 36px rgba(0, 0, 0, 0.65);
-        border-color: #f2f9ff;
+          0 0 24px rgba(255, 255, 255, 0.88),
+          0 0 46px rgba(102, 198, 255, 0.58),
+          0 22px 42px rgba(0, 0, 0, 0.72);
+        border-color: #f4faff;
       }
     }
 
     @keyframes ps4TileSheen {
-      0% { transform: translate3d(-135%, 0, 0) skewX(-24deg); opacity: 0; }
-      25% { opacity: 0.55; }
-      100% { transform: translate3d(220%, 0, 0) skewX(-24deg); opacity: 0; }
+      0% { transform: translate3d(-140%, 0, 0) skewX(-24deg); opacity: 0; }
+      22% { opacity: 0.52; }
+      100% { transform: translate3d(230%, 0, 0) skewX(-24deg); opacity: 0; }
     }
 
     .ps4-tile {
@@ -467,17 +527,28 @@
       height: var(--tile-size);
       flex-shrink: 0;
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
       background: #003791;
+      border: 0px solid rgba(255, 255, 255, 0);
+      padding: 0;
+      transform: translate3d(0, 0, 0);
       backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      will-change: width, height, transform;
       transition:
-        width 0.26s cubic-bezier(0.2, 0.85, 0.25, 1),
-        height 0.26s cubic-bezier(0.2, 0.85, 0.25, 1),
-        transform 0.16s ease,
-        background 0.22s ease;
+        width 0.36s var(--orbis-ease-quint),
+        height 0.36s var(--orbis-ease-quint),
+        transform 0.28s var(--orbis-ease-out),
+        background 0.28s var(--orbis-ease-out),
+        padding 0.28s var(--orbis-ease-quint),
+        border-width 0.18s var(--orbis-ease-out),
+        box-shadow 0.34s var(--orbis-ease-out);
     }
 
     .ps4-tile:not(.active):hover {
-      transform: translate3d(0, -3px, 0);
+      transform: translate3d(0, -4px, 0) scale(1.015);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.48);
     }
 
     .ps4-tile-inner {
@@ -487,6 +558,9 @@
       overflow: hidden;
       background: linear-gradient(180deg, #0047b3 0%, #002b75 100%);
       border: 1px solid rgba(255, 255, 255, 0.18);
+      transition:
+        height 0.36s var(--orbis-ease-quint),
+        border-color 0.25s var(--orbis-ease-out);
     }
 
     .ps4-tile-inner::after {
@@ -496,29 +570,28 @@
       bottom: 0;
       left: 0;
       width: 48%;
-      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.32) 50%, transparent 100%);
-      transform: translate3d(-135%, 0, 0) skewX(-24deg);
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.34) 50%, transparent 100%);
+      transform: translate3d(-140%, 0, 0) skewX(-24deg);
       pointer-events: none;
     }
 
     .ps4-tile.active .ps4-tile-inner::after {
-      animation: ps4TileSheen 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: ps4TileSheen 0.76s var(--orbis-ease-out) forwards;
     }
 
     .ps4-tile.active {
       width: var(--tile-active-size);
       height: calc(var(--tile-active-size) + var(--tile-bottom-bar));
       z-index: 20;
-      background: linear-gradient(180deg, rgba(16, 78, 185, 0.62) 0%, rgba(0, 42, 122, 0.78) 100%);
+      background: linear-gradient(180deg, rgba(16, 78, 185, 0.64) 0%, rgba(0, 42, 122, 0.82) 100%);
       border: 3px solid #ffffff;
       padding: 5px 5px 0 5px;
-      display: flex;
-      flex-direction: column;
-      animation: ps4FocusPulse 2.6s ease-in-out infinite;
+      animation: ps4FocusPulse 2.8s ease-in-out infinite;
     }
 
     .ps4-tile.active.pressed {
-      transform: scale(0.965);
+      transform: translate3d(0, 0, 0) scale(0.958);
+      transition: transform 0.09s ease-out;
     }
 
     body.state-folder .main-ribbon-layer .ps4-tile.active,
@@ -531,17 +604,22 @@
     body.state-folder .main-ribbon-layer .ps4-tile.active .tile-side-title,
     body.state-submenu .ps4-tile.active .tile-side-title {
       opacity: 0;
+      transform: translate3d(-10px, 0, 0);
     }
 
     .ps4-tile.active .ps4-tile-inner {
       width: 100%;
       height: calc(var(--tile-active-size) - 10px);
-      border: none;
+      border-color: transparent;
     }
 
+    /* Płynnie rozwijany dolny pasek "Start" bez skoku display:none -> flex */
     .tile-bottom-bar {
-      display: none;
-      height: var(--tile-bottom-bar);
+      display: flex;
+      height: 0;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
       width: 100%;
       align-items: center;
       justify-content: center;
@@ -551,17 +629,30 @@
       letter-spacing: 0.5px;
       gap: 8px;
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.16) 100%);
-      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      border-top: 1px solid rgba(255, 255, 255, 0);
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-      transition: background 0.18s ease;
+      transform: translate3d(0, -6px, 0);
+      pointer-events: none;
+      transition:
+        height 0.34s var(--orbis-ease-quint),
+        max-height 0.34s var(--orbis-ease-quint),
+        opacity 0.26s var(--orbis-ease-out),
+        transform 0.34s var(--orbis-ease-quint),
+        background 0.22s ease,
+        border-color 0.26s ease;
+    }
+
+    .ps4-tile.active .tile-bottom-bar {
+      height: var(--tile-bottom-bar);
+      max-height: var(--tile-bottom-bar);
+      opacity: 1;
+      border-top-color: rgba(255, 255, 255, 0.22);
+      transform: translate3d(0, 0, 0);
+      pointer-events: auto;
     }
 
     .ps4-tile.active:hover .tile-bottom-bar {
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.26) 100%);
-    }
-
-    .ps4-tile.active .tile-bottom-bar {
-      display: flex;
     }
 
     .down-arrow-glyph {
@@ -569,10 +660,16 @@
       height: 19px;
       fill: #ffffff;
       filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+      transition: transform 0.28s var(--orbis-spring);
     }
 
+    .ps4-tile.active:hover .down-arrow-glyph {
+      transform: translate3d(0, 2px, 0);
+    }
+
+    /* Płynny wjazd tytułu gry z boku kafelka jak w Orbis OS */
     .tile-side-title {
-      display: none;
+      display: block;
       position: absolute;
       left: calc(100% + 18px);
       bottom: 4px;
@@ -584,11 +681,24 @@
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
       pointer-events: none;
       z-index: 30;
-      transition: opacity 0.22s ease;
+      opacity: 0;
+      visibility: hidden;
+      transform: translate3d(-14px, 0, 0);
+      will-change: opacity, transform;
+      transition:
+        opacity 0.24s var(--orbis-ease-out),
+        transform 0.36s var(--orbis-ease-quint),
+        visibility 0s linear 0.24s;
     }
 
     .ps4-tile.active .tile-side-title {
-      display: block;
+      opacity: 1;
+      visibility: visible;
+      transform: translate3d(0, 0, 0);
+      transition:
+        opacity 0.34s var(--orbis-ease-out) 0.04s,
+        transform 0.42s var(--orbis-ease-quint) 0.03s,
+        visibility 0s linear 0s;
     }
 
     .tile-cover-img {
@@ -596,6 +706,12 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      transform: translate3d(0, 0, 0) scale(1.015);
+      transition: transform 0.44s var(--orbis-ease-quint);
+    }
+
+    .ps4-tile.active .tile-cover-img {
+      transform: translate3d(0, 0, 0) scale(1);
     }
 
     .tile-system-art {
@@ -614,6 +730,11 @@
       width: 56%;
       height: 56%;
       filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
+      transition: transform 0.38s var(--orbis-ease-quint);
+    }
+
+    .ps4-tile.active .tile-system-art svg {
+      transform: scale(1.04);
     }
 
     .tile-system-label {
@@ -668,14 +789,14 @@
       pointer-events: none;
       opacity: 0;
       will-change: transform, opacity;
-      transform: translate3d(0, 325px, 0);
+      transform: translate3d(0, 345px, 0);
       transition:
-        transform 0.4s cubic-bezier(0.2, 0.85, 0.25, 1),
-        opacity 0.32s ease;
+        transform 0.52s var(--orbis-ease-quint),
+        opacity 0.38s var(--orbis-ease-out);
     }
 
     body.folder-preview .folder-ribbon-layer {
-      opacity: 1;
+      opacity: 0.95;
       pointer-events: auto;
       transform: translate3d(0, 325px, 0);
     }
@@ -683,7 +804,7 @@
     body.folder-preview .folder-ribbon-layer .ps4-tile {
       width: var(--preview-tile-size);
       height: var(--preview-tile-size);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.22);
       padding: 0;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
       animation: none;
@@ -695,7 +816,11 @@
 
     body.folder-preview .folder-ribbon-layer .ps4-tile .tile-bottom-bar,
     body.folder-preview .folder-ribbon-layer .ps4-tile .tile-side-title {
-      display: none !important;
+      opacity: 0 !important;
+      max-height: 0 !important;
+      height: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
     }
 
     body.state-folder .folder-ribbon-layer {
@@ -705,12 +830,23 @@
     }
 
     body.state-submenu.from-folder .folder-ribbon-layer {
-      opacity: 0.35;
-      transform: translate3d(0, -252px, 0);
+      opacity: 0.32;
+      transform: translate3d(0, -254px, 0);
       pointer-events: none;
     }
 
     /* ================= PS4 SUB-MENU / INFORMACJE O GRZE, CO NOWEGO & PLAN LEKCJI ================= */
+    @keyframes orbisSubViewIn {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
     .ps4-game-submenu {
       position: absolute;
       top: 108px;
@@ -724,10 +860,10 @@
       opacity: 0;
       pointer-events: none;
       will-change: transform, opacity;
-      transform: translate3d(0, 140px, 0);
+      transform: translate3d(0, 145px, 0);
       transition:
-        transform 0.42s cubic-bezier(0.2, 0.85, 0.25, 1),
-        opacity 0.34s ease;
+        transform 0.54s var(--orbis-ease-quint),
+        opacity 0.42s var(--orbis-ease-out);
     }
 
     body.state-submenu .ps4-game-submenu {
@@ -739,6 +875,30 @@
     .submenu-left-col {
       display: flex;
       flex-direction: column;
+      transform: translate3d(0, 24px, 0);
+      opacity: 0;
+      transition:
+        transform 0.54s var(--orbis-ease-quint) 0.02s,
+        opacity 0.42s var(--orbis-ease-out) 0.02s;
+    }
+
+    .submenu-right-col {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      height: 100%;
+      overflow: hidden;
+      transform: translate3d(0, 38px, 0);
+      opacity: 0;
+      transition:
+        transform 0.6s var(--orbis-ease-quint) 0.06s,
+        opacity 0.48s var(--orbis-ease-out) 0.06s;
+    }
+
+    body.state-submenu .submenu-left-col,
+    body.state-submenu .submenu-right-col {
+      transform: translate3d(0, 0, 0);
+      opacity: 1;
     }
 
     .submenu-cover-box {
@@ -748,6 +908,7 @@
       box-shadow: 0 16px 38px rgba(0, 0, 0, 0.78);
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.18);
+      transform: translate3d(0, 0, 0);
     }
 
     .submenu-start-row {
@@ -766,19 +927,24 @@
       color: #ffffff;
       background: linear-gradient(180deg, rgba(20, 92, 205, 0.35) 0%, rgba(8, 42, 112, 0.55) 100%);
       border: 2px solid rgba(255, 255, 255, 0.35);
-      transition: transform 0.14s ease, background 0.2s ease, border-color 0.2s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        transform 0.22s var(--orbis-spring),
+        background 0.26s var(--orbis-ease-out),
+        border-color 0.24s var(--orbis-ease-out),
+        box-shadow 0.28s var(--orbis-ease-out);
     }
 
     .submenu-start-row.focused,
     .submenu-start-row:hover {
       background: linear-gradient(180deg, rgba(38, 118, 235, 0.65) 0%, rgba(12, 58, 145, 0.82) 100%);
       border: 2.5px solid #ffffff;
-      animation: ps4FocusPulse 2.6s ease-in-out infinite;
+      animation: ps4FocusPulse 2.8s ease-in-out infinite;
     }
 
     .submenu-start-row:active,
     .submenu-start-row.pressed {
-      transform: scale(0.965);
+      transform: translate3d(0, 0, 0) scale(0.96);
     }
 
     .submenu-nav-list {
@@ -797,6 +963,12 @@
       font-weight: 300;
       color: rgba(255, 255, 255, 0.72);
       border-radius: 2px;
+      border-left: 3px solid transparent;
+      transition:
+        background 0.26s var(--orbis-ease-out),
+        color 0.24s var(--orbis-ease-out),
+        border-color 0.24s var(--orbis-ease-out),
+        transform 0.26s var(--orbis-ease-out);
     }
 
     .submenu-nav-item.active {
@@ -804,14 +976,7 @@
       border-left: 3px solid #ffffff;
       color: #ffffff;
       font-weight: 400;
-    }
-
-    .submenu-right-col {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      height: 100%;
-      overflow: hidden;
+      transform: translate3d(4px, 0, 0);
     }
 
     .submenu-header-bar {
@@ -847,6 +1012,7 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      animation: orbisSubViewIn 0.42s var(--orbis-ease-quint) both;
     }
 
     .info-main-box {
@@ -856,6 +1022,9 @@
       box-shadow:
         0 0 18px rgba(58, 166, 255, 0.42),
         inset 0 0 14px rgba(58, 166, 255, 0.15);
+      transition:
+        box-shadow 0.34s var(--orbis-ease-out),
+        border-color 0.34s var(--orbis-ease-out);
     }
 
     .info-subtitle-tag {
@@ -887,12 +1056,19 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      transition: border-color 0.2s ease, background 0.2s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        border-color 0.28s var(--orbis-ease-out),
+        background 0.28s var(--orbis-ease-out),
+        transform 0.28s var(--orbis-ease-quint),
+        box-shadow 0.28s var(--orbis-ease-out);
     }
 
     .info-meta-card:hover {
-      border-color: rgba(102, 190, 255, 0.6);
-      background: rgba(14, 30, 62, 0.9);
+      border-color: rgba(102, 190, 255, 0.65);
+      background: rgba(14, 30, 62, 0.92);
+      transform: translate3d(0, -2px, 0);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.42);
     }
 
     .meta-label {
@@ -916,6 +1092,7 @@
       gap: 12px;
       height: 100%;
       overflow: hidden;
+      animation: orbisSubViewIn 0.42s var(--orbis-ease-quint) both;
     }
 
     .zsa-news-toolbar {
@@ -941,7 +1118,12 @@
       color: #ffffff;
       font-size: 0.86rem;
       cursor: pointer;
-      transition: background 0.18s ease, transform 0.14s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        background 0.24s var(--orbis-ease-out),
+        transform 0.22s var(--orbis-spring),
+        box-shadow 0.26s var(--orbis-ease-out),
+        border-color 0.24s var(--orbis-ease-out);
     }
 
     .zsa-refresh-btn:hover,
@@ -949,6 +1131,7 @@
       background: linear-gradient(180deg, rgba(78, 182, 255, 0.55) 0%, rgba(24, 92, 188, 0.75) 100%);
       border-color: #ffffff;
       box-shadow: 0 0 16px rgba(255, 255, 255, 0.65), 0 0 28px rgba(102, 190, 255, 0.6);
+      transform: translate3d(0, -1px, 0);
     }
 
     .zsa-refresh-btn:active {
@@ -983,7 +1166,12 @@
       border-left: 4px solid #66beff;
       padding: 16px 20px;
       cursor: pointer;
-      transition: background 0.22s ease, border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        background 0.28s var(--orbis-ease-out),
+        border-color 0.28s var(--orbis-ease-out),
+        transform 0.32s var(--orbis-ease-quint),
+        box-shadow 0.32s var(--orbis-ease-out);
     }
 
     .zsa-news-card:hover,
@@ -993,7 +1181,7 @@
       box-shadow:
         0 0 16px rgba(255, 255, 255, 0.55),
         0 0 32px rgba(80, 180, 255, 0.45);
-      transform: translate3d(4px, 0, 0);
+      transform: translate3d(6px, 0, 0);
     }
 
     .zsa-news-date {
@@ -1027,7 +1215,7 @@
       color: rgba(230, 240, 255, 0.84);
     }
 
-    /* Płynnie rozwijany podgląd oryginalnego zdjęcia z wpisu ZSA (jak na zdj. 2) */
+    /* Płynnie rozwijany podgląd oryginalnego zdjęcia z wpisu ZSA */
     .zsa-news-img-wrap {
       max-height: 0;
       opacity: 0;
@@ -1036,13 +1224,13 @@
       border-radius: 4px;
       border: 1px solid transparent;
       background: rgba(4, 12, 28, 0.92);
-      transform: translate3d(0, -6px, 0);
+      transform: translate3d(0, -8px, 0);
       transition:
-        max-height 0.52s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.45s ease,
-        margin-top 0.38s ease,
-        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-        border-color 0.38s ease;
+        max-height 0.58s var(--orbis-ease-quint),
+        opacity 0.46s var(--orbis-ease-out),
+        margin-top 0.44s var(--orbis-ease-quint),
+        transform 0.52s var(--orbis-ease-quint),
+        border-color 0.38s var(--orbis-ease-out);
     }
 
     .zsa-news-card.reveal-image .zsa-news-img-wrap {
@@ -1069,6 +1257,7 @@
       gap: 12px;
       height: 100%;
       overflow: hidden;
+      animation: orbisSubViewIn 0.42s var(--orbis-ease-quint) both;
     }
 
     .tt-top-bar {
@@ -1105,7 +1294,12 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        background 0.24s var(--orbis-ease-out),
+        border-color 0.24s var(--orbis-ease-out),
+        box-shadow 0.26s var(--orbis-ease-out),
+        transform 0.22s var(--orbis-spring);
     }
 
     .tt-back-step-btn:hover,
@@ -1113,6 +1307,7 @@
       background: rgba(58, 166, 255, 0.42);
       border-color: #ffffff;
       box-shadow: 0 0 14px rgba(255, 255, 255, 0.65);
+      transform: translate3d(0, -1px, 0);
     }
 
     /* Krok 1: Wybór Szkoły (Liceum vs Technikum) */
@@ -1121,6 +1316,7 @@
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       margin-top: 6px;
+      animation: orbisSubViewIn 0.38s var(--orbis-ease-quint) both;
     }
 
     .tt-school-card {
@@ -1132,7 +1328,12 @@
       flex-direction: column;
       justify-content: space-between;
       min-height: 205px;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        transform 0.32s var(--orbis-ease-quint),
+        border-color 0.26s var(--orbis-ease-out),
+        box-shadow 0.32s var(--orbis-ease-out),
+        background 0.28s var(--orbis-ease-out);
     }
 
     .tt-school-card:hover,
@@ -1142,7 +1343,7 @@
       box-shadow:
         0 0 20px rgba(255, 255, 255, 0.6),
         0 0 38px rgba(80, 180, 255, 0.48);
-      transform: translate3d(0, -3px, 0);
+      transform: translate3d(0, -4px, 0) scale(1.01);
     }
 
     .tt-school-badge {
@@ -1179,7 +1380,7 @@
       font-weight: 500;
     }
 
-    /* Krok 2: Siatka wyboru klasy (stałe kolumny + geometryczna nawigacja góra/dół) */
+    /* Krok 2: Siatka wyboru klasy */
     .tt-class-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -1187,6 +1388,7 @@
       overflow-y: auto;
       padding: 4px 8px 16px 4px;
       max-height: calc(100vh - 250px);
+      animation: orbisSubViewIn 0.38s var(--orbis-ease-quint) both;
     }
 
     .tt-class-card {
@@ -1198,7 +1400,12 @@
       display: flex;
       flex-direction: column;
       gap: 5px;
-      transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        background 0.26s var(--orbis-ease-out),
+        border-color 0.26s var(--orbis-ease-out),
+        transform 0.28s var(--orbis-ease-quint),
+        box-shadow 0.28s var(--orbis-ease-out);
     }
 
     .tt-class-card:hover,
@@ -1208,7 +1415,7 @@
       box-shadow:
         0 0 14px rgba(255, 255, 255, 0.6),
         0 0 26px rgba(80, 180, 255, 0.45);
-      transform: translate3d(0, -2px, 0);
+      transform: translate3d(0, -3px, 0) scale(1.012);
     }
 
     .tt-class-code {
@@ -1242,6 +1449,7 @@
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
       scroll-behavior: smooth;
       padding-bottom: 12px;
+      animation: orbisSubViewIn 0.38s var(--orbis-ease-quint) both;
     }
 
     .tt-schedule-wrap::-webkit-scrollbar {
@@ -1307,6 +1515,12 @@
       color: #ffffff;
       line-height: 1.35;
       cursor: help;
+      transition: background 0.22s var(--orbis-ease-out), transform 0.22s var(--orbis-ease-out);
+    }
+
+    .tt-lesson-pill:hover {
+      background: rgba(38, 92, 185, 0.68);
+      transform: translate3d(2px, 0, 0);
     }
 
     .tt-empty-slot {
@@ -1379,7 +1593,7 @@
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
     }
 
-    /* ================= AUTENTYCZNE IKONY PRZYCISKÓW DUALSHOCK 4 NA DOLE ================= */
+    /* ================= IKONY PRZYCISKÓW (PC KLAWIATURA / TELEFON / DUALSHOCK 4) ================= */
     .ps4-bottom-prompts {
       position: fixed;
       bottom: 18px;
@@ -1393,7 +1607,7 @@
       color: rgba(255, 255, 255, 0.9);
       text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
       pointer-events: none;
-      transition: opacity 0.45s ease;
+      transition: opacity 0.45s var(--orbis-ease-out);
     }
 
     .ps4-prompt-item {
@@ -1402,47 +1616,51 @@
       gap: 7px;
     }
 
+    /* Domyślny wygląd na PC (gdy kontroler NIE jest podłączony) — klawisze klawiatury */
     .ds4-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 22px;
+      min-width: 24px;
       height: 22px;
-      padding: 0 5px;
-      border-radius: 11px;
-      background: rgba(8, 22, 54, 0.85);
-      border: 1.5px solid rgba(255, 255, 255, 0.78);
-      font-size: 0.72rem;
-      font-weight: 700;
+      padding: 0 7px;
+      border-radius: 4px;
+      background: rgba(12, 30, 68, 0.92);
+      border: 1.5px solid rgba(180, 215, 255, 0.75);
+      border-bottom-width: 2.5px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
       color: #ffffff;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     }
 
-    .ds4-badge.cross {
+    /* Dopiero po podłączeniu kontrolera (body.has-gamepad) — okrągłe ikony PlayStation */
+    body.has-gamepad .ds4-badge {
+      min-width: 22px;
+      padding: 0 5px;
+      border-radius: 11px;
+      border-bottom-width: 1.5px;
+      background: rgba(8, 22, 54, 0.85);
+      border-color: rgba(255, 255, 255, 0.78);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    body.has-gamepad .ds4-badge.cross {
       color: #7ab8ff;
       border-color: #7ab8ff;
     }
 
-    .ds4-badge.circle {
+    body.has-gamepad .ds4-badge.circle {
       color: #ff7a7a;
       border-color: #ff7a7a;
     }
 
-    /* Kontrolki mobilne */
-    .mobile-controls {
-      display: none;
-    }
-
-    body.is-mobile .mobile-controls {
-      display: flex;
-      position: fixed;
-      bottom: 18px;
-      left: 18px;
-      right: 18px;
-      z-index: 50;
-      justify-content: space-between;
-      align-items: flex-end;
-      pointer-events: none;
+    /* Na telefonie bez podłączonego kontrolera — brak jakichkolwiek ikon PlayStation */
+    body.is-mobile:not(.has-gamepad) .ds4-badge,
+    body.is-mobile:not(.has-gamepad) .ps4-bottom-prompts {
+      display: none !important;
     }
 
     .touch-dpad, .touch-actions {
@@ -1463,11 +1681,11 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-      transition: transform 0.12s ease, background 0.15s ease;
+      transition: transform 0.16s var(--orbis-spring), background 0.18s var(--orbis-ease-out);
     }
 
     .touch-btn:active {
-      transform: scale(0.9);
+      transform: scale(0.88);
       background: rgba(28, 92, 205, 0.95);
     }
 
@@ -1505,7 +1723,7 @@
       }
     }
 
-      /* Zegar na żywo wewnątrz Planu Lekcji */
+    /* Zegar na żywo wewnątrz Planu Lekcji */
     .tt-top-right-group {
       display: flex;
       align-items: center;
@@ -1584,6 +1802,7 @@
       height: 100%;
       overflow: hidden;
       padding-right: 4px;
+      animation: orbisSubViewIn 0.42s var(--orbis-ease-quint) both;
     }
 
     .dir-top-bar {
@@ -1614,6 +1833,7 @@
       overflow-y: auto;
       max-height: calc(100vh - 250px);
       padding: 2px 6px 14px 2px;
+      animation: orbisSubViewIn 0.38s var(--orbis-ease-quint) both;
     }
 
     .dir-section-box {
@@ -1641,7 +1861,12 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        transform 0.28s var(--orbis-ease-quint),
+        border-color 0.24s var(--orbis-ease-out),
+        box-shadow 0.28s var(--orbis-ease-out),
+        background 0.24s var(--orbis-ease-out);
     }
 
     .dir-link-card:hover,
@@ -1649,7 +1874,7 @@
       background: linear-gradient(145deg, rgba(26, 72, 156, 0.96) 0%, rgba(10, 32, 76, 0.98) 100%);
       border-color: #ffffff;
       box-shadow: 0 0 18px rgba(255, 255, 255, 0.6), 0 0 32px rgba(80, 180, 255, 0.45);
-      transform: translate3d(0, -2px, 0);
+      transform: translate3d(0, -3px, 0) scale(1.01);
     }
 
     .dir-link-tag {
@@ -1688,6 +1913,7 @@
       max-height: calc(100vh - 255px);
       padding: 4px 10px 18px 2px;
       scroll-behavior: smooth;
+      animation: orbisSubViewIn 0.38s var(--orbis-ease-quint) both;
     }
 
     .dir-detail-wrap::-webkit-scrollbar {
@@ -1744,6 +1970,12 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      transition: border-color 0.24s var(--orbis-ease-out), transform 0.24s var(--orbis-ease-quint);
+    }
+
+    .dir-info-card:hover {
+      border-color: rgba(126, 200, 255, 0.65);
+      transform: translate3d(0, -2px, 0);
     }
 
     .dir-info-card-head {
@@ -1843,7 +2075,12 @@
       align-items: center;
       gap: 8px;
       flex-shrink: 0;
-      transition: transform 0.15s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        transform 0.22s var(--orbis-spring),
+        border-color 0.24s var(--orbis-ease-out),
+        box-shadow 0.26s var(--orbis-ease-out),
+        background 0.24s var(--orbis-ease-out);
     }
 
     .dir-open-original-btn:hover,
@@ -1851,7 +2088,7 @@
       background: linear-gradient(180deg, rgba(58, 145, 255, 0.85) 0%, rgba(20, 78, 185, 0.95) 100%);
       border-color: #ffffff;
       box-shadow: 0 0 16px rgba(255, 255, 255, 0.65), 0 0 30px rgba(80, 180, 255, 0.55);
-      transform: translate3d(0, -1px, 0);
+      transform: translate3d(0, -2px, 0);
     }
 
     @media (max-width: 1100px) {
@@ -1866,13 +2103,14 @@
       }
     }
 
-   /* ================= WIDOK E: APLIKACJA PLAN NAUCZYCIELI (GODZINY I SALE) ================= */
+    /* ================= WIDOK E: APLIKACJA PLAN NAUCZYCIELI (GODZINY I SALE) ================= */
     .zsa-teachers-view {
       display: none;
       flex-direction: column;
       gap: 12px;
       height: 100%;
       overflow: hidden;
+      animation: orbisSubViewIn 0.42s var(--orbis-ease-quint) both;
     }
 
     .tch-search-input {
@@ -1884,7 +2122,10 @@
       color: #ffffff;
       font-size: 0.84rem;
       outline: none;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      transition:
+        border-color 0.24s var(--orbis-ease-out),
+        box-shadow 0.26s var(--orbis-ease-out),
+        background 0.24s var(--orbis-ease-out);
     }
 
     .tch-search-input::placeholder {
@@ -1905,6 +2146,7 @@
       max-height: calc(100vh - 250px);
       padding: 4px 8px 16px 2px;
       scroll-behavior: smooth;
+      animation: orbisSubViewIn 0.38s var(--orbis-ease-quint) both;
     }
 
     .tch-grid::-webkit-scrollbar {
@@ -1924,7 +2166,12 @@
       display: flex;
       flex-direction: column;
       gap: 5px;
-      transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+      transform: translate3d(0, 0, 0);
+      transition:
+        transform 0.26s var(--orbis-ease-quint),
+        border-color 0.24s var(--orbis-ease-out),
+        box-shadow 0.26s var(--orbis-ease-out),
+        background 0.24s var(--orbis-ease-out);
     }
 
     .tch-card:hover,
@@ -1932,7 +2179,7 @@
       background: linear-gradient(145deg, rgba(24, 68, 148, 0.96) 0%, rgba(10, 32, 78, 0.98) 100%);
       border-color: #ffffff;
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 28px rgba(80, 180, 255, 0.45);
-      transform: translate3d(0, -2px, 0);
+      transform: translate3d(0, -3px, 0) scale(1.012);
     }
 
     .tch-card-top {
@@ -2035,6 +2282,7 @@
       border-radius: 3px;
       background: rgba(20, 58, 128, 0.55);
       border-left: 3px solid #66beff;
+      transition: background 0.2s var(--orbis-ease-out);
     }
 
     .tch-slot-item:last-child {
@@ -2123,4 +2371,106 @@
       color: rgba(190, 220, 255, 0.85);
       font-weight: 600;
       white-space: nowrap;
+    }
+
+    /* ================= AKCELERACJA GPU I WSPARCIE DOTYKOWE DLA ELEMENTÓW PS4 ================= */
+    canvas,
+    .main-ribbon-layer,
+    .folder-ribbon-layer,
+    .ribbon-track,
+    .ps4-tile,
+    .ps4-tile-inner,
+    .ps4-game-submenu,
+    .submenu-left-col,
+    .submenu-right-col,
+    .zsa-news-card,
+    .tt-school-card,
+    .tt-class-card,
+    .dir-link-card,
+    .tch-card {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .ps4-tile,
+    .submenu-start-row,
+    .zsa-news-card,
+    .zsa-refresh-btn,
+    .tt-school-card,
+    .tt-class-card,
+    .tt-back-step-btn,
+    .dir-link-card,
+    .dir-open-original-btn,
+    .tch-card,
+    .touch-btn,
+    button,
+    a {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+
+    /* ================= WIDOK F: APLIKACJA DOKUMENTACJA (CZYTNIK DOCX / PDF) ================= */
+    .zsa-docs-view {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+      overflow: hidden;
+      animation: orbisSubViewIn 0.42s var(--orbis-ease-quint) both;
+    }
+
+    .doc-reader-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .doc-match-counter {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #7ec8ff;
+      background: rgba(58, 166, 255, 0.18);
+      border: 1px solid rgba(126, 200, 255, 0.45);
+      padding: 2px 9px;
+      border-radius: 3px;
+    }
+
+    .doc-sections-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .doc-section-card {
+      background: rgba(7, 20, 48, 0.9);
+      border: 1px solid rgba(102, 190, 255, 0.32);
+      border-left: 4px solid #3aa6ff;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.22s var(--orbis-ease-out), background 0.22s var(--orbis-ease-out);
+    }
+
+    .doc-section-card.has-match {
+      border-color: var(--ps4-plus-gold);
+      background: rgba(14, 36, 82, 0.94);
+    }
+
+    .doc-section-body {
+      font-size: 0.92rem;
+      line-height: 1.62;
+      color: rgba(232, 243, 255, 0.94);
+      white-space: pre-line;
+    }
+
+    mark.doc-hl {
+      background: var(--ps4-plus-gold);
+      color: #04122c;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 2px;
     }

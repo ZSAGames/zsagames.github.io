@@ -2,7 +2,7 @@
        0. USTAWIENIA OTWIERANIA APLIKACJI (_blank vs _self), SLEEP DELAY I AUDIO
        ============================================================================ */
     const OPEN_APPS_IN_NEW_TAB = true;
-    const SLEEP_BEFORE_LAUNCH_DELAY_MS = 200; // Zmniejszony delay po wejściu w Sleep Mode przed otwarciem karty
+    const SLEEP_BEFORE_LAUNCH_DELAY_MS = 300; // Zmniejszony delay po wejściu w Sleep Mode przed otwarciem karty
     const NEWS_IMAGE_DWELL_MS = 380;          // Czas zatrzymania się na wpisie ZSA (w ms), po którym płynnie rozwija się zdjęcie
 
     const IS_LOW_END_PC = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
@@ -61,7 +61,7 @@
         subtitle: "PROJEKT #2 • ZSAGAMES",
         url: "https://zsagames.github.io/velvet",
         cover: "VPCover.png",
-        background: "VPBackground.png",
+        background: "VPBackground.mp4",
         music: "VPTheme.mp3",
         fallbackBg: "linear-gradient(135deg, #21c438, #115c26, #1c0436)",
         author: "ZSAGames — ZSA Łomża",
@@ -101,17 +101,11 @@
         author: "Zespół Szkół Akademickich w Łomży",
         platform: "Portal Informacyjny ZSA (zsa.mans.edu.pl/2026/)",
         description: "Najnowsze wiadomości i wydarzenia z życia Zespołu Szkół Akademickich w Łomży pobierane na bieżąco z archiwum 2026.",
-        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3">
-                <path d="M14 22h36l-3 32H17L14 22z" fill="rgba(255,255,255,0.12)"/>
-                <path d="M23 22v-5a9 9 0 0 1 18 0v5"/>
+        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M32 11c12.7 0 23 8.1 23 18s-10.3 18-23 18c-3.4 0-6.7-.6-9.6-1.7L12 52l2.8-9.8C11.2 38.9 9 33.7 9 29c0-9.9 10.3-18 23-18z" fill="rgba(255,255,255,0.14)"/>
+                <circle cx="32" cy="22" r="2.2" fill="#ffffff" stroke="none"/>
+                <line x1="32" y1="28" x2="32" y2="37" stroke-width="3.5"/>
               </svg>`
-      },
-      {
-        id: "folder-games",
-        type: "folder",
-        title: "Gry",
-        subtitle: "KOLEKCJA GIER ZSAGAMES",
-        items: CUSTOM_GAMES_DATA
       },
       {
         id: "timetable-app",
@@ -162,6 +156,13 @@
               </svg>`
       },
       {
+        id: "folder-games",
+        type: "folder",
+        title: "Gry",
+        subtitle: "KOLEKCJA GIER ZSAGAMES",
+        items: CUSTOM_GAMES_DATA
+      },
+      {
         id: "directions-app",
         type: "system",
         isDirections: true,
@@ -179,6 +180,28 @@
                 <path d="M32 12L8 24l24 12 24-12-24-12z" fill="rgba(255,255,255,0.14)"/>
                 <path d="M16 30v14c0 4 7 8 16 8s16-4 16-8V30"/>
                 <line x1="56" y1="24" x2="56" y2="44"/>
+              </svg>`
+      },
+      {
+        id: "docs-app",
+        type: "system",
+        isDocs: true,
+        title: "Dokumentacja",
+        subtitle: "STATUTY, REGULAMINY I PROGRAMY (DOCX / PDF)",
+        url: "REGULMIN-KLAS-MUNDUROWYCH-IX.2024-akt.pdf",
+        cover: "ZSACover.png",
+        background: "ZSABackground.png",
+        music: "",
+        fallbackBg: "linear-gradient(135deg, #124d88, #041733)",
+        author: "Zespół Szkół Akademickich MANS w Łomży",
+        platform: "Czytnik Dokumentów PS4 (Wyszukiwarka + Scroll)",
+        description: "Oficjalna dokumentacja ZSA w Łomży: Statuty Technikum (AT) i Liceum (ALO), Regulamin Klas Mundurowych, Regulamin Wycieczek oraz Program Wychowawczo-Profilaktyczny.",
+        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3">
+                <path d="M16 10h22l12 12v32a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V12a2 2 0 0 1 2-2z" fill="rgba(255,255,255,0.14)"/>
+                <polyline points="38 10 38 22 50 22"/>
+                <line x1="22" y1="30" x2="42" y2="30"/>
+                <line x1="22" y1="38" x2="42" y2="38"/>
+                <line x1="22" y1="46" x2="34" y2="46"/>
               </svg>`
       },
       {
@@ -3591,6 +3614,409 @@ const TEACHERS_PDF_DB = [
       });
     }
 
+    /* ============================================================================
+       7D. APLIKACJA "DOKUMENTACJA" (CZYTNIK DOCX / PDF + WYSZUKIWARKA SŁÓW)
+       ============================================================================ */
+    const DOCS_LIBRARY_DB = [
+      {
+        id: "statut-at",
+        category: "STATUTY",
+        format: "DOCX",
+        file: "STATUT_ATMANS_W_LOMZY_v22025.docx",
+        badge: "DOCX • STATUT TECHNIKUM (AT)",
+        title: "Statut Akademickiego Technikum MANS w Łomży",
+        preview: "Przepisy ogólne, zawody technikum, organy szkoły, prawa i obowiązki ucznia, WZO, wagi ocen i punktacja zachowania.",
+        lead: "Tekst jednolity zatwierdzony Uchwałą Rady Pedagogicznej ZSA MANS w Łomży z dnia 28.08.2024 r. (obowiązujący od 01.09.2024 r.). Siedziba: ul. Studencka 19, 18-400 Łomża.",
+        sections: [
+          {
+            code: "Rozdział I–II (§1–§3)",
+            title: "Przepisy ogólne, nazwa szkoły i zawody Technikum",
+            text: "• Organem prowadzącym Akademickie Technikum MANS w Łomży (ul. Studencka 19) jest Międzynarodowa Akademia Nauk Stosowanych w Łomży.\n• Nadzór pedagogiczny sprawuje Podlaski Kurator Oświaty.\n• Zawody 5-letniego technikum na podbudowie szkoły podstawowej: Technik informatyk (351203), Technik logistyk (333107), Technik mechatronik (311410), Technik programista (351406)."
+          },
+          {
+            code: "Rozdział III–IV (§4–§15)",
+            title: "Cele i zadania szkoły oraz Organy Szkoły",
+            text: "• Organy szkoły: Dyrektor szkoły, Rada Pedagogiczna, Rada Rodziców, Samorząd Uczniowski.\n• Stanowiska kierownicze (§14): Dyrektor szkoły, Wicedyrektor szkoły, Koordynator kształcenia mundurowego, Koordynator kształcenia praktycznego.\n• Zebrania rodziców organizowane są nie rzadziej niż 2 razy w roku szkolnym. Uchwały Rady Pedagogicznej zapadają większością głosów w obecności co najmniej połowy/2/3 członków."
+          },
+          {
+            code: "Rozdział V–VI (§16–§32b)",
+            title: "Organizacja pracy szkoły, e-dziennik Librus i nauka zdalna (MS Teams)",
+            text: "• Godzina lekcyjna trwa 45 minut, zajęcia rozpoczynają się o godzinie 8:00. Optymalna liczebność oddziału: 20–35 uczniów.\n• Kształcenie praktyczne realizowane jest przez zajęcia praktyczne i praktyki zawodowe śródroczne.\n• Platformą komunikacji i wymiany danych jest dziennik elektroniczny Librus, Office 365 oraz aplikacja MS Teams (ćwiczenia online do 30 min, zakaz nagrywania lekcji i robienia zrzutów ekranu z wizerunkiem)."
+          },
+          {
+            code: "Rozdział VII–VIII (§33–§39)",
+            title: "Zasady rekrutacji, Prawa i Obowiązki Ucznia oraz Nagrody i Kary",
+            text: "• Obowiązki ucznia (§37): systematyczny udział w zajęciach, wyłączanie telefonu podczas lekcji i w bibliotece, usprawiedliwianie nieobecności w terminie do 14 dni (przez Librus, pisemnie lub telefonicznie), strój galowy biało-granatowy lub mundur w dni mundurowe, całkowity zakaz palenia tytoniu, e-papierosów, alkoholu i środków odurzających.\n• Kary statutowe (§39): upomnienie wychowawcy (-15 pkt), nagana wychowawcy (-20 pkt), nagana wychowawcy z wpisem do akt (-25 pkt), upomnienie dyrektora (-30 pkt), nagana dyrektora (-35 pkt), nagana Rady Pedagogicznej (-40 pkt), nagana z ostrzeżeniem Rady Pedagogicznej (-45 pkt), przeniesienie lub skreślenie z listy uczniów."
+          },
+          {
+            code: "Rozdział IX (§40–§48)",
+            title: "Wewnątrzszkolne Zasady Oceniania (WZO) — Progi procentowe i Wagi ocen",
+            text: "• Skala ocen i progi procentowe (§44): 100–99% Celujący (6), 98–89% Bardzo dobry (5), 88–71% Dobry (4), 70–51% Dostateczny (3), 50–29% Dopuszczający (2), 28–0% Niedostateczny (1). Znak '+' podnosi ocenę o 0,50, a '-' obniża o 0,20.\n• Wagi ocen: Sprawdzian dyrektorski (6), Sprawdzian (6), Kartkówka (3), Odpowiedź ustna (3), Test online (2), Aktywność (1), Praca domowa (1).\n• Zasady sprawdzianów (§43): zapowiadane min. 14 dni wcześniej (maks. 3 w tygodniu, 1 dziennie), sprawdzane w ciągu 14 dni (kartkówki 7 dni). Nieprzygotowanie ('np.'): 1 raz przy 1 godz./tyg. lub 2 razy przy 2+ godz./tyg. Do 15 września klasom pierwszym nie stawia się ocen niedostatecznych.\n• Poprawa sprawdzianu przysługuje raz w ciągu 2 tygodni. Warunek podwyższenia oceny rocznej (§46): min. 80% frekwencji i brak godzin nieusprawiedliwionych."
+          },
+          {
+            code: "Rozdział IX–X (§49–§69)",
+            title: "Punktowy System Oceniania Zachowania i Postanowienia Końcowe",
+            text: "• Wyjściowa liczba punktów zachowania (§59): +35 pkt (ocena dobra).\n• Skala półroczna i roczna: Wzorowe (+100 pkt i więcej), Bardzo dobre (61–99 pkt), Dobre (15–60 pkt), Poprawne (-25 do +14 pkt), Nieodpowiednie (-249 do -26 pkt), Naganne (poniżej -250 pkt lub automatycznie powyżej 40 godz. nieusprawiedliwionych w półroczu).\n• Punkty dodatnie: praca na rzecz klasy (1–5 pkt), życie szkoły (5 pkt), samorząd uczniowski (10 pkt), organizacja imprez (10–15 pkt), konkursy/olimpiady/zawody/sztandar/wolontariat (10 pkt), 100% frekwencji (10 pkt za każdy miesiąc).\n• Punkty ujemne: godzina nieusprawiedliwiona (-5 pkt), spóźnienie (-2 pkt), jazda windą (-5 pkt), brak stroju galowego/munduru (-5 pkt), telefon/jedzenie na lekcji (-5 pkt), palenie papierosów (-10 pkt), poruszanie się pojazdami między lekcjami (-10 pkt), oszustwo/ściąganie (-10 pkt), wandalizm (-20 pkt)."
+          }
+        ]
+      },
+      {
+        id: "statut-alo",
+        category: "STATUTY",
+        format: "DOCX",
+        file: "STATUT_ALOMANS_W_LOMZY_v22025-1.docx",
+        badge: "DOCX • STATUT LICEUM (ALO)",
+        title: "Statut Akademickiego Liceum Ogólnokształcącego MANS w Łomży",
+        preview: "Organizacja 4-letniego Liceum (ALO), organy szkoły, rekrutacja, prawa i obowiązki ucznia, WZO i ocenianie zachowania.",
+        lead: "Tekst jednolity zatwierdzony Uchwałą Rady Pedagogicznej Zespołu Szkół Akademickich MANS w Łomży z dnia 28.08.2024 r. obowiązujący od dnia 01.09.2024 r.",
+        sections: [
+          {
+            code: "Rozdział I–IV (§1–§15)",
+            title: "Postanowienia ogólne, Organy Szkoły i Współpraca z Rodzicami",
+            text: "• Siedziba szkoły: ul. Studencka 19, 18-400 Łomża. Organ prowadzący: Międzynarodowa Akademia Nauk Stosowanych w Łomży. Nadzór pedagogiczny: Podlaski Kurator Oświaty.\n• Organy szkoły: Dyrektor, Rada Pedagogiczna, Rada Rodziców, Samorząd Uczniowski (w tym Rada Wolontariatu).\n• Stanowiska kierownicze: Dyrektor, Wicedyrektor, Koordynator kształcenia mundurowego, Koordynator kształcenia praktycznego."
+          },
+          {
+            code: "Rozdział V–VIII (§16–§39)",
+            title: "Organizacja zajęć, Pomoc Psychologiczno-Pedagogiczna oraz Prawa i Obowiązki Ucznia",
+            text: "• Lekcje trwają 45 minut i zaczynają się o 8:00. Odbywają się w oddziałach liczących optymalnie 20–35 uczniów.\n• Pomoc psychologiczno-pedagogiczna (§32a) jest dobrowolna i nieodpłatna (konsultacje z pedagogiem, psychologiem, współpraca z Poradnią Psychologiczno-Pedagogiczną w Łomży).\n• Usprawiedliwianie nieobecności (§38): do 14 dni od ustania nieobecności przez e-dziennik Librus, pisemnie lub telefonicznie.\n• Obowiązuje zakaz używania telefonów na lekcji, zakaz używek oraz obowiązek noszenia stroju galowego na uroczystościach i munduru w dni mundurowe."
+          },
+          {
+            code: "Rozdział IX–X (§40–§69)",
+            title: "Wewnątrzszkolne Zasady Oceniania (WZO), Egzaminy i Zachowanie",
+            text: "• Obowiązują jednolite progi procentowe ocen (Celujący 99–100%, Bardzo dobry 89–98%, Dobry 71–88%, Dostateczny 51–70%, Dopuszczający 29–50%, Niedostateczny 0–28%) oraz wagi: Sprawdzian (6), Kartkówka/Odpowiedź (3), Test online (2), Aktywność/Praca domowa (1).\n• Egzamin klasyfikacyjny (§47) zdaje uczeń nieklasyfikowany z powodu ponad 50% nieobecności (część pisemna 60 min + ustna).\n• Egzamin poprawkowy (§48) przysługuje przy 1 lub 2 ocenach niedostatecznych rocznych (w ostatnim tygodniu ferii letnich; pisemny 60 min + ustny 15 min przygotowania i 20 min odpowiedzi).\n• Punktacja zachowania (§59): kapitał startowy +35 pkt (dobre), wzorowe od +100 pkt, bardzo dobre 61–99 pkt, poprawne -25 do +14 pkt, nieodpowiednie -249 do -26 pkt, naganne poniżej -250 pkt lub powyżej 40 godz. nieusprawiedliwionych."
+          }
+        ]
+      },
+      {
+        id: "program-wych-prof",
+        category: "STATUTY",
+        format: "PDF",
+        file: "Program-Wych-Prof-2025-2026.pdf",
+        badge: "PDF • ROK SZKOLNY 2025/2026 (15 STRON)",
+        title: "Szkolny Program Wychowawczo-Profilaktyczny ZSA MANS",
+        preview: "Diagnoza środowiska, higiena cyfrowa, zdrowie psychiczne, sylwetka absolwenta i roczny harmonogram działań (IX–VI).",
+        lead: "Uchwalony przez Radę Pedagogiczną w porozumieniu z Radą Rodziców ZSA w Łomży dnia 10 września 2025 r. na rok szkolny 2025/2026.",
+        sections: [
+          {
+            code: "Rozdział 1–5 (str. 3–7)",
+            title: "Podstawa prawna, Diagnoza środowiska, Misja Szkoły i Sylwetka Absolwenta",
+            text: "• Główne obszary wynikające z diagnozy szkolnej:\n1) Wspieranie zdrowia psychicznego uczniów — odporność psychiczna, radzenie sobie ze stresem.\n2) Kształtowanie higieny cyfrowej — bezpieczne korzystanie z sieci, przeciwdziałanie fonoholizmowi i cyberprzemocy, analiza fake newsów.\n3) Rozwijanie kompetencji społecznych i obywatelskich — komunikacja, mediacje, wolontariat.\n4) Promocja zdrowego stylu życia — odżywianie, aktywność ruchowa, profilaktyka uzależnień (alkohol, tytoń, dopalacze).\n5) Kształtowanie postaw ekologicznych.\n• Sylwetka absolwenta ZSA MANS: świadomy tożsamości narodowej, odpowiedzialny, empatyczny, dbający o zdrowie, racjonalnie korzystający z technologii IT."
+          },
+          {
+            code: "Rozdział 6–8 (str. 7–11)",
+            title: "Obszary profilaktyczne i Zadania Organów Szkoły",
+            text: "• Edukacja prozdrowotna: warsztaty nt. stresu, relaksacji, obchody Dnia Zdrowia Psychicznego.\n• Higiena cyfrowa: warsztaty z ekspertami IT, Dzień Bezpiecznego Internetu, walka z hejtem i manipulacją.\n• Kompetencje społeczne: Trening Umiejętności Społecznych (TUS), zajęcia integracyjne klas I, mediacje rówieśnicze.\n• Bezpieczeństwo fizyczne: próbne ewakuacje, szkolenia BHP, warsztaty pierwszej pomocy i bezpieczeństwa ruchu drogowego (m.in. z udziałem WORD Łomża)."
+          },
+          {
+            code: "Rozdział 9–10 (str. 12–15)",
+            title: "Roczny plan działań (Wrzesień – Czerwiec) i Ewaluacja",
+            text: "• Wrzesień: diagnoza potrzeb (ankiety), zajęcia adaptacyjne klas I, Akcja Sprzątania Świata.\n• Październik–Listopad: rozpoznawanie kryzysów psychicznych, wolontariat, Święto Niepodległości, warsztaty antyprzemocowe.\n• Grudzień–Styczeń: tydzień zdrowego trybu życia, radzenie sobie ze stresem maturalnym, kiermasz charytatywny, Góra Grosza, ewaluacja półroczna.\n• Luty–Marzec: Dzień Bezpiecznego Internetu, tydzień profilaktyki uzależnień (papierosy, alkohol, fonoholizm), Dzień Osób z Autyzmem.\n• Kwiecień–Czerwiec: Światowy Dzień Zdrowia, Dzień Ziemi (22 IV), tydzień obywatelski, Dni Samorządności, Bezpieczne Wakacje i ankiety ewaluacyjne."
+          }
+        ]
+      },
+      {
+        id: "regulamin-mundurowy",
+        category: "REGULAMINY",
+        format: "PDF",
+        file: "REGULMIN-KLAS-MUNDUROWYCH-IX.2024-akt.pdf",
+        badge: "PDF • REGULAMIN MUNDUROWY (11 STRON)",
+        title: "Regulamin Klas o Profilu Mundurowym ZSA MANS",
+        preview: "Mundur polowy wz. 2010, beret, naszywki ZSA, zasady wyglądu, oddawanie honorów, hierarchia i kary dyscyplinarne.",
+        lead: "Opracował Zespół Mundurowy ZSA MANS w Łomży wraz z Samorządem Uczniowskim (wprowadzony 01.09.2024 r. przez Dyrektor mgr Barbarę Aleksandrę Turek).",
+        sections: [
+          {
+            code: "Postanowienia ogólne & Pkt 1–3 (str. 1–4)",
+            title: "Status klasy mundurowej, stopień „Kadet” i skład umundurowania wzór 2010",
+            text: "• Dla celów szkoleniowych nauczyciele i instruktorzy mogą używać słowa „Kadet” przed nazwiskiem ucznia oraz nazw „drużyna” lub „pluton” podczas musztry, obozów obronnych i uroczystości.\n• Mundur noszony przez uczniów ZSA MANS to mundur polowy wojskowy wzór 2010 z barwami narodowymi.\n• Skład umundurowania: zielony beret z godłem Orła Białego RP, bluza polowa, spodnie polowe, sznurowane trzewiki wojskowe (brązowe lub czarne), koszulka T-shirt czarna lub zielona (khaki) wkładana do spodni."
+          },
+          {
+            code: "Pkt 4a–4e (str. 5–6)",
+            title: "Zasady noszenia munduru, naszywki na rzep i okres letni / zimowy",
+            text: "• W drodze do i ze szkoły obowiązuje pełne umundurowanie (nogawki wpuszczone w trzewiki, sznurowadła schowane, zielony beret). W dni chłodne dopuszcza się polar, czapkę oliwkową/czarną, komin i czarne rękawiczki.\n• Obowiązkowe oznaczenia na rzep: identyfikator z nazwiskiem po prawej stronie bluzy, flagi biało-czerwone na obu rękawach, na lewym rękawie emblemat „ZESPÓŁ SZKÓŁ AKADEMICKICH KLASA MUNDUROWA”, z przodu szary emblemat „ZSA ŁOMŻA” lub „ZSA MANS W ŁOMŻY”.\n• Plecak w kolorze czarnym lub ciemnozielonym bez znaków reklamowych. W okresie letnim na terenie szkoły można chodzić bez bluzy polowej (w koszulce szkolnej), lecz bluzę trzeba mieć przy sobie."
+          },
+          {
+            code: "Pkt 4f–4i (str. 6–7)",
+            title: "Uczesanie, paznokcie, biżuteria i zakazy w umundurowaniu",
+            text: "• Długie włosy muszą być schludnie upięte (kucyk, warkocz, kok, gumka czarna lub w kolorze włosów) bez ozdobnych klamr.\n• Paznokcie przycięte (maks. 2 mm poza opuszki palców), w kolorach naturalnych/cielistych (jasny róż, beż). Makijaż delikatny.\n• Zakaz łączenia elementów cywilnych z mundurem. Dopuszcza się po jednym drobnym kolczyku w płatku ucha; kolczyki w obrębie twarzy (nos, warga, brew) należy zdjąć. Na zajęciach obronnych zdejmuje się wszelką biżuterię, zegarki i opróżnia kieszenie.\n• Zabrania się trzymania rąk w kieszeniach, wypychania kieszeni oraz chodzenia w mundurze i żucia gumy."
+          },
+          {
+            code: "Pkt 5–9 (str. 8–11)",
+            title: "Zwolnienia z munduru, Oddawanie honorów, Brak hierarchii i Kary",
+            text: "• Zwolnienie z noszenia munduru (pkt 5): zalecenie lekarza, kontuzja narządów ruchu (zgłoszona dzień wcześniej przez Librus koordynatorowi klas mundurowych) lub decyzja Dyrektora.\n• Oddawanie honorów (pkt 6): podczas Hymnu Państwowego, wciągania Flagi na maszt i pocztom sztandarowym (bez nakrycia głowy — postawa zasadnicza i skłon głowy; w berecie — wg Regulaminu musztry).\n• Hierarchia (pkt 7): uczniowie nie posiadają stopni ani relacji podwładny–przełożony bez względu na rocznik; nie mogą wydawać sobie rozkazów ani wyznaczać kar.\n• Naruszenie godności munduru (pkt 8): czasowy zakaz noszenia munduru do 14 dni lekcyjnych (nie zwalnia z munduru na lekcjach Bezpieczeństwa Wewnętrznego). Obowiązuje zakaz odpowiedzialności zbiorowej — każdy przypadek rozpatrywany jest indywidualnie."
+          }
+        ]
+      },
+      {
+        id: "regulamin-wycieczek",
+        category: "REGULAMINY",
+        format: "PDF",
+        file: "regulamin_wycieczek_2022_v2.pdf",
+        badge: "PDF • REGULAMIN WYCIECZEK (14 STRON)",
+        title: "Regulamin Wycieczek Szkolnych i Wyjść Grupowych ZSA",
+        preview: "Rodzaje wycieczek, zadania kierownika i opiekunów, limity uczniów na 1 opiekuna, zasady w autokarze i pociągu, załączniki.",
+        lead: "Regulamin organizowania krajoznawstwa, turystyki i wyjść grupowych w Zespole Szkół Akademickich w Łomży (ul. Studencka 19) wraz z wzorami oświadczeń rodziców i klauzulą RODO.",
+        sections: [
+          {
+            code: "§1–§3 (str. 1–4)",
+            title: "Zasady ogólne, Rodzaje wycieczek oraz Kierownik i Opiekunowie",
+            text: "• Rodzaje wycieczek (§2): 1) przedmiotowe (w ramach lekcji), 2) krajoznawczo-turystyczne, 3) specjalistyczne wycieczki krajoznawczo-turystyczne.\n• Kierownika i opiekunów wyznacza Dyrektor szkoły. Na wycieczce zagranicznej przynajmniej jedna osoba musi znać język obcy kraju docelowego/tranzytowego.\n• Kierownik odpowiada za program, regulamin, apteczkę pierwszej pomocy, transport, wyżywienie, noclegi oraz rozliczenie finansowe wycieczki w terminie 14 dni od jej zakończenia."
+          },
+          {
+            code: "§4 pkt 1–27 (str. 4–7)",
+            title: "Bezpieczeństwo i Maksymalna liczba uczniów na 1 opiekuna",
+            text: "• Limity uczniów na 1 opiekuna (§4 ust. 3):\n  a) na terenie Łomży i okolic (piesze / komunikacja miejska): 1 opiekun na 25 uczniów,\n  b) poza Łomżę środkami transportu (autokar, bus, kolej): 1 opiekun na 15 uczniów,\n  c) na szlakach turystycznych: 1 opiekun na 15 uczniów,\n  d) wycieczki rowerowe: 1 opiekun na 15 uczniów (obowiązkowe kaski rowerowe!),\n  e) wycieczki zagraniczne: 1 opiekun na 10 uczniów.\n• Dokumentację wycieczki składa się do zatwierdzenia Dyrektorowi minimum 7 dni przed wyjazdem (wyjście grupowe zgłasza się co najmniej dzień wcześniej).\n• Zakaz prowadzenia wycieczek podczas burzy, śnieżycy i gołoledzi. Zakaz podawania uczniom lekarstw bez zgody rodziców."
+          },
+          {
+            code: "§4 pkt 28–31 & §5 (str. 7–8)",
+            title: "Przejazdy autokarem, pociągiem, poruszanie się w mieście i Obowiązki Uczestnika",
+            text: "• Autokar: przejście musi być wolne, opiekunowie siedzą przy drzwiach i w środku pojazdu, zakaz spacerowania i siedzenia tyłem, przerwy tylko na wyznaczonych parkingach, liczenie grupy po każdym postoju.\n• Pociąg: zakaz rozdzielania grupy na dwa wagony, zakaz wychylania się przez okna; bilety i legitymacje przechowuje kierownik.\n• Miasto: jeden opiekun prowadzi grupę na czele, drugi zamyka kolumnę w granicach kontaktu wzrokowego.\n• Obowiązki ucznia (§5): punktualność, zgłaszanie choroby lokomocyjnej, zakaz oddalania się bez zgody opiekuna, zakaz palenia, alkoholu i środków odurzających."
+          },
+          {
+            code: "§6–§8 i Załączniki 1–2 (str. 8–14)",
+            title: "Finansowanie, Konsekwencje naruszeń i Załączniki (Zgoda rodziców / RODO)",
+            text: "• Finansowanie (§6): plan finansowy określa koszt ogólny i na jednego uczestnika; uczniowie w trudnej sytuacji mogą wnioskować o dofinansowanie z Rady Rodziców.\n• Uczniowie niebiorący udziału w wycieczce uczestniczą w lekcjach z inną klasą wskazaną przez dyrekcję (§7 ust. 5).\n• W przypadku rażącego naruszenia regulaminu (np. alkohol/używki) zawiadamia się rodziców i Dyrektora, a rodzice mają obowiązek natychmiastowego odebrania dziecka na własny koszt. Za szkody materialne odpowiadają rodzice.\n• Załącznik nr 1: 19-punktowy Regulamin Wycieczki. Załącznik nr 2: Wzór zgody rodziców na udział i leczenie oraz klauzula RODO ZSA w Łomży."
+          }
+        ]
+      }
+    ];
+
+    let docStep = "LIST";          // "LIST" | "READER"
+    let docFocusArea = "MAIN";     // "MAIN" | "START_BTN" | "SEARCH_INPUT" | "BACK_BTN" | "OPEN_FILE_BTN"
+    let docFocusIdx = 0;
+    let docSelectedId = "statut-at";
+    let docSearchQuery = "";
+
+    const docListStepEl = document.getElementById("doc-list-step");
+    const docReaderStepEl = document.getElementById("doc-reader-step");
+    const docBreadcrumbEl = document.getElementById("doc-breadcrumb");
+    const docBackStepBtnEl = document.getElementById("doc-back-step-btn");
+    const docSearchInputEl = document.getElementById("doc-search-input");
+    const docSectionsListEl = document.getElementById("doc-sections-list");
+    const docOpenFileBtnEl = document.getElementById("doc-open-file-btn");
+    const docMatchCounterEl = document.getElementById("doc-match-counter");
+
+    function escapeHtmlDoc(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function highlightDocText(text, query) {
+      const safe = escapeHtmlDoc(text);
+      const q = (query || "").trim();
+      if (!q) return safe;
+      const escapedQ = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const rx = new RegExp(`(${escapedQ})`, "gi");
+      return safe.replace(rx, `<mark class="doc-hl">$1</mark>`);
+    }
+
+    function countDocMatches(doc, query) {
+      const q = (query || "").trim().toLowerCase();
+      if (!q) return 0;
+      const escapedQ = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const rx = new RegExp(escapedQ, "gi");
+      let count = 0;
+      doc.sections.forEach((s) => {
+        const hay = `${s.code} ${s.title} ${s.text}`;
+        const m = hay.match(rx);
+        if (m) count += m.length;
+      });
+      return count;
+    }
+
+    function syncDocsFocusVisuals() {
+      const startBtnEl = document.getElementById("sub-start-btn");
+      if (startBtnEl) startBtnEl.classList.toggle("focused", docFocusArea === "START_BTN");
+      if (docBackStepBtnEl) docBackStepBtnEl.classList.toggle("pad-focused", docFocusArea === "BACK_BTN");
+      if (docSearchInputEl) docSearchInputEl.classList.toggle("pad-focused", docFocusArea === "SEARCH_INPUT");
+      if (docOpenFileBtnEl) docOpenFileBtnEl.classList.toggle("pad-focused", docFocusArea === "OPEN_FILE_BTN");
+
+      if (docListStepEl) {
+        const cards = Array.from(docListStepEl.querySelectorAll(".dir-link-card"));
+        cards.forEach((card, idx) => {
+          const active = (docStep === "LIST" && docFocusArea === "MAIN" && idx === docFocusIdx);
+          card.classList.toggle("pad-focused", active);
+          if (active) {
+            card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        });
+      }
+    }
+
+    function openDocReader(docId) {
+      const doc = DOCS_LIBRARY_DB.find((d) => d.id === docId) || DOCS_LIBRARY_DB[0];
+      if (!doc) return;
+      docSelectedId = doc.id;
+      docStep = "READER";
+      docFocusArea = "MAIN";
+      playCustomWav("select");
+      renderDocsUI();
+      if (docReaderStepEl) docReaderStepEl.scrollTop = 0;
+    }
+
+    function closeDocReader() {
+      if (docStep !== "READER") return false;
+      docStep = "LIST";
+      docFocusArea = "MAIN";
+      playCustomWav("back");
+      renderDocsUI();
+      return true;
+    }
+
+    function renderDocsUI() {
+      if (!docListStepEl || !docReaderStepEl) return;
+      const q = docSearchQuery.trim();
+
+      if (docStep === "LIST") {
+        docListStepEl.style.display = "grid";
+        docReaderStepEl.style.display = "none";
+        docBackStepBtnEl.style.display = "none";
+        docBreadcrumbEl.innerHTML = q
+          ? `Wyniki wyszukiwania frazy „<strong>${escapeHtmlDoc(q)}</strong>” we wszystkich dokumentach:`
+          : `Wybierz dokument do czytania w menu: <strong>Statuty i Programy</strong> lub <strong>Regulaminy Szkolne</strong>`;
+
+        const colStatuty = DOCS_LIBRARY_DB.filter((d) => d.category === "STATUTY");
+        const colRegulaminy = DOCS_LIBRARY_DB.filter((d) => d.category === "REGULAMINY");
+        const orderedDocs = [...colStatuty, ...colRegulaminy];
+
+        if (docFocusIdx >= orderedDocs.length) docFocusIdx = 0;
+
+        const renderCard = (doc) => {
+          const globalIdx = orderedDocs.indexOf(doc);
+          const matches = countDocMatches(doc, q);
+          const matchBadge = q
+            ? (matches > 0
+                ? `<span style="color:#f5c418;font-weight:700;">• Знаleziono trafień: ${matches}</span>`
+                : `<span style="color:rgba(255,255,255,0.45);">• Brak trafień (0)</span>`)
+            : "";
+
+          return `
+            <div class="dir-link-card" data-doc-id="${doc.id}" data-doc-idx="${globalIdx}">
+              <span class="dir-link-tag">${doc.badge} ${matchBadge}</span>
+              <span class="dir-link-name">${highlightDocText(doc.title, q)}</span>
+              <span class="dir-link-desc-preview">${highlightDocText(doc.preview, q)}</span>
+              <span class="dir-link-url">✕ Otwórz czytnik (${doc.sections.length} sekcji) • Plik: ${doc.file}</span>
+            </div>
+          `;
+        };
+
+        docListStepEl.innerHTML = `
+          <div class="dir-section-box">
+            <div class="dir-section-title">Statuty i Programy</div>
+            ${colStatuty.map(renderCard).join("")}
+          </div>
+          <div class="dir-section-box">
+            <div class="dir-section-title">Regulaminy Szkolne</div>
+            ${colRegulaminy.map(renderCard).join("")}
+          </div>
+        `;
+
+        Array.from(docListStepEl.querySelectorAll(".dir-link-card")).forEach((card) => {
+          const idx = Number(card.getAttribute("data-doc-idx")) || 0;
+          const id = card.getAttribute("data-doc-id");
+          card.addEventListener("mouseenter", () => {
+            docFocusArea = "MAIN";
+            docFocusIdx = idx;
+            syncDocsFocusVisuals();
+          });
+          card.addEventListener("click", () => {
+            docFocusIdx = idx;
+            openDocReader(id);
+          });
+        });
+      } else {
+        docListStepEl.style.display = "none";
+        docReaderStepEl.style.display = "flex";
+        docBackStepBtnEl.style.display = "inline-flex";
+
+        const doc = DOCS_LIBRARY_DB.find((d) => d.id === docSelectedId) || DOCS_LIBRARY_DB[0];
+        const totalMatches = countDocMatches(doc, q);
+
+        docBreadcrumbEl.innerHTML = `Czytnik: <strong>${doc.title}</strong> (▲ ▼ Przewijaj tekst lub szukaj słowa powyżej)`;
+        document.getElementById("doc-reader-badge").textContent = `${doc.badge} • ${doc.file}`;
+        document.getElementById("doc-reader-title").innerHTML = highlightDocText(doc.title, q);
+        document.getElementById("doc-reader-lead").innerHTML = highlightDocText(doc.lead, q);
+        document.getElementById("doc-reader-file-text").textContent = doc.file;
+
+        if (docMatchCounterEl) {
+          docMatchCounterEl.textContent = q
+            ? `Trafienia dla „${q}”: ${totalMatches}`
+            : `Rozdziałów: ${doc.sections.length}`;
+        }
+
+        const filteredSections = q
+          ? doc.sections.filter((s) => `${s.code} ${s.title} ${s.text}`.toLowerCase().includes(q.toLowerCase()))
+          : doc.sections;
+
+        if (filteredSections.length === 0) {
+          docSectionsListEl.innerHTML = `
+            <div class="doc-section-card">
+              <div class="dir-info-card-title">Brak wyników dla frazy „${escapeHtmlDoc(q)}” w tym dokumencie</div>
+              <p class="doc-section-body">Wyczyść pole wyszukiwania powyżej lub wróć do listy dokumentów, aby sprawdzić pozostałe pliki.</p>
+            </div>
+          `;
+        } else {
+          docSectionsListEl.innerHTML = filteredSections.map((s) => `
+            <div class="doc-section-card ${q ? "has-match" : ""}">
+              <div class="dir-info-card-head">
+                <span class="dir-info-card-title">${highlightDocText(s.title, q)}</span>
+                <span class="dir-info-card-code">${highlightDocText(s.code, q)}</span>
+              </div>
+              <div class="doc-section-body">${highlightDocText(s.text, q)}</div>
+            </div>
+          `).join("");
+        }
+      }
+
+      if (typeof syncInputPromptsUI === "function") syncInputPromptsUI();
+      syncDocsFocusVisuals();
+    }
+
+    if (docSearchInputEl) {
+      docSearchInputEl.addEventListener("input", (e) => {
+        docSearchQuery = e.target.value || "";
+        renderDocsUI();
+      });
+      docSearchInputEl.addEventListener("mouseenter", () => {
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isDocs) {
+          docFocusArea = "SEARCH_INPUT";
+          syncDocsFocusVisuals();
+        }
+      });
+      docSearchInputEl.addEventListener("focus", () => {
+        docFocusArea = "SEARCH_INPUT";
+        syncDocsFocusVisuals();
+      });
+    }
+
+    if (docBackStepBtnEl) {
+      docBackStepBtnEl.addEventListener("mouseenter", () => {
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isDocs) {
+          docFocusArea = "BACK_BTN";
+          syncDocsFocusVisuals();
+        }
+      });
+      docBackStepBtnEl.addEventListener("click", () => {
+        closeDocReader();
+      });
+    }
+
+    if (docOpenFileBtnEl) {
+      docOpenFileBtnEl.addEventListener("mouseenter", () => {
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isDocs) {
+          docFocusArea = "OPEN_FILE_BTN";
+          syncDocsFocusVisuals();
+        }
+      });
+      docOpenFileBtnEl.addEventListener("click", () => {
+        const doc = DOCS_LIBRARY_DB.find((d) => d.id === docSelectedId) || DOCS_LIBRARY_DB[0];
+        if (doc && doc.file) {
+          launchUrlWithSleepDelay(doc.file, doc.title);
+        }
+      });
+    }
+
     /* Wykrywanie urządzeń mobilnych */
     function detectRealMobile() {
       const uaMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -3600,7 +4026,7 @@ const TEACHERS_PDF_DB = [
     detectRealMobile();
 
     /* ============================================================================
-       8. MASZYNA STANÓW NAWIGACJI PS4
+       8. MASZYNA STANÓW NAWIGACJI PS4 (ZUNIFIKOWANA: KLAWIATURA, MYSZ, DOTYK, PAD)
        ============================================================================ */
     let navLevel = "MAIN";
     let mainIndex = 0;
@@ -3674,7 +4100,7 @@ const TEACHERS_PDF_DB = [
         <div class="tile-side-title">${item.title}</div>
       `;
 
-      tile.addEventListener("click", () => onClick(index, item));
+      tile.addEventListener("click", (e) => onClick(index, item, e));
       return tile;
     }
 
@@ -3682,30 +4108,47 @@ const TEACHERS_PDF_DB = [
       refreshLayoutMetrics();
       mainTrackEl.innerHTML = "";
       MAIN_RIBBON_ITEMS.forEach((item, idx) => {
-        const el = createTileElement(item, idx, (clickedIdx, clickedItem) => {
+        const el = createTileElement(item, idx, (clickedIdx, clickedItem, evt) => {
           if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
           unlockAudioOnInteraction();
+
+          // Kliknięcie przygaszonej wstęgi w Submenu cofa do wstęgi
           if (navLevel === "SUBMENU") {
             navigateUp(true);
             return;
           }
+
+          // Kliknięcie głównej wstęgi podczas otwartego folderu wraca na główną wstęgę
           if (navLevel === "FOLDER") {
             navLevel = "MAIN";
+            mainIndex = clickedIdx;
+            playCustomWav("back");
+            syncUiState();
+            return;
           }
+
+          // Kliknięcie nieaktywnego kafelka — przesuń na niego fokus
           if (mainIndex !== clickedIdx) {
             mainIndex = clickedIdx;
             playCustomWav("move");
             syncUiState();
-          } else if (
+            return;
+          }
+
+          // Kliknięcie już aktywnego kafelka
+          if (
             clickedItem.type === "folder" ||
             clickedItem.isTimetable ||
             clickedItem.isWhatsNew ||
             clickedItem.isDirections ||
-            clickedItem.isTeachers
+            clickedItem.isTeachers ||
+            clickedItem.isDocs
           ) {
             navigateDown();
-          } else {
+          } else if (evt && evt.target.closest(".tile-bottom-bar")) {
             launchActiveItem();
+          } else {
+            navigateDown();
           }
         });
         mainTrackEl.appendChild(el);
@@ -3713,9 +4156,15 @@ const TEACHERS_PDF_DB = [
 
       folderTrackEl.innerHTML = "";
       CUSTOM_GAMES_DATA.forEach((game, gIdx) => {
-        const el = createTileElement({ ...game, type: "game" }, gIdx, (clickedIdx) => {
+        const el = createTileElement({ ...game, type: "game" }, gIdx, (clickedIdx, _clickedItem, evt) => {
           if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
           unlockAudioOnInteraction();
+
+          if (navLevel === "SUBMENU") {
+            navigateUp(true);
+            return;
+          }
+
           if (navLevel === "MAIN") {
             navLevel = "FOLDER";
             folderIndex = clickedIdx;
@@ -3726,8 +4175,10 @@ const TEACHERS_PDF_DB = [
               folderIndex = clickedIdx;
               playCustomWav("move");
               syncUiState();
-            } else {
+            } else if (evt && evt.target.closest(".tile-bottom-bar")) {
               launchActiveItem();
+            } else {
+              navigateDown();
             }
           }
         });
@@ -3757,6 +4208,8 @@ const TEACHERS_PDF_DB = [
       const leftNavLabelEl = document.getElementById("sub-left-nav-label");
       const startBtnEl = document.getElementById("sub-start-btn");
       const startBtnTextEl = document.getElementById("sub-start-btn-text");
+      const zsaDocsViewEl = document.getElementById("zsa-docs-view");
+      if (zsaDocsViewEl) zsaDocsViewEl.style.display = "none";
 
       if (zsaTeachersViewEl) zsaTeachersViewEl.style.display = "none";
 
@@ -3805,6 +4258,18 @@ const TEACHERS_PDF_DB = [
         tchStep = "LIST";
         tchFocusArea = "MAIN";
         renderTeachersUI();
+        } else if (item.isDocs) {
+        gameInfoViewEl.style.display = "none";
+        zsaNewsViewEl.style.display = "none";
+        zsaTimetableViewEl.style.display = "none";
+        zsaDirectionsViewEl.style.display = "none";
+        if (zsaDocsViewEl) zsaDocsViewEl.style.display = "flex";
+        rightLabelEl.textContent = "Statuty, Regulaminy i Programy";
+        leftNavLabelEl.textContent = "Dokumentacja ZSA";
+        startBtnTextEl.textContent = "Pobierz Plik";
+        docStep = "LIST";
+        docFocusArea = "MAIN";
+        renderDocsUI();
       } else {
         gameInfoViewEl.style.display = "flex";
         zsaNewsViewEl.style.display = "none";
@@ -3856,6 +4321,9 @@ const TEACHERS_PDF_DB = [
       } else {
         clearTimeout(newsImageDwellTimer);
         pauseBackdropVideo();
+        if (tchSearchInputEl && document.activeElement === tchSearchInputEl) {
+          tchSearchInputEl.blur();
+        }
       }
       syncBackgroundMusic();
     }
@@ -3867,12 +4335,28 @@ const TEACHERS_PDF_DB = [
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
 
+        if (activeItem?.isDocs) {
+          if (docFocusArea === "BACK_BTN" || docFocusArea === "SEARCH_INPUT") {
+            if (docSearchInputEl) docSearchInputEl.blur();
+            docFocusArea = "START_BTN";
+          } else if (docStep === "LIST" && docFocusArea === "MAIN") {
+            if (docFocusIdx >= 3) docFocusIdx = Math.min(2, docFocusIdx - 3);
+            else docFocusArea = "START_BTN";
+          } else {
+            docFocusArea = "START_BTN";
+          }
+          playCustomWav("move");
+          syncDocsFocusVisuals();
+          return;
+        }
+
         if (activeItem?.isDirections) {
           if (dirStep === "LIST") {
             if (dirFocusIdx >= 2) dirFocusIdx -= 2;
             else dirFocusIdx = -1;
           } else {
-            dirDetailFocus = "START_BTN";
+            if (dirDetailFocus === "BACK_BTN") dirDetailFocus = "OPEN_URL";
+            else dirDetailFocus = "START_BTN";
           }
           playCustomWav("move");
           updateDirectionsFocusUI();
@@ -3896,18 +4380,15 @@ const TEACHERS_PDF_DB = [
             return;
           }
           if (ttStep === "SCHOOL" && ttFocusArea === "MAIN") {
-            if (ttSchoolFocusIdx > 0) {
-              ttSchoolFocusIdx--;
-            } else {
-              ttFocusArea = "PDF_BTN";
-            }
+            if (ttSchoolFocusIdx > 0) ttSchoolFocusIdx--;
+            else ttFocusArea = "PDF_BTN";
             playCustomWav("move");
             syncTimetableFocusVisuals();
           } else if (ttStep === "CLASS" && ttFocusArea === "MAIN") {
             const cards = Array.from(ttClassStepEl.querySelectorAll(".tt-class-card"));
             const curCard = cards[ttClassFocusIdx];
             const prevCard = cards[ttClassFocusIdx - 1];
-            if (prevCard && curCard && Math.abs(prevCard.getBoundingClientRect().top - curCard.getBoundingClientRect().top) < 15) {
+            if (prevCard && curCard && Math.abs(prevCard.getBoundingClientRect().top - curCard.getBoundingClientRect().top) < 18) {
               ttClassFocusIdx--;
             } else {
               ttFocusArea = "PDF_BTN";
@@ -3923,11 +4404,18 @@ const TEACHERS_PDF_DB = [
         }
 
         if (activeItem?.isTeachers) {
+          if (tchFocusArea === "BACK_BTN" || tchFocusArea === "SEARCH_INPUT") {
+            if (tchSearchInputEl) tchSearchInputEl.blur();
+            tchFocusArea = "PDF_BTN";
+            playCustomWav("move");
+            syncTeachersFocusVisuals();
+            return;
+          }
           if (tchStep === "LIST" && tchFocusArea === "MAIN") {
             const cards = Array.from(tchListStepEl.querySelectorAll(".tch-card"));
             const curCard = cards[tchFocusIdx];
             const prevCard = cards[tchFocusIdx - 1];
-            if (prevCard && curCard && Math.abs(prevCard.getBoundingClientRect().top - curCard.getBoundingClientRect().top) < 15) {
+            if (prevCard && curCard && Math.abs(prevCard.getBoundingClientRect().top - curCard.getBoundingClientRect().top) < 18) {
               tchFocusIdx--;
             } else {
               tchFocusArea = "PDF_BTN";
@@ -3961,9 +4449,22 @@ const TEACHERS_PDF_DB = [
     function navigateRight() {
       if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
-
+      
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
+        
+        if (activeItem?.isDocs) {
+          if (docFocusArea === "START_BTN") {
+            docFocusArea = docStep === "READER" ? "OPEN_FILE_BTN" : "MAIN";
+          } else if (docStep === "LIST" && docFocusArea === "MAIN" && docFocusIdx < 3) {
+            docFocusIdx = Math.min(DOCS_LIBRARY_DB.length - 1, docFocusIdx + 3);
+          } else if (docStep === "READER") {
+            docFocusArea = "BACK_BTN";
+          }
+          playCustomWav("move");
+          syncDocsFocusVisuals();
+          return;
+        }
 
         if (activeItem?.isDirections) {
           if (dirStep === "LIST") {
@@ -3971,6 +4472,7 @@ const TEACHERS_PDF_DB = [
             else if (dirFocusIdx < 2) dirFocusIdx += 2;
           } else {
             if (dirDetailFocus === "START_BTN") dirDetailFocus = "OPEN_URL";
+            else if (dirDetailFocus === "OPEN_URL") dirDetailFocus = "BACK_BTN";
           }
           playCustomWav("move");
           updateDirectionsFocusUI();
@@ -4004,6 +4506,10 @@ const TEACHERS_PDF_DB = [
               playCustomWav("move");
               syncTimetableFocusVisuals();
             }
+          } else if (ttStep === "SCHEDULE" && ttFocusArea === "MAIN") {
+            ttFocusArea = "BACK_BTN";
+            playCustomWav("move");
+            syncTimetableFocusVisuals();
           }
           return;
         }
@@ -4022,6 +4528,10 @@ const TEACHERS_PDF_DB = [
               playCustomWav("move");
               syncTeachersFocusVisuals();
             }
+          } else if (tchStep === "SCHEDULE" && tchFocusArea === "MAIN") {
+            tchFocusArea = "BACK_BTN";
+            playCustomWav("move");
+            syncTeachersFocusVisuals();
           }
           return;
         }
@@ -4050,27 +4560,47 @@ const TEACHERS_PDF_DB = [
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
+        
+        if (activeItem?.isDocs) {
+          if (docFocusArea === "SEARCH_INPUT" || docFocusArea === "BACK_BTN") {
+            if (docSearchInputEl) docSearchInputEl.blur();
+            docFocusArea = "MAIN";
+            playCustomWav("move");
+            syncDocsFocusVisuals();
+            return;
+          }
+          if (docStep === "LIST" && docFocusArea === "MAIN") {
+            if (docFocusIdx !== 2 && docFocusIdx < DOCS_LIBRARY_DB.length - 1) {
+              docFocusIdx++;
+              playCustomWav("move");
+              syncDocsFocusVisuals();
+            }
+          } else if (docStep === "READER") {
+            docReaderStepEl.scrollBy({ top: 170, behavior: "smooth" });
+            playCustomWav("move");
+          }
+          return;
+        }
 
         if (activeItem?.isDirections) {
           if (dirStep === "LIST") {
-            if (dirFocusIdx === 0 || dirFocusIdx === 2) {
-              dirFocusIdx++;
-              playCustomWav("move");
-              updateDirectionsFocusUI();
-            }
+            if (dirFocusIdx === -1) dirFocusIdx = 0;
+            else if (dirFocusIdx === 0 || dirFocusIdx === 2) dirFocusIdx++;
+            playCustomWav("move");
+            updateDirectionsFocusUI();
           } else {
             if (dirDetailFocus === "BACK_BTN") {
               dirDetailFocus = "OPEN_URL";
               updateDirectionsFocusUI();
             }
-            dirDetailStepEl.scrollBy({ top: 140, behavior: "smooth" });
+            dirDetailStepEl.scrollBy({ top: 150, behavior: "smooth" });
             playCustomWav("move");
           }
           return;
         }
 
         if (activeItem?.isWhatsNew) {
-          if (whatsNewFocusIndex === -2) {
+          if (whatsNewFocusIndex < 0) {
             whatsNewFocusIndex = 0;
           } else if (whatsNewFocusIndex < zsaNewsArticles.length - 1) {
             whatsNewFocusIndex++;
@@ -4096,13 +4626,22 @@ const TEACHERS_PDF_DB = [
               syncTimetableFocusVisuals();
             }
           } else if (ttStep === "SCHEDULE") {
-            ttScheduleStepEl.scrollBy({ top: 150, behavior: "smooth" });
+            ttFocusArea = "MAIN";
+            syncTimetableFocusVisuals();
+            ttScheduleStepEl.scrollBy({ top: 160, behavior: "smooth" });
             playCustomWav("move");
           }
           return;
         }
 
         if (activeItem?.isTeachers) {
+          if (tchFocusArea === "SEARCH_INPUT" || tchFocusArea === "BACK_BTN") {
+            if (tchSearchInputEl) tchSearchInputEl.blur();
+            tchFocusArea = "MAIN";
+            playCustomWav("move");
+            syncTeachersFocusVisuals();
+            return;
+          }
           if (tchStep === "LIST" && tchFocusArea === "MAIN") {
             const cards = Array.from(tchListStepEl.querySelectorAll(".tch-card"));
             const alignedBelowIdx = findVerticallyAlignedCardIndex(cards, tchFocusIdx, 1);
@@ -4112,7 +4651,9 @@ const TEACHERS_PDF_DB = [
               syncTeachersFocusVisuals();
             }
           } else if (tchStep === "SCHEDULE") {
-            tchScheduleStepEl.scrollBy({ top: 150, behavior: "smooth" });
+            tchFocusArea = "MAIN";
+            syncTeachersFocusVisuals();
+            tchScheduleStepEl.scrollBy({ top: 160, behavior: "smooth" });
             playCustomWav("move");
           }
           return;
@@ -4147,12 +4688,51 @@ const TEACHERS_PDF_DB = [
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
+        
+        if (activeItem?.isDocs) {
+          if (docStep === "READER") {
+            if (isBackButton) {
+              closeDocReader();
+              return;
+            }
+            if (docReaderStepEl.scrollTop > 10) {
+              docReaderStepEl.scrollBy({ top: -170, behavior: "smooth" });
+              playCustomWav("move");
+              return;
+            }
+            closeDocReader();
+            return;
+          } else if (docStep === "LIST" && !isBackButton) {
+            if (docFocusArea === "MAIN" && docFocusIdx !== 0 && docFocusIdx !== 3) {
+              docFocusIdx--;
+              playCustomWav("move");
+              syncDocsFocusVisuals();
+              return;
+            } else if (docFocusArea === "MAIN") {
+              docFocusArea = "SEARCH_INPUT";
+              playCustomWav("move");
+              syncDocsFocusVisuals();
+              return;
+            }
+          }
+        }
 
+        /* Kierunki Kształcenia */
         if (activeItem?.isDirections) {
           if (dirStep === "DETAIL") {
-            if (!isBackButton && dirDetailStepEl.scrollTop > 10) {
-              dirDetailStepEl.scrollBy({ top: -140, behavior: "smooth" });
+            if (isBackButton) {
+              closeDirectionDetail();
+              return;
+            }
+            if (dirDetailStepEl.scrollTop > 10) {
+              dirDetailStepEl.scrollBy({ top: -150, behavior: "smooth" });
               playCustomWav("move");
+              return;
+            }
+            if (dirDetailFocus !== "BACK_BTN") {
+              dirDetailFocus = "BACK_BTN";
+              playCustomWav("move");
+              updateDirectionsFocusUI();
               return;
             }
             closeDirectionDetail();
@@ -4166,7 +4746,7 @@ const TEACHERS_PDF_DB = [
           }
         }
 
-        /* Nawigacja w górę wewnątrz "Co nowego" */
+        /* Co nowego */
         if (activeItem?.isWhatsNew && !isBackButton) {
           if (whatsNewFocusIndex > 0) {
             whatsNewFocusIndex--;
@@ -4181,12 +4761,18 @@ const TEACHERS_PDF_DB = [
           }
         }
 
-        /* Nawigacja w górę / cofanie wewnątrz "Planu Lekcji" */
+        /* Plan Lekcji */
         if (activeItem?.isTimetable) {
           if (ttStep === "SCHEDULE") {
             if (!isBackButton && ttScheduleStepEl.scrollTop > 10) {
-              ttScheduleStepEl.scrollBy({ top: -150, behavior: "smooth" });
+              ttScheduleStepEl.scrollBy({ top: -160, behavior: "smooth" });
               playCustomWav("move");
+              return;
+            }
+            if (!isBackButton && ttFocusArea !== "BACK_BTN") {
+              ttFocusArea = "BACK_BTN";
+              playCustomWav("move");
+              syncTimetableFocusVisuals();
               return;
             }
             ttStep = "CLASS";
@@ -4195,7 +4781,14 @@ const TEACHERS_PDF_DB = [
             renderTimetableUI();
             return;
           } else if (ttStep === "CLASS") {
-            if (!isBackButton && ttFocusArea === "MAIN") {
+            if (isBackButton) {
+              ttStep = "SCHOOL";
+              ttFocusArea = "MAIN";
+              playCustomWav("back");
+              renderTimetableUI();
+              return;
+            }
+            if (ttFocusArea === "MAIN") {
               const cards = Array.from(ttClassStepEl.querySelectorAll(".tt-class-card"));
               const alignedAboveIdx = findVerticallyAlignedCardIndex(cards, ttClassFocusIdx, -1);
               if (alignedAboveIdx !== -1) {
@@ -4204,21 +4797,32 @@ const TEACHERS_PDF_DB = [
                 syncTimetableFocusVisuals();
                 return;
               }
+              ttFocusArea = "BACK_BTN";
+              playCustomWav("move");
+              syncTimetableFocusVisuals();
+              return;
+            } else if (ttFocusArea === "BACK_BTN") {
+              ttStep = "SCHOOL";
+              ttFocusArea = "MAIN";
+              playCustomWav("back");
+              renderTimetableUI();
+              return;
             }
-            ttStep = "SCHOOL";
-            ttFocusArea = "MAIN";
-            playCustomWav("back");
-            renderTimetableUI();
-            return;
           }
         }
 
-        /* Nawigacja w górę / cofanie wewnątrz "Planu Nauczycieli" */
+        /* Plan Nauczycieli */
         if (activeItem?.isTeachers) {
           if (tchStep === "SCHEDULE") {
             if (!isBackButton && tchScheduleStepEl.scrollTop > 10) {
-              tchScheduleStepEl.scrollBy({ top: -150, behavior: "smooth" });
+              tchScheduleStepEl.scrollBy({ top: -160, behavior: "smooth" });
               playCustomWav("move");
+              return;
+            }
+            if (!isBackButton && tchFocusArea !== "BACK_BTN") {
+              tchFocusArea = "BACK_BTN";
+              playCustomWav("move");
+              syncTeachersFocusVisuals();
               return;
             }
             tchStep = "LIST";
@@ -4226,11 +4830,17 @@ const TEACHERS_PDF_DB = [
             playCustomWav("back");
             renderTeachersUI();
             return;
-          } else if (tchStep === "LIST" && !isBackButton && tchFocusArea === "MAIN") {
-            const cards = Array.from(tchListStepEl.querySelectorAll(".tch-card"));
-            const alignedAboveIdx = findVerticallyAlignedCardIndex(cards, tchFocusIdx, -1);
-            if (alignedAboveIdx !== -1) {
-              tchFocusIdx = alignedAboveIdx;
+          } else if (tchStep === "LIST" && !isBackButton) {
+            if (tchFocusArea === "MAIN") {
+              const cards = Array.from(tchListStepEl.querySelectorAll(".tch-card"));
+              const alignedAboveIdx = findVerticallyAlignedCardIndex(cards, tchFocusIdx, -1);
+              if (alignedAboveIdx !== -1) {
+                tchFocusIdx = alignedAboveIdx;
+                playCustomWav("move");
+                syncTeachersFocusVisuals();
+                return;
+              }
+              tchFocusArea = "SEARCH_INPUT";
               playCustomWav("move");
               syncTeachersFocusVisuals();
               return;
@@ -4266,10 +4876,16 @@ const TEACHERS_PDF_DB = [
       if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
 
-      /* Jeśli jesteśmy na głównej wstędze, kafelki Folder, Plan Lekcji, Plan Nauczycieli i Kierunki otwierają swój widok na dole */
       if (navLevel === "MAIN") {
         const curr = MAIN_RIBBON_ITEMS[mainIndex];
-        if (curr.type === "folder" || curr.isTimetable || curr.isDirections || curr.isTeachers) {
+        if (
+          curr.type === "folder" ||
+          curr.isWhatsNew ||
+          curr.isTimetable ||
+          curr.isDirections ||
+          curr.isTeachers || 
+          curr.isDocs
+        ) {
           navigateDown();
           return;
         }
@@ -4277,7 +4893,35 @@ const TEACHERS_PDF_DB = [
 
       const item = getActiveGameItem();
 
-      /* Obsługa zatwierdzenia X / Enter wewnątrz Sub-Menu "Kierunki Kształcenia" */
+      
+      /* Obsługa zatwierdzenia X / Enter / Spacja wewnątrz Sub-Menu "Dokumentacja" */
+      if (navLevel === "SUBMENU" && item?.isDocs) {
+        const currentDoc = DOCS_LIBRARY_DB.find((d) => d.id === docSelectedId) || DOCS_LIBRARY_DB[docFocusIdx] || DOCS_LIBRARY_DB[0];
+        if (docFocusArea === "START_BTN" || docFocusArea === "OPEN_FILE_BTN") {
+          triggerPressAnimation();
+          launchUrlWithSleepDelay(currentDoc.file, currentDoc.title);
+          return;
+        }
+        if (docFocusArea === "BACK_BTN") {
+          closeDocReader();
+          return;
+        }
+        if (docFocusArea === "SEARCH_INPUT") {
+          if (docSearchInputEl) docSearchInputEl.focus();
+          return;
+        }
+        if (docStep === "LIST") {
+          const targetDoc = DOCS_LIBRARY_DB[docFocusIdx] || DOCS_LIBRARY_DB[0];
+          openDocReader(targetDoc.id);
+          return;
+        } else if (docStep === "READER") {
+          triggerPressAnimation();
+          launchUrlWithSleepDelay(currentDoc.file, currentDoc.title);
+          return;
+        }
+      }
+
+      /* Kierunki Kształcenia */
       if (navLevel === "SUBMENU" && item?.isDirections) {
         if (dirStep === "LIST") {
           if (dirFocusIdx >= 0) {
@@ -4298,7 +4942,7 @@ const TEACHERS_PDF_DB = [
         }
       }
 
-      /* Obsługa zatwierdzenia X / Enter wewnątrz Sub-Menu "Co nowego" */
+      /* Co nowego */
       if (navLevel === "SUBMENU" && item?.isWhatsNew) {
         if (whatsNewFocusIndex === -1) {
           playCustomWav("select");
@@ -4313,7 +4957,7 @@ const TEACHERS_PDF_DB = [
         }
       }
 
-      /* Obsługa zatwierdzenia X / Enter wewnątrz Sub-Menu "Plan Lekcji" */
+      /* Plan Lekcji */
       if (navLevel === "SUBMENU" && item?.isTimetable) {
         if (ttFocusArea === "PDF_BTN") {
           triggerPressAnimation();
@@ -4345,11 +4989,19 @@ const TEACHERS_PDF_DB = [
         }
       }
 
-      /* Obsługa zatwierdzenia X / Enter wewnątrz Sub-Menu "Plan Nauczycieli" */
+      /* Plan Nauczycieli */
       if (navLevel === "SUBMENU" && item?.isTeachers) {
         if (tchFocusArea === "PDF_BTN") {
           triggerPressAnimation();
           launchUrlWithSleepDelay(item.url, "Pełny Plan Lekcji PDF (ZSA)");
+          return;
+        }
+        if (tchFocusArea === "BACK_BTN") {
+          navigateUp(true);
+          return;
+        }
+        if (tchFocusArea === "SEARCH_INPUT") {
+          if (tchSearchInputEl) tchSearchInputEl.focus();
           return;
         }
         if (tchStep === "LIST") {
@@ -4376,8 +5028,28 @@ const TEACHERS_PDF_DB = [
       }
     }
 
+    /* Synchronizacja hovera myszki na przyciskach Submenu */
+    const subStartBtnEl = document.getElementById("sub-start-btn");
+    subStartBtnEl.addEventListener("mouseenter", () => {
+      if (navLevel !== "SUBMENU") return;
+      const item = getActiveGameItem();
+      if (item?.isWhatsNew) {
+        whatsNewFocusIndex = -2;
+        updateWhatsNewFocusUI();
+      } else if (item?.isTimetable) {
+        ttFocusArea = "PDF_BTN";
+        syncTimetableFocusVisuals();
+      } else if (item?.isDirections) {
+        if (dirStep === "LIST") dirFocusIdx = -1;
+        else dirDetailFocus = "START_BTN";
+        updateDirectionsFocusUI();
+      } else if (item?.isTeachers) {
+        tchFocusArea = "PDF_BTN";
+        syncTeachersFocusVisuals();
+      }
+    });
 
-    document.getElementById("sub-start-btn").addEventListener("click", () => {
+    subStartBtnEl.addEventListener("click", () => {
       const item = getActiveGameItem();
       if (item && item.url) {
         triggerPressAnimation();
@@ -4385,7 +5057,57 @@ const TEACHERS_PDF_DB = [
       }
     });
 
-    /* Obsługa klawiatury */
+    const zsaRefreshBtnHoverEl = document.getElementById("zsa-refresh-btn");
+    if (zsaRefreshBtnHoverEl) {
+      zsaRefreshBtnHoverEl.addEventListener("mouseenter", () => {
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isWhatsNew) {
+          whatsNewFocusIndex = -1;
+          updateWhatsNewFocusUI();
+        }
+      });
+    }
+
+    if (ttBackStepBtnEl) {
+      ttBackStepBtnEl.addEventListener("mouseenter", () => {
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isTimetable) {
+          ttFocusArea = "BACK_BTN";
+          syncTimetableFocusVisuals();
+        }
+      });
+    }
+
+    if (dirBackStepBtnEl) {
+      dirBackStepBtnEl.addEventListener("mouseenter", () => {
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isDirections && dirStep === "DETAIL") {
+          dirDetailFocus = "BACK_BTN";
+          updateDirectionsFocusUI();
+        }
+      });
+    }
+
+    if (tchBackStepBtnEl) {
+      tchBackStepBtnEl.addEventListener("mouseenter", () => {
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isTeachers) {
+          tchFocusArea = "BACK_BTN";
+          syncTeachersFocusVisuals();
+        }
+      });
+    }
+
+    if (tchSearchInputEl) {
+      tchSearchInputEl.addEventListener("mouseenter", () => {
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isTeachers && tchStep === "LIST") {
+          tchFocusArea = "SEARCH_INPUT";
+          syncTeachersFocusVisuals();
+        }
+      });
+      tchSearchInputEl.addEventListener("focus", () => {
+        tchFocusArea = "SEARCH_INPUT";
+        syncTeachersFocusVisuals();
+      });
+    }
+
+    /* Obsługa klawiatury (z pełnym zabezpieczeniem pola wyszukiwarki) */
     window.addEventListener("keydown", (e) => {
       if (isSystemSleeping) {
         e.preventDefault();
@@ -4393,6 +5115,24 @@ const TEACHERS_PDF_DB = [
         return;
       }
       if (performance.now() < wakeUpCooldownUntil) return;
+
+      // Gdy użytkownik pisze w polu wyszukiwania nauczyciela, nie przechwytuj liter WASD ani Backspace
+      const activeTag = document.activeElement ? document.activeElement.tagName : "";
+      if (activeTag === "INPUT" || activeTag === "TEXTAREA") {
+        if (e.key === "ArrowDown" || e.key === "Enter") {
+          e.preventDefault();
+          document.activeElement.blur();
+          tchFocusArea = "MAIN";
+          playCustomWav("move");
+          syncTeachersFocusVisuals();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          document.activeElement.blur();
+          tchFocusArea = "MAIN";
+          syncTeachersFocusVisuals();
+        }
+        return;
+      }
 
       if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
         e.preventDefault(); navigateLeft();
@@ -4404,30 +5144,48 @@ const TEACHERS_PDF_DB = [
         e.preventDefault(); navigateUp(false);
       } else if (e.key === "Escape" || e.key === "Backspace") {
         e.preventDefault(); navigateUp(true);
-      } else if (e.key === "Enter") {
+      } else if (e.key === "Enter" || e.key === " ") {
         e.preventDefault(); launchActiveItem();
       }
     });
 
-    /* Obsługa kółka myszy */
+    /* Obsługa kółka myszy (bez wyrzucania z przewijanych list wewnątrz Submenu) */
     let lastWheelTime = 0;
     window.addEventListener("wheel", (e) => {
       if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
-      if (navLevel === "SUBMENU" && (MAIN_RIBBON_ITEMS[mainIndex]?.isWhatsNew || MAIN_RIBBON_ITEMS[mainIndex]?.isTimetable || MAIN_RIBBON_ITEMS[mainIndex]?.isDirections)) {
-        return;
+
+      if (navLevel === "SUBMENU") {
+        const scrollable = e.target.closest(
+          ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid"
+        );
+        if (scrollable) {
+          return; // Pozwól przeglądarce płynnie przewijać listę/tabelę
+        }
+        const activeItem = getActiveGameItem();
+        if (
+          activeItem?.isWhatsNew ||
+          activeItem?.isTimetable ||
+          activeItem?.isDirections ||
+          activeItem?.isTeachers ||
+          activeItem?.isDocs
+        ) {
+          return;
+        }
       }
+
       const now = performance.now();
-      if (now - lastWheelTime < 150) return;
+      if (now - lastWheelTime < 110) return;
+
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        if (Math.abs(e.deltaX) > 10) {
+        if (Math.abs(e.deltaX) > 8) {
           lastWheelTime = now;
           if (e.deltaX > 0) navigateRight();
           else navigateLeft();
         }
-      } else if (Math.abs(e.deltaY) > 12) {
+      } else if (Math.abs(e.deltaY) > 10) {
         lastWheelTime = now;
         if (navLevel === "SUBMENU") {
-          if (e.deltaY < 0) navigateUp(true);
+          if (e.deltaY < -20) navigateUp(true);
         } else {
           if (e.deltaY > 0) navigateRight();
           else navigateLeft();
@@ -4435,26 +5193,47 @@ const TEACHERS_PDF_DB = [
       }
     }, { passive: true });
 
-    /* Gesty dotykowe i przyciski mobilne */
+    /* Zunifikowana obsługa gestów dotykowych (Swipe) oraz przycisków mobilnych */
     let touchStartX = 0;
     let touchStartY = 0;
+    let touchLastX = 0;
+    let touchLastY = 0;
+    let touchMovedInScrollable = false;
+
     window.addEventListener("touchstart", (e) => {
-      if (isSystemSleeping || !e.touches.length) return;
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
+      if (isSystemSleeping || e.touches.length !== 1) return;
+      touchStartX = touchLastX = e.touches[0].clientX;
+      touchStartY = touchLastY = e.touches[0].clientY;
+
+      const scrollable = e.target.closest(
+        ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid"
+      );
+      touchMovedInScrollable = Boolean(scrollable && scrollable.scrollHeight > scrollable.clientHeight);
     }, { passive: true });
 
-    window.addEventListener("touchend", (e) => {
-      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil || !e.changedTouches.length) return;
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-      if (Math.abs(dx) < 34 && Math.abs(dy) < 34) return;
+    window.addEventListener("touchmove", (e) => {
+      if (isSystemSleeping || e.touches.length !== 1 || touchMovedInScrollable) return;
+      if (performance.now() < wakeUpCooldownUntil) return;
+
+      const curX = e.touches[0].clientX;
+      const curY = e.touches[0].clientY;
+      const dx = curX - touchLastX;
+      const dy = curY - touchLastY;
+
       if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx < 0) navigateRight();
-        else navigateLeft();
+        if (Math.abs(dx) >= 52) {
+          if (dx < 0) navigateRight();
+          else navigateLeft();
+          touchLastX = curX;
+          touchLastY = curY;
+        }
       } else {
-        if (dy < 0) navigateDown();
-        else navigateUp(false);
+        if (Math.abs(dy) >= 48) {
+          if (dy < 0) navigateDown();
+          else navigateUp(false);
+          touchLastY = curY;
+          touchLastX = curX;
+        }
       }
     }, { passive: true });
 
@@ -4465,12 +5244,107 @@ const TEACHERS_PDF_DB = [
     document.getElementById("btn-back").addEventListener("click", () => navigateUp(true));
     document.getElementById("btn-play").addEventListener("click", launchActiveItem);
 
-    /* Obsługa kontrolera DualShock 4 / Xbox Gamepad API */
+    /* ============================================================================
+       OBSŁUGA KONTROLERA + AUTOMATYCZNE PRZEŁĄCZANIE IKON (PAD / PC / TELEFON)
+       ============================================================================ */
+    let isGamepadConnected = false;
     let lastPadTime = 0;
+
+    function checkAnyGamepadConnected() {
+      if (!navigator.getGamepads) return false;
+      const pads = navigator.getGamepads();
+      for (let i = 0; i < pads.length; i++) {
+        if (pads[i] && pads[i].connected) return true;
+      }
+      return false;
+    }
+
+    function syncInputPromptsUI() {
+      isGamepadConnected = checkAnyGamepadConnected();
+      document.body.classList.toggle("has-gamepad", isGamepadConnected);
+
+      const isMobile = document.body.classList.contains("is-mobile");
+      const mode = isGamepadConnected ? "PAD" : (isMobile ? "MOBILE" : "PC");
+
+      const crossText = mode === "PAD" ? "✕" : (mode === "PC" ? "Spacja" : "");
+      const circleText = mode === "PAD" ? "○" : (mode === "PC" ? "Backspace" : "");
+      const navText = mode === "PAD" ? "◀ ▶ ▲ ▼" : (mode === "PC" ? "Strzałki / WASD" : "");
+      const inlinePrefix = mode === "PAD" ? "✕ " : (mode === "PC" ? "[Spacja] " : "");
+
+      // 1. Podmiana wszystkich plakietek przycisków (.ds4-badge)
+      document.querySelectorAll(".ds4-badge").forEach((badge) => {
+        if (badge.classList.contains("cross")) {
+          badge.textContent = crossText;
+        } else if (badge.classList.contains("circle")) {
+          badge.textContent = circleText;
+        } else {
+          badge.textContent = navText;
+        }
+      });
+
+      // 2. Przyciski dotykowe na telefonie (bez znaczków PS, dopóki pad nie jest podłączony)
+      const btnBackEl = document.getElementById("btn-back");
+      const btnPlayEl = document.getElementById("btn-play");
+      if (btnBackEl) btnBackEl.textContent = isGamepadConnected ? "○ Wróć" : "Wróć";
+      if (btnPlayEl) btnPlayEl.textContent = isGamepadConnected ? "✕ Start" : "Start";
+
+      // 3. Etykiety na kartach wyboru w Planie Lekcji i Kierunkach Kształcenia
+      document.querySelectorAll(".tt-school-count, .dir-link-url").forEach((el) => {
+        const clean = el.textContent.replace(/^(\[Spacja\]\s*|✕\s*)/, "");
+        el.textContent = `${inlinePrefix}${clean}`;
+      });
+
+      // 4. Podpowiedzi w sekcji "Co nowego"
+      const newsStatusEl = document.getElementById("zsa-news-status-text");
+      if (newsStatusEl && !newsStatusEl.textContent.includes("Sprawdzanie")) {
+        if (mode === "PAD") {
+          newsStatusEl.textContent = "Nawiguj padem (▲ ▼) — zatrzymaj się na wpisie, aby rozwinąć zdjęcie";
+        } else if (mode === "MOBILE") {
+          newsStatusEl.textContent = "Przesuwaj palcem i dotknij wpisu, aby otworzyć artykuł";
+        } else {
+          newsStatusEl.textContent = "Nawiguj klawiaturą (▲ ▼ / WS) lub myszką — zatrzymaj się na wpisie, aby rozwinąć zdjęcie";
+        }
+      }
+
+      document.querySelectorAll(".zsa-news-card").forEach((card) => {
+        const hintEl = card.querySelector(".zsa-news-dwell-hint");
+        if (!hintEl) return;
+        const hasImg = card.getAttribute("data-has-image") === "1";
+        if (mode === "PAD") {
+          hintEl.textContent = hasImg ? "Zatrzymaj się, aby zobaczyć zdjęcie • ✕ Otwórz" : "✕ Otwórz artykuł";
+        } else if (mode === "MOBILE") {
+          hintEl.textContent = "Dotknij, aby otworzyć";
+        } else {
+          hintEl.textContent = hasImg ? "Zatrzymaj się, aby zobaczyć zdjęcie • [Spacja] Otwórz" : "[Spacja] Otwórz artykuł";
+        }
+      });
+    }
+
+    // Automatyczna aktualizacja po wyrenderowaniu listy aktualności ZSA lub zmianie rozmiaru okna
+    const _origRenderZsaNewsList = renderZsaNewsList;
+    renderZsaNewsList = function () {
+      _origRenderZsaNewsList();
+      syncInputPromptsUI();
+    };
+
+    window.addEventListener("gamepadconnected", syncInputPromptsUI);
+    window.addEventListener("gamepaddisconnected", syncInputPromptsUI);
+    window.addEventListener("resize", () => {
+      detectRealMobile();
+      syncInputPromptsUI();
+    });
+
+    syncInputPromptsUI();
+
     function pollGamepad(now) {
+      const currentlyConnected = checkAnyGamepadConnected();
+      if (currentlyConnected !== isGamepadConnected) {
+        syncInputPromptsUI();
+      }
+
       const pads = navigator.getGamepads ? navigator.getGamepads() : [];
       const pad = pads[0] || pads[1] || pads[2] || pads[3];
-      if (!pad || now - lastPadTime <= 180) return;
+      if (!pad || now - lastPadTime <= 170) return;
 
       const axX = pad.axes[0] || 0;
       const axY = pad.axes[1] || 0;
@@ -4697,9 +5571,11 @@ const TEACHERS_PDF_DB = [
     }
 
     /* ============================================================================
-       10. ZJEDNOCZONA PĘTLA GŁÓWNA (AUDIO + GAMEPAD + CANVAS)
+       10. ZJEDNOCZONA PĘTLA GŁÓWNA (AUDIO + GAMEPAD + CANVAS + SLEEP RECOVERY)
        ============================================================================ */
     let lastAudioTime = performance.now();
+    let lastCanvasFrameTime = 0;
+
     function mainLoop(now) {
       const dtSec = Math.min(0.1, (now - lastAudioTime) / 1000);
       lastAudioTime = now;
@@ -4709,11 +5585,25 @@ const TEACHERS_PDF_DB = [
       if (!document.hidden) {
         pollGamepad(now);
         if (!isSystemSleeping && navLevel !== "SUBMENU") {
-          drawPs4XmbWave(now);
+          if (!IS_LOW_END_PC || now - lastCanvasFrameTime >= 15.5) {
+            lastCanvasFrameTime = now;
+            drawPs4XmbWave(now);
+          }
         }
       }
       requestAnimationFrame(mainLoop);
     }
+
+    function restoreScreenAfterTabOrSleep() {
+      document.body.classList.toggle("tab-hidden", document.hidden);
+      if (!document.hidden) {
+        resizeCanvas();
+      }
+    }
+
+    document.addEventListener("visibilitychange", restoreScreenAfterTabOrSleep);
+    window.addEventListener("focus", restoreScreenAfterTabOrSleep);
+    window.addEventListener("pageshow", restoreScreenAfterTabOrSleep);
 
     buildRibbons();
     resizeCanvas();

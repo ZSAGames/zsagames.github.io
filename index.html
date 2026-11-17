@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ZSAGames — Zespół Szkół Akademickich w Łomży (PS4 System Menu)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
@@ -31,11 +32,49 @@
   <header class="ps4-top-bar">
     <div class="top-left-icons">
       <a href="https://zsagames.github.io/" target="_self" rel="noopener" class="ps-plus-icon" title="ZSAGames Plus">
-        <svg viewBox="0 0 32 32">
-          <path fill="#f5c418" d="M12.5 3h7v9.5H29v7h-9.5V29h-7v-9.5H3v-7h9.5V3z"/>
-          <path fill="#d49b00" d="M19.5 12.5V3h-2v9.5H3v2h14.5V29h2V14.5H29v-2h-9.5z" opacity="0.45"/>
-        </svg>
-      </a>
+  <svg viewBox="0 0 100 34" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Maska ograniczająca błysk wyłącznie do kształtu łuku ZSA -->
+      <clipPath id="zsa-line-clip">
+        <path d="M 11.5 30.5 C 2.8 32.5, -1.4 23.2, 4.8 16.8 C 27.5 3.4, 67.5 -3.4, 99.2 12.8 C 72.5 3.6, 44.5 12.8, 11.5 30.5 Z" />
+      </clipPath>
+
+      <!-- Pionowy gradient złotego rozbłysku (od dołu do góry) -->
+      <linearGradient id="zsa-gold-flash" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#f5c418" stop-opacity="0" />
+        <stop offset="30%" stop-color="#ffe46b" stop-opacity="0.8" />
+        <stop offset="50%" stop-color="#ffffff" stop-opacity="1" />
+        <stop offset="70%" stop-color="#ffe46b" stop-opacity="0.8" />
+        <stop offset="100%" stop-color="#f5c418" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+
+    <!-- Główny złoty kształt łuku (#f5c418) -->
+    <path
+      fill="#f5c418"
+      d="M 11.5 30.5 C 2.8 32.5, -1.4 23.2, 4.8 16.8 C 27.5 3.4, 67.5 -3.4, 99.2 12.8 C 72.5 3.6, 44.5 12.8, 11.5 30.5 Z"
+    />
+
+    <!-- Dolne cieniowanie w oryginalnym kolorze (#d49b00) -->
+    <path
+      fill="#d49b00"
+      opacity="0.45"
+      d="M 11.5 30.5 C 6.2 31.6, 1.8 28.4, 2.0 24.2 C 31.5 11.2, 65.2 1.6, 99.2 12.8 C 72.5 3.6, 44.5 12.8, 11.5 30.5 Z"
+    />
+
+    <!-- Warstwa szybkiego złotego błysku od dołu do góry po najechaniu -->
+    <g clip-path="url(#zsa-line-clip)">
+      <rect
+        class="gold-line-flash"
+        x="-10"
+        y="0"
+        width="120"
+        height="14"
+        fill="url(#zsa-gold-flash)"
+      />
+    </g>
+  </svg>
+</a>
       <div class="ps-notif-circle">i</div>
     </div>
 
@@ -43,7 +82,7 @@
       <div class="status-friends">
         <div class="friends-badge">
           <span class="online-dot"></span>
-          <span>12</span>
+          <span>500+</span>
         </div>
         <svg class="friends-glyph" viewBox="0 0 24 24">
           <path d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 10c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4zm7.5-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm0 9c-1.2 0-2.32.22-3.28.6 1.73 1.02 2.78 2.43 2.78 4v1.4h6.5v-2c0-2.02-2.69-4-6-4z"/>
@@ -56,9 +95,10 @@
           <img src="https://avatars.githubusercontent.com/u/349516848?v=4" alt="ZSA" />
         </div>
         <span class="user-name">ZSAGames</span>
-        <svg class="ps-plus-mini" viewBox="0 0 32 32">
-          <path fill="#f5c418" d="M12.5 3h7v9.5H29v7h-9.5V29h-7v-9.5H3v-7h9.5V3z"/>
-        </svg>
+        <svg class="ps-plus-mini" viewBox="0 0 100 34">
+  <path fill="#f5c418" d="M 11.5 30.5 C 2.8 32.5, -1.4 23.2, 4.8 16.8 C 27.5 3.4, 67.5 -3.4, 99.2 12.8 C 72.5 3.6, 44.5 12.8, 11.5 30.5 Z"/>
+  <path fill="#d49b00" opacity="0.45" d="M 11.5 30.5 C 6.2 31.6, 1.8 28.4, 2.0 24.2 C 31.5 11.2, 65.2 1.6, 99.2 12.8 C 72.5 3.6, 44.5 12.8, 11.5 30.5 Z"/>
+</svg>
       </a>
     </div>
 
@@ -337,6 +377,56 @@
             <div class="tch-daily-box">
               <div class="tt-legend-title" id="tch-daily-title">Szczegółowy wykaz godzin lekcyjnych i sal</div>
               <div class="tch-daily-grid" id="tch-daily-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WIDOK F: Dokumentacja Szkolna ZSA (Czytnik DOCX i PDF + Wyszukiwarka słów kluczowych) -->
+        <div class="zsa-docs-view" id="zsa-docs-view">
+          <div class="tt-top-bar">
+            <div class="tt-breadcrumb" id="doc-breadcrumb">
+              Wybierz (<strong>dokument</strong>) lub wpisz słowo kluczowe
+            </div>
+            <div class="tt-top-right-group">
+              <input
+                type="text"
+                class="tch-search-input"
+                id="doc-search-input"
+                placeholder="🔍 Szukaj słowa w dokumencie (np. mundur, beret, oceny, opiekun, Librus)..."
+                autocomplete="off"
+              />
+              <button type="button" class="tt-back-step-btn" id="doc-back-step-btn" style="display:none;">
+                <span class="ds4-badge circle">○</span> Lista dokumentów
+              </button>
+            </div>
+          </div>
+
+          <!-- Krok 1: Posegregowana lista dokumentów (2 kolumny jak w Kierunkach Kształcenia) -->
+          <div class="dir-columns" id="doc-list-step"></div>
+
+          <!-- Krok 2: Wbudowany czytnik dokumentu z przewijaniem i podświetlaniem fraz -->
+          <div class="dir-detail-wrap" id="doc-reader-step" style="display:none;">
+            <div class="dir-detail-hero">
+              <div class="doc-reader-meta-row">
+                <span class="dir-detail-badge" id="doc-reader-badge">DOKUMENT • ZSA</span>
+                <span class="doc-match-counter" id="doc-match-counter"></span>
+              </div>
+              <h2 class="dir-detail-title" id="doc-reader-title">Tytuł dokumentu</h2>
+              <p class="dir-detail-lead" id="doc-reader-lead"></p>
+            </div>
+
+            <!-- Lista rozdziałów / paragrafów dokumentu -->
+            <div class="doc-sections-list" id="doc-sections-list"></div>
+
+            <div class="dir-detail-actions">
+              <div>
+                <div class="meta-label">Plik źródłowy w katalogu projektu:</div>
+                <div class="dir-original-url-text" id="doc-reader-file-text">plik.pdf</div>
+              </div>
+              <button type="button" class="dir-open-original-btn" id="doc-open-file-btn">
+                <span class="ds4-badge cross">✕</span>
+                <span>Otwórz / Pobierz oryginalny plik</span>
+              </button>
             </div>
           </div>
         </div>
