@@ -430,6 +430,128 @@
             </div>
           </div>
         </div>
+
+        <!-- WIDOK G: Globalny Terminarz (Kalendarz Dni Wolnych i Nieobecności Nauczycieli) -->
+        <div class="zsa-calendar-view" id="zsa-calendar-view">
+          <div class="tt-top-bar">
+            <div class="tt-breadcrumb" id="cal-breadcrumb">
+              Globalny Terminarz ZSA — <strong id="cal-month-title">Listopad 2026</strong>
+            </div>
+            <div class="tt-top-right-group">
+              <button type="button" class="tt-back-step-btn" id="cal-prev-month">◀ Poprzedni</button>
+              <button type="button" class="tt-back-step-btn" id="cal-today-btn">Dziś</button>
+              <button type="button" class="tt-back-step-btn" id="cal-next-month">Następny ▶</button>
+              <button type="button" class="zsa-refresh-btn" id="cal-refresh-btn">Odśwież</button>
+            </div>
+          </div>
+
+          <div class="cal-layout">
+            <!-- Lewa część: Siatka miesięcznego kalendarza -->
+            <div class="cal-board">
+              <div class="cal-weekdays">
+                <span>Pon</span><span>Wt</span><span>Śr</span><span>Czw</span><span>Pią</span><span>Sob</span><span>Nie</span>
+              </div>
+              <div class="cal-grid" id="cal-grid"></div>
+              <div class="cal-legend-bar">
+                <span><i class="cal-dot holiday"></i> Dzień wolny</span>
+                <span><i class="cal-dot absence"></i> Nieobecność nauczyciela</span>
+                <span><i class="cal-dot today"></i> Dzisiaj</span>
+              </div>
+            </div>
+
+            <!-- Prawa część: Szczegóły wybranego dnia -->
+            <div class="cal-details-panel" id="cal-details-panel">
+              <div class="cal-details-header" id="cal-selected-date-label">Wybierz dzień w kalendarzu</div>
+              <div class="cal-details-list" id="cal-details-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WIDOK H: Kontakt ZSA w Łomży -->
+        <div class="zsa-contact-view" id="zsa-contact-view">
+          <div class="contact-scroll-wrap" id="contact-scroll-wrap">
+            <!-- Baner z adresem i Dyrektorem -->
+            <div class="dir-detail-hero">
+              <span class="dir-detail-badge">KONTAKT • ZESPÓŁ SZKÓŁ AKADEMICKICH W ŁOMŻY</span>
+              <h2 class="dir-detail-title">Zespół Szkół Akademickich MANS w Łomży</h2>
+              <p class="dir-detail-lead">
+                Dyrektor Zespołu Szkół Akademickich — <strong>Barbara Aleksandra Turek</strong>
+              </p>
+            </div>
+
+            <!-- Kafelki z danymi kontaktowymi -->
+            <div class="contact-info-grid">
+              <div class="dir-info-card">
+                <div class="dir-info-card-head">
+                  <span class="dir-info-card-title">Adres szkoły</span>
+                  <span class="dir-info-card-code">SIEDZIBA</span>
+                </div>
+                <p class="dir-info-card-desc">
+                  <strong>ul. Studencka 19</strong><br />
+                  18 – 402 Łomża
+                </p>
+              </div>
+
+              <div class="dir-info-card">
+                <div class="dir-info-card-head">
+                  <span class="dir-info-card-title">Sekretariat</span>
+                  <span class="dir-info-card-code">GODZINY PRACY</span>
+                </div>
+                <p class="dir-info-card-desc">
+                  Poniedziałek – piątek<br />
+                  <strong>7:30 – 15:30</strong>
+                </p>
+              </div>
+
+              <div class="dir-info-card">
+                <div class="dir-info-card-head">
+                  <span class="dir-info-card-title">Telefon</span>
+                  <span class="dir-info-card-code">TEL.</span>
+                </div>
+                <p class="dir-info-card-desc">
+                  <a href="tel:+48862150249" class="contact-direct-link">+48 86 215 02 49</a>
+                </p>
+              </div>
+
+              <div class="dir-info-card">
+                <div class="dir-info-card-head">
+                  <span class="dir-info-card-title">Poczta elektroniczna</span>
+                  <span class="dir-info-card-code">E-MAIL</span>
+                </div>
+                <p class="dir-info-card-desc">
+                  <a href="mailto:asp@mans.edu.pl" class="contact-direct-link">asp@mans.edu.pl</a>
+                </p>
+              </div>
+            </div>
+
+            <!-- Media społecznościowe (nawigowalne klawiaturą, padem, myszką i dotykiem) -->
+            <div class="dir-highlights-box">
+              <div class="dir-highlights-title">Media społecznościowe ZSA w Łomży</div>
+              <div class="contact-social-grid">
+                <div class="dir-link-card contact-social-card social-fb" data-contact-idx="0" data-url="https://www.facebook.com/ZSALOMZA/" data-title="Facebook — ZSA Łomża">
+                  <span class="dir-link-tag">SOCIAL MEDIA • FACEBOOK</span>
+                  <span class="dir-link-name">Facebook</span>
+                  <span class="dir-link-desc-preview">Oficjalny profil ZSA w Łomży (aktualności, wydarzenia, zdjęcia).</span>
+                  <span class="dir-link-url">✕ Otwórz Facebook</span>
+                </div>
+
+                <div class="dir-link-card contact-social-card social-ig" data-contact-idx="1" data-url="https://www.instagram.com/zsa.lomza/" data-title="Instagram — ZSA Łomża">
+                  <span class="dir-link-tag">SOCIAL MEDIA • INSTAGRAM</span>
+                  <span class="dir-link-name">Instagram</span>
+                  <span class="dir-link-desc-preview">Relacje i galerie ze szkolnego życia (@zsa.lomza).</span>
+                  <span class="dir-link-url">✕ Otwórz Instagram</span>
+                </div>
+
+                <div class="dir-link-card contact-social-card social-yt" data-contact-idx="2" data-url="https://www.youtube.com/results?search_query=szko%C5%82y%20akademickie%20w%20%C5%82om%C5%BCy" data-title="YouTube — Szkoły Akademickie w Łomży">
+                  <span class="dir-link-tag">SOCIAL MEDIA • YOUTUBE</span>
+                  <span class="dir-link-name">YouTube</span>
+                  <span class="dir-link-desc-preview">Filmy promocyjne i materiały wideo szkół akademickich w Łomży.</span>
+                  <span class="dir-link-url">✕ Otwórz YouTube</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         
       </div>
     </section>

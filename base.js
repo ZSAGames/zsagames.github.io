@@ -156,6 +156,32 @@
               </svg>`
       },
       {
+        id: "calendar-app",
+        type: "system",
+        isCalendar: true,
+        title: "Terminarz",
+        subtitle: "DNI WOLNE I NIEOBECNOŚCI NAUCZYCIELI",
+        url: "https://zsa.mans.edu.pl/",
+        cover: "ZSACover.png",
+        background: "ZSABackground.png",
+        music: "",
+        fallbackBg: "linear-gradient(135deg, #164b9c, #041534)",
+        author: "Zespół Szkół Akademickich w Łomży",
+        platform: "Globalny Terminarz Online (Cloud Sync)",
+        description: "Sprawdź nadchodzące dni wolne od zajęć dydaktycznych oraz aktualną niedostępność nauczycieli (cały dzień lub konkretne godziny).",
+        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="10" y="14" width="44" height="40" rx="4" fill="rgba(255,255,255,0.14)"/>
+                <line x1="10" y1="26" x2="54" y2="26"/>
+                <line x1="22" y1="8" x2="22" y2="18" stroke-width="3.5"/>
+                <line x1="42" y1="8" x2="42" y2="18" stroke-width="3.5"/>
+                <circle cx="22" cy="36" r="2.5" fill="#f5c418" stroke="none"/>
+                <circle cx="32" cy="36" r="2.5" fill="#ff6b7a" stroke="none"/>
+                <circle cx="42" cy="36" r="2.5" fill="#ffffff" stroke="none"/>
+                <circle cx="22" cy="45" r="2.5" fill="#ffffff" stroke="none"/>
+                <circle cx="32" cy="45" r="2.5" fill="#f5c418" stroke="none"/>
+              </svg>`
+      },
+      {
         id: "folder-games",
         type: "folder",
         title: "Gry",
@@ -222,6 +248,27 @@
                 <line x1="28" y1="76" x2="72" y2="76" stroke-width="5.5"/>
               </svg>`
       },
+      {
+        id: "contact-app",
+        type: "system",
+        isContact: true,
+        title: "Kontakt",
+        subtitle: "SEKRETARIAT, ADRES I MEDIA SPOŁECZNOŚCIOWE",
+        url: "https://zsa.mans.edu.pl/",
+        cover: "ZSACover.png",
+        background: "ZSABackground.png",
+        music: "",
+        fallbackBg: "linear-gradient(135deg, #0d4b96, #041638)",
+        author: "Zespół Szkół Akademickich w Łomży",
+        platform: "Informacje kontaktowe i Social Media",
+        description: "Dane kontaktowe ZSA w Łomży (ul. Studencka 19), godziny pracy sekretariatu oraz odnośniki do Facebooka, Instagrama i YouTube.",
+        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="10" y="16" width="44" height="32" rx="4" fill="rgba(255,255,255,0.14)"/>
+                <polyline points="12 19 32 35 52 19"/>
+                <line x1="12" y1="45" x2="25" y2="32"/>
+                <line x1="52" y1="45" x2="39" y2="32"/>
+              </svg>`
+      }
     ];
 
     /* ============================================================================
@@ -3460,8 +3507,17 @@ const TEACHERS_PDF_DB = [
         tchListStepEl.innerHTML = filtered.map((t, idx) => {
           const stats = getTeacherMetaStats(t);
           const mainRooms = stats.rooms.slice(0, 5).join(", ");
+          const todayAbs = getTeacherAbsencesOnDate(t.code);
+          const absBadgeHtml = todayAbs.length
+            ? todayAbs.map((a) => `
+                <div class="tch-absent-badge">
+                  🚫 ${a.all_day ? "Niedostępny dziś (cały dzień)" : `Niedostępny dziś: ${a.time_from}–${a.time_to}`}
+                </div>
+              `).join("")
+            : "";
+
           return `
-            <div class="tch-card" data-tcode="${t.code}" data-tidx="${idx}">
+            <div class="tch-card ${todayAbs.length ? "is-absent-today" : ""}" data-tcode="${t.code}" data-tidx="${idx}">
               <div class="tch-card-top">
                 <span class="tch-card-code">${t.code}</span>
                 <span class="tch-card-hours">${stats.totalLessons} lek./tyg.</span>
@@ -3469,6 +3525,7 @@ const TEACHERS_PDF_DB = [
               <div class="tch-card-name">${t.name}</div>
               <div class="tch-card-subjects">${t.role}</div>
               <div class="tch-card-rooms">🚪 Sale: <strong>${mainRooms || "wg planu"}</strong></div>
+              ${absBadgeHtml}
             </div>
           `;
         }).join("");
@@ -3512,21 +3569,38 @@ const TEACHERS_PDF_DB = [
           </div>
         `;
 
-        const dayKeys = ["Pn", "Wt", "Sr", "Czw", "Pi"];
+        const teacherTodayAbs = getTeacherAbsencesOnDate(teacher.code);
+        if (teacherTodayAbs.length > 0) {
+          tchSummaryBannerEl.innerHTML += teacherTodayAbs.map((a) => `
+            <div class="tch-absent-badge" style="width:100%;font-size:0.84rem;padding:6px 10px;">
+              🚫 DZISIAJ NIEDOSTĘPNY: ${a.all_day ? "CAŁY DZIEŃ" : `od ${a.time_from} do ${a.time_to}`} ${a.note ? ` (${a.note})` : ""}
+            </div>
+          `).join("");
+        }
+
+        const todayWeekdayKey = ["Nd", "Pn", "Wt", "Sr", "Czw", "Pi", "Sb"][new Date().getDay()];
+
         tchScheduleTbodyEl.innerHTML = LESSON_HOURS.map((hourStr, hIdx) => {
           const lessonNr = hIdx + 1;
           const renderCell = (dayKey) => {
             const entries = (teacher.days[dayKey] || []).filter((e) => e[0] === lessonNr);
             if (entries.length === 0) return `<span class="tt-empty-slot">—</span>`;
+            const isBlockedToday =
+              dayKey === todayWeekdayKey &&
+              teacherTodayAbs.some((a) => doesLessonOverlapAbsence(hourStr, a));
+
             return entries.map(([nr, subj, cls, room]) => {
               const tip = buildLessonTooltip(subj).replace(/"/g, "&quot;");
               return `
-                <div class="tch-slot-item" ${tip ? `title="${tip}"` : ""}>
+                <div class="tch-slot-item ${isBlockedToday ? "slot-absent" : ""}" ${tip ? `title="${tip}"` : ""}>
                   <div class="tch-slot-top">
                     <span class="tch-slot-subj">${subj}</span>
                     <span class="tch-slot-room">Sala ${room}</span>
                   </div>
-                  <div class="tch-slot-class">Klasa: <strong>${cls}</strong></div>
+                  <div class="tch-slot-class">
+                    Klasa: <strong>${cls}</strong>
+                    ${isBlockedToday ? `<span style="color:#ff8e99;font-size:0.7rem;font-weight:700;"> • NIEDOSTĘPNY</span>` : ""}
+                  </div>
                 </div>
               `;
             }).join("");
@@ -4016,14 +4090,317 @@ const TEACHERS_PDF_DB = [
         }
       });
     }
+    
+
+    /* ============================================================================
+       7E. CHMURA (SUPABASE) + GLOBALNY TERMINARZ + STATUS NIEOBECNOŚCI NAUCZYCIELI
+       ============================================================================ */
+    const CLOUD_SCHEDULE_CONFIG = {
+      supabaseUrl: "https://feiedqoneahslanzibez.supabase.co",
+      supabaseAnonKey: "sb_publishable_Lbm_cxTaXYYLIubz1_62MQ_YTHaF8H9"
+    };
+
+    let cloudDaysOff = [];
+    let cloudTeacherAbsences = [];
+
+    function formatIsoLocal(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const d = String(dateObj.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function isDateInRange(isoDate, fromIso, toIso) {
+      return isoDate >= fromIso && isoDate <= (toIso || fromIso);
+    }
+
+    function getHolidaysForDate(isoDate) {
+      return cloudDaysOff.filter((h) => isDateInRange(isoDate, h.date_from, h.date_to));
+    }
+
+    function getAbsencesForDate(isoDate) {
+      return cloudTeacherAbsences.filter((a) => isDateInRange(isoDate, a.date_from, a.date_to));
+    }
+
+    function getTeacherAbsencesOnDate(teacherCode, isoDate = formatIsoLocal(new Date())) {
+      return cloudTeacherAbsences.filter(
+        (a) => a.teacher_code === teacherCode && isDateInRange(isoDate, a.date_from, a.date_to)
+      );
+    }
+
+    function doesLessonOverlapAbsence(lessonRangeStr, absence) {
+      if (!absence) return false;
+      if (absence.all_day) return true;
+      if (!absence.time_from || !absence.time_to) return true;
+      const [lStart, lEnd] = lessonRangeStr.split("-").map(parseHmToMinutes);
+      const aStart = parseHmToMinutes(absence.time_from);
+      const aEnd = parseHmToMinutes(absence.time_to);
+      return lStart < aEnd && lEnd > aStart;
+    }
+
+    async function fetchCloudScheduleData() {
+      const configured =
+        CLOUD_SCHEDULE_CONFIG.supabaseUrl &&
+        !CLOUD_SCHEDULE_CONFIG.supabaseUrl.includes("TWOJ-PROJEKT");
+
+      if (!configured) {
+        try {
+          cloudDaysOff = JSON.parse(localStorage.getItem("zsa_days_off") || "[]");
+          cloudTeacherAbsences = JSON.parse(localStorage.getItem("zsa_teacher_absences") || "[]");
+        } catch (_) {}
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isCalendar) renderCalendarUI();
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isTeachers) renderTeachersUI();
+        return;
+      }
+
+      const headers = {
+        "apikey": CLOUD_SCHEDULE_CONFIG.supabaseAnonKey
+      };
+      if (CLOUD_SCHEDULE_CONFIG.supabaseAnonKey.startsWith("eyJ")) {
+        headers["Authorization"] = `Bearer ${CLOUD_SCHEDULE_CONFIG.supabaseAnonKey}`;
+      }
+
+      try {
+        const [resH, resA] = await Promise.all([
+          fetch(`${CLOUD_SCHEDULE_CONFIG.supabaseUrl}/rest/v1/days_off?select=*&order=date_from.asc`, { headers }),
+          fetch(`${CLOUD_SCHEDULE_CONFIG.supabaseUrl}/rest/v1/teacher_absences?select=*&order=date_from.asc`, { headers })
+        ]);
+        if (resH.ok) cloudDaysOff = await resH.json();
+        if (resA.ok) cloudTeacherAbsences = await resA.json();
+      } catch (_) {}
+
+      if (navLevel === "SUBMENU" && getActiveGameItem()?.isCalendar) renderCalendarUI();
+      if (navLevel === "SUBMENU" && getActiveGameItem()?.isTeachers) renderTeachersUI();
+    }
+
+    /* Stan kalendarza */
+    const nowDateInit = new Date();
+    let calYear = nowDateInit.getFullYear();
+    let calMonth = nowDateInit.getMonth(); // 0..11
+    let calSelectedIso = formatIsoLocal(nowDateInit);
+    let calFocusArea = "GRID"; // "GRID" | "START_BTN"
+
+    const calGridEl = document.getElementById("cal-grid");
+    const calMonthTitleEl = document.getElementById("cal-month-title");
+    const calDetailsLabelEl = document.getElementById("cal-selected-date-label");
+    const calDetailsListEl = document.getElementById("cal-details-list");
+
+    const MONTHS_PL_NOM = [
+      "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
+      "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
+    ];
+
+    function renderCalendarDetails(isoDate) {
+      if (!calDetailsLabelEl || !calDetailsListEl) return;
+      const [y, m, d] = isoDate.split("-");
+      calDetailsLabelEl.textContent = `Dzień: ${d}.${m}.${y}`;
+
+      const holidays = getHolidaysForDate(isoDate);
+      const absences = getAbsencesForDate(isoDate);
+
+      if (holidays.length === 0 && absences.length === 0) {
+        calDetailsListEl.innerHTML = `
+          <div class="cal-event-card">
+            <div class="cal-event-tag" style="color:#7ec8ff;">Brak zmian w planie</div>
+            <div class="cal-event-title">Normalny dzień zajęć</div>
+            <div class="cal-event-meta">Brak zgłoszonych dni wolnych oraz nieobecności nauczycieli w tym terminie.</div>
+          </div>
+        `;
+        return;
+      }
+
+      const holHtml = holidays.map((h) => `
+        <div class="cal-event-card holiday">
+          <div class="cal-event-tag">Dzień wolny od zajęć</div>
+          <div class="cal-event-title">${h.title}</div>
+          <div class="cal-event-meta">Termin: ${h.date_from === h.date_to ? h.date_from : `${h.date_from} – ${h.date_to}`}</div>
+        </div>
+      `).join("");
+
+      const absHtml = absences.map((a) => `
+        <div class="cal-event-card absence">
+          <div class="cal-event-tag">Nieobecność nauczyciela</div>
+          <div class="cal-event-title">${a.teacher_name}</div>
+          <div class="cal-event-meta">
+            Godziny: <strong>${a.all_day ? "Cały dzień" : `${a.time_from} – ${a.time_to}`}</strong><br/>
+            Okres: ${a.date_from === a.date_to ? a.date_from : `${a.date_from} – ${a.date_to}`}
+            ${a.note ? `<br/>Uwaga: ${a.note}` : ""}
+          </div>
+        </div>
+      `).join("");
+
+      calDetailsListEl.innerHTML = holHtml + absHtml;
+    }
+
+    function renderCalendarUI() {
+      if (!calGridEl || !calMonthTitleEl) return;
+      calMonthTitleEl.textContent = `${MONTHS_PL_NOM[calMonth]} ${calYear}`;
+
+      const firstDayOfMonth = new Date(calYear, calMonth, 1);
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      // Poniedziałek = 0 ... Niedziela = 6
+      const startOffset = (firstDayOfMonth.getDay() + 6) % 7;
+      const todayIso = formatIsoLocal(new Date());
+
+      let html = "";
+      for (let i = 0; i < startOffset; i++) {
+        html += `<div class="cal-day-cell empty"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const iso = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const holidays = getHolidaysForDate(iso);
+        const absences = getAbsencesForDate(iso);
+        const isToday = iso === todayIso;
+        const isSelected = iso === calSelectedIso;
+
+        const classes = ["cal-day-cell"];
+        if (isToday) classes.push("is-today");
+        if (holidays.length) classes.push("has-holiday");
+        if (absences.length) classes.push("has-absence");
+        if (isSelected) classes.push("selected");
+        if (isSelected && calFocusArea === "GRID") classes.push("pad-focused");
+
+        html += `
+          <div class="${classes.join(" ")}" data-iso="${iso}">
+            <span class="cal-day-num">${day}</span>
+            <div class="cal-day-dots">
+              ${holidays.length ? `<i class="cal-dot holiday" title="Dzień wolny"></i>` : ""}
+              ${absences.length ? `<i class="cal-dot absence" title="Nieobecności"></i><span class="cal-abs-count">${absences.length}</span>` : ""}
+            </div>
+          </div>
+        `;
+      }
+
+      calGridEl.innerHTML = html;
+
+      Array.from(calGridEl.querySelectorAll(".cal-day-cell[data-iso]")).forEach((cell) => {
+        cell.addEventListener("click", () => {
+          calFocusArea = "GRID";
+          calSelectedIso = cell.getAttribute("data-iso");
+          playCustomWav("move");
+          renderCalendarUI();
+        });
+      });
+
+      const startBtnEl = document.getElementById("sub-start-btn");
+      if (startBtnEl) startBtnEl.classList.toggle("focused", calFocusArea === "START_BTN");
+
+      renderCalendarDetails(calSelectedIso);
+    }
+
+    function shiftCalendarSelectedDay(deltaDays) {
+      const [y, m, d] = calSelectedIso.split("-").map(Number);
+      const next = new Date(y, m - 1, d + deltaDays);
+      calYear = next.getFullYear();
+      calMonth = next.getMonth();
+      calSelectedIso = formatIsoLocal(next);
+      playCustomWav("move");
+      renderCalendarUI();
+    }
+
+    document.getElementById("cal-prev-month")?.addEventListener("click", () => {
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      calSelectedIso = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-01`;
+      playCustomWav("move");
+      renderCalendarUI();
+    });
+
+    document.getElementById("cal-next-month")?.addEventListener("click", () => {
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      calSelectedIso = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-01`;
+      playCustomWav("move");
+      renderCalendarUI();
+    });
+
+    document.getElementById("cal-today-btn")?.addEventListener("click", () => {
+      const now = new Date();
+      calYear = now.getFullYear();
+      calMonth = now.getMonth();
+      calSelectedIso = formatIsoLocal(now);
+      playCustomWav("select");
+      renderCalendarUI();
+    });
+
+    document.getElementById("cal-refresh-btn")?.addEventListener("click", () => {
+      playCustomWav("select");
+      fetchCloudScheduleData();
+    });
+    
+
+    /* ============================================================================
+       7F. APLIKACJA "KONTAKT" (NAWIGACJA PO MEDIACH SPOŁECZNOŚCIOWYCH I SCROLL)
+       ============================================================================ */
+    let contactFocusIdx = 0; // -1 = lewy przycisk Start | 0 = Facebook | 1 = Instagram | 2 = YouTube
+
+    const contactScrollWrapEl = document.getElementById("contact-scroll-wrap");
+    const contactCardsEls = () => Array.from(document.querySelectorAll("#zsa-contact-view .contact-social-card"));
+
+    function updateContactFocusUI() {
+      const startBtnEl = document.getElementById("sub-start-btn");
+      if (startBtnEl) startBtnEl.classList.toggle("focused", contactFocusIdx === -1);
+
+      contactCardsEls().forEach((card, idx) => {
+        const active = idx === contactFocusIdx;
+        card.classList.toggle("pad-focused", active);
+        if (active) {
+          card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      });
+    }
+
+    contactCardsEls().forEach((card, idx) => {
+      card.addEventListener("mouseenter", () => {
+        if (navLevel === "SUBMENU" && getActiveGameItem()?.isContact) {
+          contactFocusIdx = idx;
+          updateContactFocusUI();
+        }
+      });
+      card.addEventListener("click", () => {
+        const url = card.getAttribute("data-url");
+        const title = card.getAttribute("data-title") || "Kontakt ZSA";
+        if (url) {
+          launchUrlWithSleepDelay(url, title);
+        }
+      });
+    });
 
     /* Wykrywanie urządzeń mobilnych */
+    /* Wykrywanie prawdziwych telefonów i tabletów + orientacja Portrait / Landscape */
     function detectRealMobile() {
-      const uaMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      const coarsePointer = window.matchMedia("(pointer: coarse) and (hover: none)").matches;
-      document.body.classList.toggle("is-mobile", Boolean(uaMobile && coarsePointer));
+      const ua = navigator.userAgent || "";
+      const hasTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+      const isIPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+      const uaMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Tablet|PlayBook|Silk/i.test(ua);
+      const uaDataMobile = Boolean(navigator.userAgentData && navigator.userAgentData.mobile);
+      const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+      const noHover = window.matchMedia("(hover: none)").matches;
+
+      const isTouchDevice = Boolean(
+        hasTouch && (uaMobileOrTablet || isIPadOS || uaDataMobile || (coarsePointer && noHover))
+      );
+
+      const shortestSide = Math.min(window.innerWidth, window.innerHeight);
+      const isTablet = isTouchDevice && (isIPadOS || /iPad|Tablet/i.test(ua) || shortestSide >= 600);
+      const isPortrait = window.innerHeight > window.innerWidth;
+
+      document.body.classList.toggle("is-mobile", isTouchDevice);
+      document.body.classList.toggle("is-tablet", isTablet);
+      document.body.classList.toggle("is-portrait", isTouchDevice && isPortrait);
+      document.body.classList.toggle("is-landscape", isTouchDevice && !isPortrait);
+
+      return { isTouchDevice, isTablet, isPortrait };
     }
+
+    function isPortraitTouchLayout() {
+      return document.body.classList.contains("is-mobile") && document.body.classList.contains("is-portrait");
+    }
+
     detectRealMobile();
+
+
 
     /* ============================================================================
        8. MASZYNA STANÓW NAWIGACJI PS4 (ZUNIFIKOWANA: KLAWIATURA, MYSZ, DOTYK, PAD)
@@ -4035,13 +4412,84 @@ const TEACHERS_PDF_DB = [
 
     let cachedTileStep = 178;
     let cachedFocusX = 240;
+    let cachedTileStepY = 106;
+    let cachedFocusY = 165;
 
     function refreshLayoutMetrics() {
-      const styles = getComputedStyle(document.documentElement);
-      const tileSize = parseFloat(styles.getPropertyValue("--tile-size")) || 168;
-      const tileGap = parseFloat(styles.getPropertyValue("--tile-gap")) || 10;
-      cachedFocusX = parseFloat(styles.getPropertyValue("--focus-x")) || 240;
-      cachedTileStep = tileSize + tileGap;
+      const { isTouchDevice, isTablet, isPortrait } = detectRealMobile();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const bodyStyle = document.body.style;
+
+      if (isTouchDevice) {
+        let tileSize, activeSize, bottomBar, tileGap, focusX, focusY, ribbonY, previewSize, portraitX;
+
+        if (isPortrait) {
+          if (isTablet) {
+            tileSize = Math.round(Math.max(108, Math.min(140, vw * 0.17)));
+            activeSize = Math.round(Math.max(150, Math.min(194, vw * 0.24)));
+            bottomBar = 36;
+            tileGap = 16;
+            focusY = Math.round(Math.max(110, Math.min(200, vh * 0.20)));
+            portraitX = Math.round(Math.max(32, vw * 0.06));
+          } else {
+            tileSize = Math.round(Math.max(76, Math.min(102, vw * 0.22)));
+            activeSize = Math.round(Math.max(106, Math.min(142, vw * 0.31)));
+            bottomBar = 30;
+            tileGap = 14;
+            focusY = Math.round(Math.max(84, Math.min(165, vh * 0.19)));
+            portraitX = Math.round(Math.max(14, vw * 0.05));
+          }
+          focusX = portraitX;
+          ribbonY = 0;
+          previewSize = tileSize;
+        } else {
+          if (isTablet) {
+            tileSize = Math.round(Math.max(120, Math.min(156, vh * 0.21)));
+            activeSize = Math.round(Math.max(170, Math.min(220, vh * 0.30)));
+            bottomBar = 38;
+            tileGap = 10;
+            focusX = Math.round(Math.max(80, Math.min(165, vw * 0.12)));
+            ribbonY = Math.round(Math.max(96, Math.min(144, vh * 0.19)));
+          } else {
+            tileSize = Math.round(Math.max(78, Math.min(122, vh * 0.27)));
+            activeSize = Math.round(Math.max(110, Math.min(168, vh * 0.38)));
+            bottomBar = 28;
+            tileGap = 8;
+            focusX = Math.round(Math.max(30, Math.min(100, vw * 0.09)));
+            ribbonY = Math.round(Math.max(58, Math.min(100, vh * 0.19)));
+          }
+          focusY = ribbonY;
+          portraitX = focusX;
+          previewSize = Math.round(tileSize * 0.78);
+        }
+
+        bodyStyle.setProperty("--tile-size", `${tileSize}px`);
+        bodyStyle.setProperty("--tile-active-size", `${activeSize}px`);
+        bodyStyle.setProperty("--tile-bottom-bar", `${bottomBar}px`);
+        bodyStyle.setProperty("--tile-gap", `${tileGap}px`);
+        bodyStyle.setProperty("--focus-x", `${focusX}px`);
+        bodyStyle.setProperty("--focus-y", `${focusY}px`);
+        bodyStyle.setProperty("--ribbon-y", `${ribbonY}px`);
+        bodyStyle.setProperty("--preview-tile-size", `${previewSize}px`);
+        bodyStyle.setProperty("--portrait-x", `${portraitX}px`);
+
+        cachedFocusX = focusX;
+        cachedFocusY = focusY;
+        cachedTileStep = tileSize + tileGap;
+        cachedTileStepY = tileSize + tileGap;
+      } else {
+        ["--tile-size", "--tile-active-size", "--tile-bottom-bar", "--tile-gap", "--focus-x", "--focus-y", "--ribbon-y", "--preview-tile-size", "--portrait-x"]
+          .forEach((prop) => bodyStyle.removeProperty(prop));
+
+        const styles = getComputedStyle(document.documentElement);
+        const tileSize = parseFloat(styles.getPropertyValue("--tile-size")) || 168;
+        const tileGap = parseFloat(styles.getPropertyValue("--tile-gap")) || 10;
+        cachedFocusX = parseFloat(styles.getPropertyValue("--focus-x")) || 240;
+        cachedTileStep = tileSize + tileGap;
+        cachedFocusY = 162;
+        cachedTileStepY = cachedTileStep;
+      }
     }
 
     const mainTrackEl = document.getElementById("main-ribbon-track");
@@ -4104,7 +4552,7 @@ const TEACHERS_PDF_DB = [
       return tile;
     }
 
-    function buildRibbons() {
+  function buildRibbons() {
       refreshLayoutMetrics();
       mainTrackEl.innerHTML = "";
       MAIN_RIBBON_ITEMS.forEach((item, idx) => {
@@ -4112,13 +4560,11 @@ const TEACHERS_PDF_DB = [
           if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
           unlockAudioOnInteraction();
 
-          // Kliknięcie przygaszonej wstęgi w Submenu cofa do wstęgi
           if (navLevel === "SUBMENU") {
             navigateUp(true);
             return;
           }
 
-          // Kliknięcie głównej wstęgi podczas otwartego folderu wraca na główną wstęgę
           if (navLevel === "FOLDER") {
             navLevel = "MAIN";
             mainIndex = clickedIdx;
@@ -4127,7 +4573,6 @@ const TEACHERS_PDF_DB = [
             return;
           }
 
-          // Kliknięcie nieaktywnego kafelka — przesuń na niego fokus
           if (mainIndex !== clickedIdx) {
             mainIndex = clickedIdx;
             playCustomWav("move");
@@ -4135,14 +4580,15 @@ const TEACHERS_PDF_DB = [
             return;
           }
 
-          // Kliknięcie już aktywnego kafelka
           if (
             clickedItem.type === "folder" ||
             clickedItem.isTimetable ||
             clickedItem.isWhatsNew ||
             clickedItem.isDirections ||
             clickedItem.isTeachers ||
-            clickedItem.isDocs
+            clickedItem.isDocs ||
+            clickedItem.isCalendar ||
+            clickedItem.isContact
           ) {
             navigateDown();
           } else if (evt && evt.target.closest(".tile-bottom-bar")) {
@@ -4201,6 +4647,9 @@ const TEACHERS_PDF_DB = [
 
       const zsaDirectionsViewEl = document.getElementById("zsa-directions-view");
       const zsaTeachersViewEl = document.getElementById("zsa-teachers-view");
+      const zsaDocsViewEl = document.getElementById("zsa-docs-view");
+      const zsaCalendarViewEl = document.getElementById("zsa-calendar-view");
+      const zsaContactViewEl = document.getElementById("zsa-contact-view");
       const gameInfoViewEl = document.getElementById("game-info-view");
       const zsaNewsViewEl = document.getElementById("zsa-news-view");
       const zsaTimetableViewEl = document.getElementById("zsa-timetable-view");
@@ -4208,16 +4657,18 @@ const TEACHERS_PDF_DB = [
       const leftNavLabelEl = document.getElementById("sub-left-nav-label");
       const startBtnEl = document.getElementById("sub-start-btn");
       const startBtnTextEl = document.getElementById("sub-start-btn-text");
-      const zsaDocsViewEl = document.getElementById("zsa-docs-view");
-      if (zsaDocsViewEl) zsaDocsViewEl.style.display = "none";
 
+      gameInfoViewEl.style.display = "none";
+      zsaNewsViewEl.style.display = "none";
+      zsaTimetableViewEl.style.display = "none";
+      zsaDirectionsViewEl.style.display = "none";
       if (zsaTeachersViewEl) zsaTeachersViewEl.style.display = "none";
+      if (zsaDocsViewEl) zsaDocsViewEl.style.display = "none";
+      if (zsaCalendarViewEl) zsaCalendarViewEl.style.display = "none";
+      if (zsaContactViewEl) zsaContactViewEl.style.display = "none";
 
       if (item.isWhatsNew) {
-        gameInfoViewEl.style.display = "none";
         zsaNewsViewEl.style.display = "flex";
-        zsaTimetableViewEl.style.display = "none";
-        zsaDirectionsViewEl.style.display = "none";
         rightLabelEl.textContent = "Aktualności 2026";
         leftNavLabelEl.textContent = "Wieści ZSA";
         startBtnTextEl.textContent = "Portal ZSA";
@@ -4225,10 +4676,7 @@ const TEACHERS_PDF_DB = [
         renderZsaNewsList();
         fetchLatestZsaNews2026();
       } else if (item.isTimetable) {
-        gameInfoViewEl.style.display = "none";
-        zsaNewsViewEl.style.display = "none";
         zsaTimetableViewEl.style.display = "flex";
-        zsaDirectionsViewEl.style.display = "none";
         rightLabelEl.textContent = "Rozkład Zajęć 2026";
         leftNavLabelEl.textContent = "Wybór Szkoły i Klasy";
         startBtnTextEl.textContent = "Pełny PDF";
@@ -4236,9 +4684,6 @@ const TEACHERS_PDF_DB = [
         ttFocusArea = "MAIN";
         renderTimetableUI();
       } else if (item.isDirections) {
-        gameInfoViewEl.style.display = "none";
-        zsaNewsViewEl.style.display = "none";
-        zsaTimetableViewEl.style.display = "none";
         zsaDirectionsViewEl.style.display = "flex";
         rightLabelEl.textContent = "Technikum i Liceum";
         leftNavLabelEl.textContent = "Oferta Edukacyjna";
@@ -4247,10 +4692,6 @@ const TEACHERS_PDF_DB = [
         dirFocusIdx = 0;
         updateDirectionsFocusUI();
       } else if (item.isTeachers) {
-        gameInfoViewEl.style.display = "none";
-        zsaNewsViewEl.style.display = "none";
-        zsaTimetableViewEl.style.display = "none";
-        zsaDirectionsViewEl.style.display = "none";
         if (zsaTeachersViewEl) zsaTeachersViewEl.style.display = "flex";
         rightLabelEl.textContent = "Godziny i Sale Nauczycieli (PDF)";
         leftNavLabelEl.textContent = "Wykaz Nauczycieli";
@@ -4258,11 +4699,8 @@ const TEACHERS_PDF_DB = [
         tchStep = "LIST";
         tchFocusArea = "MAIN";
         renderTeachersUI();
-        } else if (item.isDocs) {
-        gameInfoViewEl.style.display = "none";
-        zsaNewsViewEl.style.display = "none";
-        zsaTimetableViewEl.style.display = "none";
-        zsaDirectionsViewEl.style.display = "none";
+        fetchCloudScheduleData();
+      } else if (item.isDocs) {
         if (zsaDocsViewEl) zsaDocsViewEl.style.display = "flex";
         rightLabelEl.textContent = "Statuty, Regulaminy i Programy";
         leftNavLabelEl.textContent = "Dokumentacja ZSA";
@@ -4270,11 +4708,25 @@ const TEACHERS_PDF_DB = [
         docStep = "LIST";
         docFocusArea = "MAIN";
         renderDocsUI();
+      } else if (item.isCalendar) {
+        if (zsaCalendarViewEl) zsaCalendarViewEl.style.display = "flex";
+        rightLabelEl.textContent = "Kalendarz ZSA";
+        leftNavLabelEl.textContent = "Dni Wolne & Nieobecności";
+        startBtnTextEl.textContent = "Odśwież Dane";
+        calFocusArea = "GRID";
+        renderCalendarUI();
+        fetchCloudScheduleData();
+      } else if (item.isContact) {
+        if (zsaContactViewEl) zsaContactViewEl.style.display = "flex";
+        rightLabelEl.textContent = "Dane Kontaktowe";
+        leftNavLabelEl.textContent = "Kontakt & Social Media";
+        startBtnTextEl.textContent = "Portal ZSA";
+        contactFocusIdx = 0;
+        if (contactScrollWrapEl) contactScrollWrapEl.scrollTop = 0;
+        updateContactFocusUI();
+        if (typeof syncInputPromptsUI === "function") syncInputPromptsUI();
       } else {
         gameInfoViewEl.style.display = "flex";
-        zsaNewsViewEl.style.display = "none";
-        zsaTimetableViewEl.style.display = "none";
-        zsaDirectionsViewEl.style.display = "none";
         rightLabelEl.textContent = "Informacje";
         leftNavLabelEl.textContent = "Informacje o grze";
         startBtnTextEl.textContent = "Start";
@@ -4291,26 +4743,40 @@ const TEACHERS_PDF_DB = [
     }
 
     function syncUiState() {
-      const mainTranslateX = cachedFocusX - mainIndex * cachedTileStep;
-      mainTrackEl.style.transform = `translate3d(${Math.round(mainTranslateX)}px, 0, 0)`;
+      const verticalMode = isPortraitTouchLayout();
+
+      if (verticalMode) {
+        const mainTranslateY = cachedFocusY - mainIndex * cachedTileStepY;
+        mainTrackEl.style.transform = `translate3d(0, ${Math.round(mainTranslateY)}px, 0)`;
+
+        if (navLevel === "MAIN") {
+          folderTrackEl.style.transform = `translate3d(0, ${Math.round(cachedFocusY)}px, 0)`;
+        } else {
+          const folderTranslateY = cachedFocusY - folderIndex * cachedTileStepY;
+          folderTrackEl.style.transform = `translate3d(0, ${Math.round(folderTranslateY)}px, 0)`;
+        }
+      } else {
+        const mainTranslateX = cachedFocusX - mainIndex * cachedTileStep;
+        mainTrackEl.style.transform = `translate3d(${Math.round(mainTranslateX)}px, 0, 0)`;
+
+        if (navLevel === "MAIN") {
+          folderTrackEl.style.transform = `translate3d(${Math.round(cachedFocusX)}px, 0, 0)`;
+        } else {
+          const folderTranslateX = cachedFocusX - folderIndex * cachedTileStep;
+          folderTrackEl.style.transform = `translate3d(${Math.round(folderTranslateX)}px, 0, 0)`;
+        }
+      }
 
       Array.from(mainTrackEl.children).forEach((el, idx) => {
         el.classList.toggle("active", idx === mainIndex);
       });
-
-      if (navLevel === "MAIN") {
-        folderTrackEl.style.transform = `translate3d(${Math.round(cachedFocusX)}px, 0, 0)`;
-      } else {
-        const folderTranslateX = cachedFocusX - folderIndex * cachedTileStep;
-        folderTrackEl.style.transform = `translate3d(${Math.round(folderTranslateX)}px, 0, 0)`;
-      }
 
       Array.from(folderTrackEl.children).forEach((el, idx) => {
         el.classList.toggle("active", navLevel !== "MAIN" && idx === folderIndex);
       });
 
       const onFolderTile = MAIN_RIBBON_ITEMS[mainIndex]?.type === "folder";
-      document.body.classList.toggle("folder-preview", navLevel === "MAIN" && onFolderTile);
+      document.body.classList.toggle("folder-preview", !verticalMode && navLevel === "MAIN" && onFolderTile);
       document.body.classList.toggle("state-folder", navLevel === "FOLDER");
       document.body.classList.toggle("state-submenu", navLevel === "SUBMENU");
       document.body.classList.toggle("from-folder", navLevel === "SUBMENU" && enteredSubmenuFromFolder);
@@ -4321,9 +4787,8 @@ const TEACHERS_PDF_DB = [
       } else {
         clearTimeout(newsImageDwellTimer);
         pauseBackdropVideo();
-        if (tchSearchInputEl && document.activeElement === tchSearchInputEl) {
-          tchSearchInputEl.blur();
-        }
+        if (tchSearchInputEl && document.activeElement === tchSearchInputEl) tchSearchInputEl.blur();
+        if (docSearchInputEl && document.activeElement === docSearchInputEl) docSearchInputEl.blur();
       }
       syncBackgroundMusic();
     }
@@ -4334,6 +4799,19 @@ const TEACHERS_PDF_DB = [
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
+
+        if (activeItem?.isContact) {
+          if (contactFocusIdx > 0) contactFocusIdx--;
+          else contactFocusIdx = -1;
+          playCustomWav("move");
+          updateContactFocusUI();
+          return;
+        }
+
+        if (activeItem?.isCalendar) {
+          if (calFocusArea === "GRID") shiftCalendarSelectedDay(-1);
+          return;
+        }
 
         if (activeItem?.isDocs) {
           if (docFocusArea === "BACK_BTN" || docFocusArea === "SEARCH_INPUT") {
@@ -4449,10 +4927,31 @@ const TEACHERS_PDF_DB = [
     function navigateRight() {
       if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
-      
+
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
-        
+
+        if (activeItem?.isContact) {
+          const maxIdx = contactCardsEls().length - 1;
+          if (contactFocusIdx < maxIdx) {
+            contactFocusIdx++;
+            playCustomWav("move");
+            updateContactFocusUI();
+          }
+          return;
+        }
+
+        if (activeItem?.isCalendar) {
+          if (calFocusArea === "START_BTN") {
+            calFocusArea = "GRID";
+            playCustomWav("move");
+            renderCalendarUI();
+          } else {
+            shiftCalendarSelectedDay(1);
+          }
+          return;
+        }
+
         if (activeItem?.isDocs) {
           if (docFocusArea === "START_BTN") {
             docFocusArea = docStep === "READER" ? "OPEN_FILE_BTN" : "MAIN";
@@ -4560,7 +5059,29 @@ const TEACHERS_PDF_DB = [
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
-        
+
+        if (activeItem?.isContact) {
+          if (contactFocusIdx === -1) {
+            contactFocusIdx = 0;
+            playCustomWav("move");
+            updateContactFocusUI();
+          } else if (contactScrollWrapEl) {
+            contactScrollWrapEl.scrollBy({ top: 150, behavior: "smooth" });
+            playCustomWav("move");
+          }
+          return;
+        }
+
+        if (activeItem?.isCalendar) {
+          if (calFocusArea === "START_BTN") {
+            calFocusArea = "GRID";
+            renderCalendarUI();
+          } else {
+            shiftCalendarSelectedDay(7);
+          }
+          return;
+        }
+
         if (activeItem?.isDocs) {
           if (docFocusArea === "SEARCH_INPUT" || docFocusArea === "BACK_BTN") {
             if (docSearchInputEl) docSearchInputEl.blur();
@@ -4688,7 +5209,18 @@ const TEACHERS_PDF_DB = [
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
-        
+
+        if (activeItem?.isContact && !isBackButton && contactScrollWrapEl && contactScrollWrapEl.scrollTop > 10) {
+          contactScrollWrapEl.scrollBy({ top: -150, behavior: "smooth" });
+          playCustomWav("move");
+          return;
+        }
+
+        if (activeItem?.isCalendar && !isBackButton) {
+          shiftCalendarSelectedDay(-7);
+          return;
+        }
+
         if (activeItem?.isDocs) {
           if (docStep === "READER") {
             if (isBackButton) {
@@ -4717,7 +5249,6 @@ const TEACHERS_PDF_DB = [
           }
         }
 
-        /* Kierunki Kształcenia */
         if (activeItem?.isDirections) {
           if (dirStep === "DETAIL") {
             if (isBackButton) {
@@ -4746,7 +5277,6 @@ const TEACHERS_PDF_DB = [
           }
         }
 
-        /* Co nowego */
         if (activeItem?.isWhatsNew && !isBackButton) {
           if (whatsNewFocusIndex > 0) {
             whatsNewFocusIndex--;
@@ -4761,7 +5291,6 @@ const TEACHERS_PDF_DB = [
           }
         }
 
-        /* Plan Lekcji */
         if (activeItem?.isTimetable) {
           if (ttStep === "SCHEDULE") {
             if (!isBackButton && ttScheduleStepEl.scrollTop > 10) {
@@ -4811,7 +5340,6 @@ const TEACHERS_PDF_DB = [
           }
         }
 
-        /* Plan Nauczycieli */
         if (activeItem?.isTeachers) {
           if (tchStep === "SCHEDULE") {
             if (!isBackButton && tchScheduleStepEl.scrollTop > 10) {
@@ -4883,8 +5411,10 @@ const TEACHERS_PDF_DB = [
           curr.isWhatsNew ||
           curr.isTimetable ||
           curr.isDirections ||
-          curr.isTeachers || 
-          curr.isDocs
+          curr.isTeachers ||
+          curr.isDocs ||
+          curr.isCalendar ||
+          curr.isContact
         ) {
           navigateDown();
           return;
@@ -4893,8 +5423,25 @@ const TEACHERS_PDF_DB = [
 
       const item = getActiveGameItem();
 
-      
-      /* Obsługa zatwierdzenia X / Enter / Spacja wewnątrz Sub-Menu "Dokumentacja" */
+      if (navLevel === "SUBMENU" && item?.isContact) {
+        if (contactFocusIdx >= 0) {
+          const card = contactCardsEls()[contactFocusIdx];
+          if (card) {
+            const url = card.getAttribute("data-url");
+            const title = card.getAttribute("data-title") || "Kontakt ZSA";
+            if (url) launchUrlWithSleepDelay(url, title);
+          }
+          return;
+        }
+      }
+
+      if (navLevel === "SUBMENU" && item?.isCalendar) {
+        triggerPressAnimation();
+        playCustomWav("select");
+        fetchCloudScheduleData();
+        return;
+      }
+
       if (navLevel === "SUBMENU" && item?.isDocs) {
         const currentDoc = DOCS_LIBRARY_DB.find((d) => d.id === docSelectedId) || DOCS_LIBRARY_DB[docFocusIdx] || DOCS_LIBRARY_DB[0];
         if (docFocusArea === "START_BTN" || docFocusArea === "OPEN_FILE_BTN") {
@@ -4921,7 +5468,6 @@ const TEACHERS_PDF_DB = [
         }
       }
 
-      /* Kierunki Kształcenia */
       if (navLevel === "SUBMENU" && item?.isDirections) {
         if (dirStep === "LIST") {
           if (dirFocusIdx >= 0) {
@@ -4942,7 +5488,6 @@ const TEACHERS_PDF_DB = [
         }
       }
 
-      /* Co nowego */
       if (navLevel === "SUBMENU" && item?.isWhatsNew) {
         if (whatsNewFocusIndex === -1) {
           playCustomWav("select");
@@ -4957,7 +5502,6 @@ const TEACHERS_PDF_DB = [
         }
       }
 
-      /* Plan Lekcji */
       if (navLevel === "SUBMENU" && item?.isTimetable) {
         if (ttFocusArea === "PDF_BTN") {
           triggerPressAnimation();
@@ -4989,7 +5533,6 @@ const TEACHERS_PDF_DB = [
         }
       }
 
-      /* Plan Nauczycieli */
       if (navLevel === "SUBMENU" && item?.isTeachers) {
         if (tchFocusArea === "PDF_BTN") {
           triggerPressAnimation();
@@ -5028,7 +5571,6 @@ const TEACHERS_PDF_DB = [
       }
     }
 
-    /* Synchronizacja hovera myszki na przyciskach Submenu */
     const subStartBtnEl = document.getElementById("sub-start-btn");
     subStartBtnEl.addEventListener("mouseenter", () => {
       if (navLevel !== "SUBMENU") return;
@@ -5046,11 +5588,34 @@ const TEACHERS_PDF_DB = [
       } else if (item?.isTeachers) {
         tchFocusArea = "PDF_BTN";
         syncTeachersFocusVisuals();
+      } else if (item?.isDocs) {
+        docFocusArea = "START_BTN";
+        syncDocsFocusVisuals();
+      } else if (item?.isCalendar) {
+        calFocusArea = "START_BTN";
+        renderCalendarUI();
+      } else if (item?.isContact) {
+        contactFocusIdx = -1;
+        updateContactFocusUI();
       }
     });
 
     subStartBtnEl.addEventListener("click", () => {
       const item = getActiveGameItem();
+      if (item?.isCalendar) {
+        triggerPressAnimation();
+        playCustomWav("select");
+        fetchCloudScheduleData();
+        return;
+      }
+      if (item?.isDocs) {
+        const currentDoc = DOCS_LIBRARY_DB.find((d) => d.id === docSelectedId) || DOCS_LIBRARY_DB[docFocusIdx] || DOCS_LIBRARY_DB[0];
+        if (currentDoc?.file) {
+          triggerPressAnimation();
+          launchUrlWithSleepDelay(currentDoc.file, currentDoc.title);
+        }
+        return;
+      }
       if (item && item.url) {
         triggerPressAnimation();
         launchUrlWithSleepDelay(item.url, item.title);
@@ -5107,7 +5672,6 @@ const TEACHERS_PDF_DB = [
       });
     }
 
-    /* Obsługa klawiatury (z pełnym zabezpieczeniem pola wyszukiwarki) */
     window.addEventListener("keydown", (e) => {
       if (isSystemSleeping) {
         e.preventDefault();
@@ -5116,20 +5680,16 @@ const TEACHERS_PDF_DB = [
       }
       if (performance.now() < wakeUpCooldownUntil) return;
 
-      // Gdy użytkownik pisze w polu wyszukiwania nauczyciela, nie przechwytuj liter WASD ani Backspace
       const activeTag = document.activeElement ? document.activeElement.tagName : "";
       if (activeTag === "INPUT" || activeTag === "TEXTAREA") {
-        if (e.key === "ArrowDown" || e.key === "Enter") {
+        if (e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
           e.preventDefault();
           document.activeElement.blur();
           tchFocusArea = "MAIN";
+          docFocusArea = "MAIN";
           playCustomWav("move");
           syncTeachersFocusVisuals();
-        } else if (e.key === "Escape") {
-          e.preventDefault();
-          document.activeElement.blur();
-          tchFocusArea = "MAIN";
-          syncTeachersFocusVisuals();
+          syncDocsFocusVisuals();
         }
         return;
       }
@@ -5149,17 +5709,16 @@ const TEACHERS_PDF_DB = [
       }
     });
 
-    /* Obsługa kółka myszy (bez wyrzucania z przewijanych list wewnątrz Submenu) */
     let lastWheelTime = 0;
     window.addEventListener("wheel", (e) => {
       if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
 
       if (navLevel === "SUBMENU") {
         const scrollable = e.target.closest(
-          ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid"
+          ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid, .cal-board, .cal-details-panel, .contact-scroll-wrap"
         );
         if (scrollable) {
-          return; // Pozwól przeglądarce płynnie przewijać listę/tabelę
+          return;
         }
         const activeItem = getActiveGameItem();
         if (
@@ -5167,7 +5726,9 @@ const TEACHERS_PDF_DB = [
           activeItem?.isTimetable ||
           activeItem?.isDirections ||
           activeItem?.isTeachers ||
-          activeItem?.isDocs
+          activeItem?.isDocs ||
+          activeItem?.isCalendar ||
+          activeItem?.isContact
         ) {
           return;
         }
@@ -5193,12 +5754,20 @@ const TEACHERS_PDF_DB = [
       }
     }, { passive: true });
 
-    /* Zunifikowana obsługa gestów dotykowych (Swipe) oraz przycisków mobilnych */
     let touchStartX = 0;
     let touchStartY = 0;
     let touchLastX = 0;
     let touchLastY = 0;
     let touchMovedInScrollable = false;
+    let ignoreClickUntil = 0;
+
+    // Blokuje przypadkowe kliknięcie kafelka natychmiast po zakończeniu gestu swipe
+    window.addEventListener("click", (e) => {
+      if (performance.now() < ignoreClickUntil) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    }, true);
 
     window.addEventListener("touchstart", (e) => {
       if (isSystemSleeping || e.touches.length !== 1) return;
@@ -5206,9 +5775,11 @@ const TEACHERS_PDF_DB = [
       touchStartY = touchLastY = e.touches[0].clientY;
 
       const scrollable = e.target.closest(
-        ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid"
+        ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid, .cal-board, .cal-details-panel, .contact-scroll-wrap, .cal-layout"
       );
-      touchMovedInScrollable = Boolean(scrollable && scrollable.scrollHeight > scrollable.clientHeight);
+      touchMovedInScrollable = Boolean(
+        scrollable && (scrollable.scrollHeight > scrollable.clientHeight || scrollable.scrollWidth > scrollable.clientWidth)
+      );
     }, { passive: true });
 
     window.addEventListener("touchmove", (e) => {
@@ -5219,16 +5790,37 @@ const TEACHERS_PDF_DB = [
       const curY = e.touches[0].clientY;
       const dx = curX - touchLastX;
       const dy = curY - touchLastY;
+      const portraitMode = isPortraitTouchLayout();
 
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (Math.abs(dx) >= 52) {
-          if (dx < 0) navigateRight();
-          else navigateLeft();
+      if (portraitMode && navLevel !== "SUBMENU") {
+        // W trybie Portrait na wstędze: pionowy swipe przewija kafelki, poziomy otwiera/cofa
+        if (Math.abs(dy) > Math.abs(dx)) {
+          if (Math.abs(dy) >= 44) {
+            ignoreClickUntil = performance.now() + 260;
+            if (dy < 0) navigateRight();
+            else navigateLeft();
+            touchLastY = curY;
+            touchLastX = curX;
+          }
+        } else if (Math.abs(dx) >= 58) {
+          ignoreClickUntil = performance.now() + 260;
+          if (dx < 0) navigateDown();
+          else navigateUp(true);
           touchLastX = curX;
           touchLastY = curY;
         }
       } else {
-        if (Math.abs(dy) >= 48) {
+        // Tryb Landscape (lub wewnątrz Submenu): poziomy swipe po wstędze, pionowy góra/dół
+        if (Math.abs(dx) > Math.abs(dy)) {
+          if (Math.abs(dx) >= 48) {
+            ignoreClickUntil = performance.now() + 260;
+            if (dx < 0) navigateRight();
+            else navigateLeft();
+            touchLastX = curX;
+            touchLastY = curY;
+          }
+        } else if (Math.abs(dy) >= 46) {
+          ignoreClickUntil = performance.now() + 260;
           if (dy < 0) navigateDown();
           else navigateUp(false);
           touchLastY = curY;
@@ -5239,10 +5831,26 @@ const TEACHERS_PDF_DB = [
 
     document.getElementById("btn-left").addEventListener("click", navigateLeft);
     document.getElementById("btn-right").addEventListener("click", navigateRight);
-    document.getElementById("btn-up").addEventListener("click", () => navigateUp(false));
-    document.getElementById("btn-down").addEventListener("click", navigateDown);
+    document.getElementById("btn-up").addEventListener("click", () => {
+      if (isPortraitTouchLayout() && navLevel !== "SUBMENU") navigateLeft();
+      else navigateUp(false);
+    });
+    document.getElementById("btn-down").addEventListener("click", () => {
+      if (isPortraitTouchLayout() && navLevel !== "SUBMENU") navigateRight();
+      else navigateDown();
+    });
     document.getElementById("btn-back").addEventListener("click", () => navigateUp(true));
     document.getElementById("btn-play").addEventListener("click", launchActiveItem);
+
+    // Płynne przeliczenie układu po obróceniu telefonu (Portrait <-> Landscape)
+    let orientationResizeTimer = null;
+    window.addEventListener("orientationchange", () => {
+      clearTimeout(orientationResizeTimer);
+      orientationResizeTimer = setTimeout(() => {
+        resizeCanvas();
+        if (typeof syncInputPromptsUI === "function") syncInputPromptsUI();
+      }, 140);
+    });
 
     /* ============================================================================
        OBSŁUGA KONTROLERA + AUTOMATYCZNE PRZEŁĄCZANIE IKON (PAD / PC / TELEFON)
@@ -5608,4 +6216,5 @@ const TEACHERS_PDF_DB = [
     buildRibbons();
     resizeCanvas();
     fetchLatestZsaNews2026();
+    fetchCloudScheduleData();
     requestAnimationFrame(mainLoop);
