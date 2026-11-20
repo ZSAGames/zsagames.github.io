@@ -40,7 +40,10 @@
         fallbackBg: "linear-gradient(135deg, #2b2d83, #8b3dff, #ff4f7a, #ff8a5b)",
         author: "Rockstar Games",
         platform: "PS5 / XBOX Series",
-        description: "Jason i Lucia zawsze czuli, że los im nie sprzyja. Jednak gdy łatwy skok kończy się katastrofą, poznają najmroczniejsze oblicze najbardziej słonecznego miasta w Ameryce i trafiają w sam środek przestępczego spisku, który swoimi mackami oplata cały stan Leonida. Jeśli chcą wyjść z tego cało, muszą na sobie polegać tak, jak jeszcze nigdy wcześniej."
+        description: "Jason i Lucia zawsze czuli, że los im nie sprzyja. Jednak gdy łatwy skok kończy się katastrofą, poznają najmroczniejsze oblicze najbardziej słonecznego miasta w Ameryce i trafiają w sam środek przestępczego spisku, który swoimi mackami oplata cały stan Leonida. Jeśli chcą wyjść z tego cało, muszą na sobie polegać tak, jak jeszcze nigdy wcześniej.",
+        isDisc: true,
+        buyUrl: "https://www.rockstargames.com/VI",
+        discKeys: ["ZSA-GTAVI-2026", "ZSA777"],
       },
       {
         id: "przygoda-davea",
@@ -270,6 +273,24 @@
               </svg>`
       }
     ];
+
+    /* Ukryta aplikacja GoldHEN (Admin) — otwierana wyłącznie z ikony ZSAGames Plus w lewym górnym rogu */
+    const GOLDHEN_APP_ITEM = {
+      id: "goldhen-app",
+      type: "system",
+      isGoldHen: true,
+      isDisc: false,
+      title: "GoldHEN",
+      subtitle: "ADMIN • PANEL SYSTEMOWY",
+      url: "",
+      cover: "ZSACover.png",
+      background: "ZSABackground.png",
+      music: "",
+      fallbackBg: "linear-gradient(135deg, #4f3a05, #140f02)",
+      author: "ZSAGames System Admin",
+      platform: "Moduł Administracyjny Orbis OS",
+      description: "Chroniony panel administratora GoldHEN. Wymaga zalogowania kontem Supabase."
+    };
 
     /* ============================================================================
        3B. LEGENDA SKRÓTÓW PRZEDMIOTÓW + BAZA PLANÓW LEKCJI Z PLIKU PDF
@@ -4150,6 +4171,7 @@ const TEACHERS_PDF_DB = [
         } catch (_) {}
         if (navLevel === "SUBMENU" && getActiveGameItem()?.isCalendar) renderCalendarUI();
         if (navLevel === "SUBMENU" && getActiveGameItem()?.isTeachers) renderTeachersUI();
+        if (typeof window.renderGoldHenUI === "function" && navLevel === "SUBMENU" && isGoldHenOpen) window.renderGoldHenUI();
         return;
       }
 
@@ -4173,10 +4195,18 @@ const TEACHERS_PDF_DB = [
       if (navLevel === "SUBMENU" && getActiveGameItem()?.isTeachers) renderTeachersUI();
     }
 
-    /* Stan kalendarza */
-    const nowDateInit = new Date();
+    /* Stan kalendarza (tylko Poniedziałek – Piątek) */
+    function snapDateToWeekday(dateObj, dir = 1) {
+      const d = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+      while (d.getDay() === 0 || d.getDay() === 6) {
+        d.setDate(d.getDate() + (dir >= 0 ? 1 : -1));
+      }
+      return d;
+    }
+
+    const nowDateInit = snapDateToWeekday(new Date(), 1);
     let calYear = nowDateInit.getFullYear();
-    let calMonth = nowDateInit.getMonth(); // 0..11
+    let calMonth = nowDateInit.getMonth();
     let calSelectedIso = formatIsoLocal(nowDateInit);
     let calFocusArea = "GRID"; // "GRID" | "START_BTN"
 
@@ -4236,18 +4266,28 @@ const TEACHERS_PDF_DB = [
       if (!calGridEl || !calMonthTitleEl) return;
       calMonthTitleEl.textContent = `${MONTHS_PL_NOM[calMonth]} ${calYear}`;
 
-      const firstDayOfMonth = new Date(calYear, calMonth, 1);
       const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-      // Poniedziałek = 0 ... Niedziela = 6
-      const startOffset = (firstDayOfMonth.getDay() + 6) % 7;
       const todayIso = formatIsoLocal(new Date());
 
+      // Znajdź pierwszy dzień roboczy (Pon=1 .. Pią=5) w tym miesiącu
+      let firstWeekdayOffset = 0;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dow = new Date(calYear, calMonth, d).getDay();
+        if (dow >= 1 && dow <= 5) {
+          firstWeekdayOffset = dow - 1;
+          break;
+        }
+      }
+
       let html = "";
-      for (let i = 0; i < startOffset; i++) {
+      for (let i = 0; i < firstWeekdayOffset; i++) {
         html += `<div class="cal-day-cell empty"></div>`;
       }
 
       for (let day = 1; day <= daysInMonth; day++) {
+        const dow = new Date(calYear, calMonth, day).getDay();
+        if (dow === 0 || dow === 6) continue; // Pomijamy sobotę i niedzielę
+
         const iso = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         const holidays = getHolidaysForDate(iso);
         const absences = getAbsencesForDate(iso);
@@ -4292,17 +4332,31 @@ const TEACHERS_PDF_DB = [
     function shiftCalendarSelectedDay(deltaDays) {
       const [y, m, d] = calSelectedIso.split("-").map(Number);
       const next = new Date(y, m - 1, d + deltaDays);
-      calYear = next.getFullYear();
-      calMonth = next.getMonth();
-      calSelectedIso = formatIsoLocal(next);
+      const snapped = snapDateToWeekday(next, deltaDays >= 0 ? 1 : -1);
+      calYear = snapped.getFullYear();
+      calMonth = snapped.getMonth();
+      calSelectedIso = formatIsoLocal(snapped);
       playCustomWav("move");
       renderCalendarUI();
+    }
+
+    // Zwraca true, jeśli udało się przesunąć o tydzień w górę W TYM SAMYM MIESIĄCU; false -> jesteśmy na samej górze
+    function moveCalendarUpOneRow() {
+      const [y, m, d] = calSelectedIso.split("-").map(Number);
+      const prevWeek = new Date(y, m - 1, d - 7);
+      if (prevWeek.getMonth() !== calMonth || prevWeek.getFullYear() !== calYear) {
+        return false; // Jesteśmy w górnym wierszu miesiąca -> pozwól wyjść z Terminarza
+      }
+      calSelectedIso = formatIsoLocal(prevWeek);
+      playCustomWav("move");
+      renderCalendarUI();
+      return true;
     }
 
     document.getElementById("cal-prev-month")?.addEventListener("click", () => {
       calMonth--;
       if (calMonth < 0) { calMonth = 11; calYear--; }
-      calSelectedIso = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-01`;
+      calSelectedIso = formatIsoLocal(snapDateToWeekday(new Date(calYear, calMonth, 1), 1));
       playCustomWav("move");
       renderCalendarUI();
     });
@@ -4310,13 +4364,13 @@ const TEACHERS_PDF_DB = [
     document.getElementById("cal-next-month")?.addEventListener("click", () => {
       calMonth++;
       if (calMonth > 11) { calMonth = 0; calYear++; }
-      calSelectedIso = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-01`;
+      calSelectedIso = formatIsoLocal(snapDateToWeekday(new Date(calYear, calMonth, 1), 1));
       playCustomWav("move");
       renderCalendarUI();
     });
 
     document.getElementById("cal-today-btn")?.addEventListener("click", () => {
-      const now = new Date();
+      const now = snapDateToWeekday(new Date(), 1);
       calYear = now.getFullYear();
       calMonth = now.getMonth();
       calSelectedIso = formatIsoLocal(now);
@@ -4367,7 +4421,156 @@ const TEACHERS_PDF_DB = [
       });
     });
 
-    /* Wykrywanie urządzeń mobilnych */
+
+    /* ============================================================================
+       7G. SYSTEM PŁYT / KLUCZY (isDisc) ORAZ APLIKACJA "GOLDHEN" (ADMIN LOGIN)
+       ============================================================================ */
+    const DISC_ICON_SVG = `
+      <span class="ps4-disc-icon" title="Wersja płytowa">
+        <svg viewBox="0 0 24 24">
+          <defs>
+            <linearGradient id="ps4DiscGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#e8f6ff"/>
+              <stop offset="45%" stop-color="#7ec8ff"/>
+              <stop offset="100%" stop-color="#2b6cb0"/>
+            </linearGradient>
+          </defs>
+          <circle cx="12" cy="12" r="10" fill="url(#ps4DiscGrad)" stroke="rgba(255,255,255,0.75)" stroke-width="1"/>
+          <circle cx="12" cy="12" r="3.4" fill="#04122c" stroke="rgba(255,255,255,0.85)" stroke-width="1"/>
+        </svg>
+      </span>
+    `;
+
+    let pendingDiscItem = null;
+    const discModalEl = document.getElementById("ps4-disc-modal");
+    const discKeyInputEl = document.getElementById("disc-key-input");
+    const discKeyMsgEl = document.getElementById("disc-key-msg");
+
+    function getUnlockedDiscsSet() {
+      try {
+        return new Set(JSON.parse(localStorage.getItem("zsa_unlocked_discs") || "[]"));
+      } catch (_) {
+        return new Set();
+      }
+    }
+
+    function isDiscUnlocked(item) {
+      if (!item || !item.isDisc) return true;
+      return getUnlockedDiscsSet().has(item.id);
+    }
+
+    function markDiscUnlocked(itemId) {
+      const set = getUnlockedDiscsSet();
+      set.add(itemId);
+      localStorage.setItem("zsa_unlocked_discs", JSON.stringify(Array.from(set)));
+    }
+
+    function isDiscModalOpen() {
+      return Boolean(discModalEl && discModalEl.classList.contains("open"));
+    }
+
+    function openDiscModal(item) {
+      if (!discModalEl || !item) return;
+      pendingDiscItem = item;
+      document.getElementById("disc-modal-cover").innerHTML = createCoverMarkup(item);
+      document.getElementById("disc-modal-title").textContent = item.title;
+      discKeyInputEl.value = "";
+      discKeyMsgEl.textContent = "";
+      discKeyMsgEl.classList.remove("ok");
+      discModalEl.classList.add("open");
+      playCustomWav("select");
+      setTimeout(() => discKeyInputEl.focus(), 120);
+    }
+
+    function closeDiscModal() {
+      if (!discModalEl) return;
+      discModalEl.classList.remove("open");
+      pendingDiscItem = null;
+      if (discKeyInputEl) discKeyInputEl.blur();
+      playCustomWav("back");
+    }
+
+    function validateAndActivateDiscKey() {
+      if (!pendingDiscItem) return;
+      const entered = (discKeyInputEl.value || "").trim().toUpperCase();
+      if (!entered) {
+        discKeyMsgEl.textContent = "Wpisz klucz aktywacyjny.";
+        discKeyMsgEl.classList.remove("ok");
+        return;
+      }
+
+      const allowed = Array.isArray(pendingDiscItem.discKeys)
+        ? pendingDiscItem.discKeys.map((k) => String(k).trim().toUpperCase())
+        : (pendingDiscItem.discKey ? [String(pendingDiscItem.discKey).trim().toUpperCase()] : ["ZSA777"]);
+
+      if (allowed.includes(entered)) {
+        markDiscUnlocked(pendingDiscItem.id);
+        discKeyMsgEl.textContent = "Klucz zaakceptowany! Uruchamianie gry...";
+        discKeyMsgEl.classList.add("ok");
+        playCustomWav("select");
+        const targetItem = pendingDiscItem;
+        setTimeout(() => {
+          closeDiscModal();
+          launchUrlWithSleepDelay(targetItem.url, targetItem.title);
+        }, 420);
+      } else {
+        discKeyMsgEl.textContent = "Nieprawidłowy klucz. Kup grę w sklepie, aby otrzymać klucz.";
+        discKeyMsgEl.classList.remove("ok");
+        playCustomWav("back");
+      }
+    }
+
+    document.getElementById("disc-buy-btn")?.addEventListener("click", () => {
+      if (!pendingDiscItem) return;
+      const shopUrl = pendingDiscItem.buyUrl || pendingDiscItem.url;
+      if (shopUrl) {
+        launchUrlWithSleepDelay(shopUrl, `Sklep — ${pendingDiscItem.title}`);
+      }
+    });
+
+    document.getElementById("disc-activate-btn")?.addEventListener("click", validateAndActivateDiscKey);
+    document.getElementById("disc-cancel-btn")?.addEventListener("click", closeDiscModal);
+    discModalEl?.addEventListener("click", (e) => {
+      if (e.target === discModalEl) closeDiscModal();
+    });
+    discKeyInputEl?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        validateAndActivateDiscKey();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        closeDiscModal();
+      }
+      e.stopPropagation();
+    });
+
+    /* --- Otwieranie i zamykanie widoku GoldHEN (logika panelu w osobnym pliku goldhen-admin.js) --- */
+    let isGoldHenOpen = false;
+
+    function openGoldHenApp(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (isSystemSleeping || isDiscModalOpen() || performance.now() < wakeUpCooldownUntil) return;
+      unlockAudioOnInteraction();
+
+      if (navLevel === "SUBMENU" && isGoldHenOpen) return;
+
+      enteredSubmenuFromFolder = (navLevel === "FOLDER");
+      isGoldHenOpen = true;
+      navLevel = "SUBMENU";
+      playCustomWav("select");
+      syncUiState();
+    }
+
+    const psPlusGoldHenBtn = document.getElementById("ps-plus-goldhen-btn") || document.querySelector(".ps-plus-icon");
+    psPlusGoldHenBtn?.addEventListener("click", openGoldHenApp);
+
+    document.getElementById("gh-exit-login-btn")?.addEventListener("click", () => navigateUp(true));
+    document.getElementById("gh-exit-workspace-btn")?.addEventListener("click", () => navigateUp(true));
+
+
     /* Wykrywanie prawdziwych telefonów i tabletów + orientacja Portrait / Landscape */
     function detectRealMobile() {
       const ua = navigator.userAgent || "";
@@ -4538,9 +4741,10 @@ const TEACHERS_PDF_DB = [
         innerHtml = createCoverMarkup(item);
       }
 
+      const discMarkup = item.isDisc ? DISC_ICON_SVG : "";
       const bottomBarHtml = item.type === "folder"
         ? `<svg class="down-arrow-glyph" viewBox="0 0 24 24"><path d="M12 17l-6-6h4V5h4v6h4l-6 6z"/></svg>`
-        : `<span>Start</span>`;
+        : `<span>Start</span>${discMarkup}`;
 
       tile.innerHTML = `
         <div class="ps4-tile-inner">${innerHtml}</div>
@@ -4557,7 +4761,7 @@ const TEACHERS_PDF_DB = [
       mainTrackEl.innerHTML = "";
       MAIN_RIBBON_ITEMS.forEach((item, idx) => {
         const el = createTileElement(item, idx, (clickedIdx, clickedItem, evt) => {
-          if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+          if (isSystemSleeping || isDiscModalOpen() || performance.now() < wakeUpCooldownUntil) return;
           unlockAudioOnInteraction();
 
           if (navLevel === "SUBMENU") {
@@ -4588,7 +4792,8 @@ const TEACHERS_PDF_DB = [
             clickedItem.isTeachers ||
             clickedItem.isDocs ||
             clickedItem.isCalendar ||
-            clickedItem.isContact
+            clickedItem.isContact ||
+            clickedItem.isGoldHen
           ) {
             navigateDown();
           } else if (evt && evt.target.closest(".tile-bottom-bar")) {
@@ -4603,7 +4808,7 @@ const TEACHERS_PDF_DB = [
       folderTrackEl.innerHTML = "";
       CUSTOM_GAMES_DATA.forEach((game, gIdx) => {
         const el = createTileElement({ ...game, type: "game" }, gIdx, (clickedIdx, _clickedItem, evt) => {
-          if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+          if (isSystemSleeping || isDiscModalOpen() || performance.now() < wakeUpCooldownUntil) return;
           unlockAudioOnInteraction();
 
           if (navLevel === "SUBMENU") {
@@ -4635,6 +4840,9 @@ const TEACHERS_PDF_DB = [
     }
 
     function getActiveGameItem() {
+      if (navLevel === "SUBMENU" && isGoldHenOpen) {
+        return GOLDHEN_APP_ITEM;
+      }
       if (navLevel === "FOLDER" || (navLevel === "SUBMENU" && enteredSubmenuFromFolder)) {
         return CUSTOM_GAMES_DATA[folderIndex];
       }
@@ -4650,6 +4858,7 @@ const TEACHERS_PDF_DB = [
       const zsaDocsViewEl = document.getElementById("zsa-docs-view");
       const zsaCalendarViewEl = document.getElementById("zsa-calendar-view");
       const zsaContactViewEl = document.getElementById("zsa-contact-view");
+      const zsaGoldHenViewEl = document.getElementById("zsa-goldhen-view");
       const gameInfoViewEl = document.getElementById("game-info-view");
       const zsaNewsViewEl = document.getElementById("zsa-news-view");
       const zsaTimetableViewEl = document.getElementById("zsa-timetable-view");
@@ -4666,6 +4875,7 @@ const TEACHERS_PDF_DB = [
       if (zsaDocsViewEl) zsaDocsViewEl.style.display = "none";
       if (zsaCalendarViewEl) zsaCalendarViewEl.style.display = "none";
       if (zsaContactViewEl) zsaContactViewEl.style.display = "none";
+      if (zsaGoldHenViewEl) zsaGoldHenViewEl.style.display = "none";
 
       if (item.isWhatsNew) {
         zsaNewsViewEl.style.display = "flex";
@@ -4725,11 +4935,20 @@ const TEACHERS_PDF_DB = [
         if (contactScrollWrapEl) contactScrollWrapEl.scrollTop = 0;
         updateContactFocusUI();
         if (typeof syncInputPromptsUI === "function") syncInputPromptsUI();
+      } else if (item.isGoldHen) {
+        if (zsaGoldHenViewEl) zsaGoldHenViewEl.style.display = "flex";
+        rightLabelEl.textContent = "Moduł Administracyjny";
+        leftNavLabelEl.textContent = "GoldHEN Admin";
+        startBtnTextEl.textContent = "Wyjdź";
+        startBtnEl.classList.add("focused");
+        if (typeof window.renderGoldHenUI === "function") window.renderGoldHenUI();
       } else {
         gameInfoViewEl.style.display = "flex";
         rightLabelEl.textContent = "Informacje";
         leftNavLabelEl.textContent = "Informacje o grze";
-        startBtnTextEl.textContent = "Start";
+        startBtnTextEl.innerHTML = item.isDisc
+          ? `Start ${DISC_ICON_SVG.replace('class="ps4-disc-icon"', 'class="ps4-disc-icon inline-disc"')}`
+          : "Start";
         startBtnEl.classList.add("focused");
 
         document.getElementById("sub-desc-tag").textContent = item.subtitle || "INFORMACJE • ZSAGAMES";
@@ -4744,6 +4963,10 @@ const TEACHERS_PDF_DB = [
 
     function syncUiState() {
       const verticalMode = isPortraitTouchLayout();
+
+      if (navLevel !== "SUBMENU") {
+        isGoldHenOpen = false;
+      }
 
       if (verticalMode) {
         const mainTranslateY = cachedFocusY - mainIndex * cachedTileStepY;
@@ -4787,18 +5010,21 @@ const TEACHERS_PDF_DB = [
       } else {
         clearTimeout(newsImageDwellTimer);
         pauseBackdropVideo();
-        if (tchSearchInputEl && document.activeElement === tchSearchInputEl) tchSearchInputEl.blur();
-        if (docSearchInputEl && document.activeElement === docSearchInputEl) docSearchInputEl.blur();
+        if (document.activeElement && document.activeElement.tagName === "INPUT") {
+          document.activeElement.blur();
+        }
       }
       syncBackgroundMusic();
     }
 
     function navigateLeft() {
-      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      if (isSystemSleeping || isDiscModalOpen() || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
+
+        if (activeItem?.isGoldHen) return;
 
         if (activeItem?.isContact) {
           if (contactFocusIdx > 0) contactFocusIdx--;
@@ -4925,11 +5151,13 @@ const TEACHERS_PDF_DB = [
     }
 
     function navigateRight() {
-      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      if (isSystemSleeping || isDiscModalOpen() || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
+
+        if (activeItem?.isGoldHen) return;
 
         if (activeItem?.isContact) {
           const maxIdx = contactCardsEls().length - 1;
@@ -5054,11 +5282,13 @@ const TEACHERS_PDF_DB = [
     }
 
     function navigateDown() {
-      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      if (isSystemSleeping || isDiscModalOpen() || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
+
+        if (activeItem?.isGoldHen) return;
 
         if (activeItem?.isContact) {
           if (contactFocusIdx === -1) {
@@ -5207,8 +5437,21 @@ const TEACHERS_PDF_DB = [
       if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
 
+      if (isDiscModalOpen()) {
+        if (isBackButton) closeDiscModal();
+        return;
+      }
+
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
+
+        if (activeItem?.isGoldHen) {
+          if (!isBackButton) return;
+          if (typeof window.isGoldHenEditorOpen === "function" && window.isGoldHenEditorOpen()) {
+            window.closeGoldHenEditor();
+            return;
+          }
+        }
 
         if (activeItem?.isContact && !isBackButton && contactScrollWrapEl && contactScrollWrapEl.scrollTop > 10) {
           contactScrollWrapEl.scrollBy({ top: -150, behavior: "smooth" });
@@ -5216,9 +5459,10 @@ const TEACHERS_PDF_DB = [
           return;
         }
 
-        if (activeItem?.isCalendar && !isBackButton) {
-          shiftCalendarSelectedDay(-7);
-          return;
+        if (activeItem?.isCalendar) {
+          if (!isBackButton && moveCalendarUpOneRow()) {
+            return;
+          }
         }
 
         if (activeItem?.isDocs) {
@@ -5401,7 +5645,7 @@ const TEACHERS_PDF_DB = [
     }
 
     function launchActiveItem() {
-      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      if (isSystemSleeping || isDiscModalOpen() || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
 
       if (navLevel === "MAIN") {
@@ -5414,7 +5658,8 @@ const TEACHERS_PDF_DB = [
           curr.isTeachers ||
           curr.isDocs ||
           curr.isCalendar ||
-          curr.isContact
+          curr.isContact ||
+          curr.isGoldHen
         ) {
           navigateDown();
           return;
@@ -5422,6 +5667,11 @@ const TEACHERS_PDF_DB = [
       }
 
       const item = getActiveGameItem();
+
+      if (navLevel === "SUBMENU" && item?.isGoldHen) {
+        navigateUp(true);
+        return;
+      }
 
       if (navLevel === "SUBMENU" && item?.isContact) {
         if (contactFocusIdx >= 0) {
@@ -5565,6 +5815,12 @@ const TEACHERS_PDF_DB = [
         }
       }
 
+      if (item && item.isDisc && !isDiscUnlocked(item)) {
+        triggerPressAnimation();
+        openDiscModal(item);
+        return;
+      }
+
       if (item && item.url) {
         triggerPressAnimation();
         launchUrlWithSleepDelay(item.url, item.title);
@@ -5602,6 +5858,10 @@ const TEACHERS_PDF_DB = [
 
     subStartBtnEl.addEventListener("click", () => {
       const item = getActiveGameItem();
+      if (item?.isGoldHen) {
+        navigateUp(true);
+        return;
+      }
       if (item?.isCalendar) {
         triggerPressAnimation();
         playCustomWav("select");
@@ -5614,6 +5874,11 @@ const TEACHERS_PDF_DB = [
           triggerPressAnimation();
           launchUrlWithSleepDelay(currentDoc.file, currentDoc.title);
         }
+        return;
+      }
+      if (item && item.isDisc && !isDiscUnlocked(item)) {
+        triggerPressAnimation();
+        openDiscModal(item);
         return;
       }
       if (item && item.url) {
@@ -5678,13 +5943,35 @@ const TEACHERS_PDF_DB = [
         wakeUpFromSleepMode();
         return;
       }
+      if (isDiscModalOpen()) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          closeDiscModal();
+        }
+        return;
+      }
       if (performance.now() < wakeUpCooldownUntil) return;
 
-      const activeTag = document.activeElement ? document.activeElement.tagName : "";
+      const activeEl = document.activeElement;
+      const activeTag = activeEl ? activeEl.tagName : "";
+
+      if (activeEl && activeEl.closest && activeEl.closest("#zsa-goldhen-view")) {
+        if (activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT") {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            activeEl.blur();
+          }
+          return;
+        }
+        if (activeTag === "BUTTON" && (e.key === "Enter" || e.key === " ")) {
+          return;
+        }
+      }
+
       if (activeTag === "INPUT" || activeTag === "TEXTAREA") {
         if (e.key === "ArrowDown" || e.key === "Enter" || e.key === "Escape") {
           e.preventDefault();
-          document.activeElement.blur();
+          activeEl.blur();
           tchFocusArea = "MAIN";
           docFocusArea = "MAIN";
           playCustomWav("move");
@@ -5711,11 +5998,11 @@ const TEACHERS_PDF_DB = [
 
     let lastWheelTime = 0;
     window.addEventListener("wheel", (e) => {
-      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      if (isSystemSleeping || isDiscModalOpen() || performance.now() < wakeUpCooldownUntil) return;
 
       if (navLevel === "SUBMENU") {
         const scrollable = e.target.closest(
-          ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid, .cal-board, .cal-details-panel, .contact-scroll-wrap"
+          ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid, .cal-board, .cal-details-panel, .contact-scroll-wrap, .gh-empty-workspace"
         );
         if (scrollable) {
           return;
@@ -5728,7 +6015,8 @@ const TEACHERS_PDF_DB = [
           activeItem?.isTeachers ||
           activeItem?.isDocs ||
           activeItem?.isCalendar ||
-          activeItem?.isContact
+          activeItem?.isContact ||
+          activeItem?.isGoldHen
         ) {
           return;
         }
@@ -5841,6 +6129,31 @@ const TEACHERS_PDF_DB = [
     });
     document.getElementById("btn-back").addEventListener("click", () => navigateUp(true));
     document.getElementById("btn-play").addEventListener("click", launchActiveItem);
+
+    function returnToRibbonMenu() {
+      if (isSystemSleeping || performance.now() < wakeUpCooldownUntil) return;
+      unlockAudioOnInteraction();
+
+      if (typeof isDiscModalOpen === "function" && isDiscModalOpen()) {
+        closeDiscModal();
+      }
+
+      if (document.activeElement && (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA")) {
+        document.activeElement.blur();
+      }
+
+      if (navLevel === "SUBMENU") {
+        navLevel = enteredSubmenuFromFolder ? "FOLDER" : "MAIN";
+        playCustomWav("back");
+        syncUiState();
+      } else if (navLevel === "FOLDER") {
+        navLevel = "MAIN";
+        playCustomWav("back");
+        syncUiState();
+      }
+    }
+
+    document.getElementById("btn-return-menu")?.addEventListener("click", returnToRibbonMenu);
 
     // Płynne przeliczenie układu po obróceniu telefonu (Portrait <-> Landscape)
     let orientationResizeTimer = null;
@@ -6057,33 +6370,36 @@ const TEACHERS_PDF_DB = [
       phase: Math.random() * Math.PI * 2
     }));
 
+    let waveParallaxX = 0;
+
     function rebuildCanvasCache() {
       bgCacheCanvas.width = cw;
       bgCacheCanvas.height = ch;
 
-      const bgGrad = bgCacheCtx.createLinearGradient(0, 0, cw * 0.9, ch);
-      bgGrad.addColorStop(0, "#00236b");
-      bgGrad.addColorStop(0.46, "#0044a6");
-      bgGrad.addColorStop(0.78, "#003082");
-      bgGrad.addColorStop(1, "#001442");
+      /* Klasyczny kobaltowy gradient tła PS4 Orbis OS */
+      const bgGrad = bgCacheCtx.createLinearGradient(0, 0, cw * 0.85, ch);
+      bgGrad.addColorStop(0, "#0039a6");
+      bgGrad.addColorStop(0.38, "#0046bf");
+      bgGrad.addColorStop(0.72, "#002b82");
+      bgGrad.addColorStop(1, "#001852");
       bgCacheCtx.fillStyle = bgGrad;
       bgCacheCtx.fillRect(0, 0, cw, ch);
 
-      const glow = bgCacheCtx.createRadialGradient(cw * 0.62, ch * 0.44, cw * 0.04, cw * 0.62, ch * 0.44, cw * 0.6);
-      glow.addColorStop(0, "rgba(65, 155, 255, 0.34)");
-      glow.addColorStop(0.55, "rgba(18, 92, 210, 0.14)");
+      const glow = bgCacheCtx.createRadialGradient(cw * 0.52, ch * 0.32, cw * 0.05, cw * 0.52, ch * 0.32, cw * 0.68);
+      glow.addColorStop(0, "rgba(110, 195, 255, 0.34)");
+      glow.addColorStop(0.5, "rgba(38, 124, 240, 0.16)");
       glow.addColorStop(1, "rgba(0, 32, 96, 0)");
       bgCacheCtx.fillStyle = glow;
       bgCacheCtx.fillRect(0, 0, cw, ch);
 
       const fillConfigs = [
-        ["rgba(0, 18, 66, 0.72)", "rgba(8, 72, 178, 0.48)", "rgba(50, 148, 255, 0.08)"],
-        ["rgba(4, 34, 102, 0.65)", "rgba(24, 108, 224, 0.42)", "rgba(110, 195, 255, 0.12)"],
-        ["rgba(12, 62, 152, 0.48)", "rgba(75, 165, 255, 0.30)", "rgba(200, 235, 255, 0.04)"]
+        ["rgba(0, 26, 94, 0.52)", "rgba(24, 102, 224, 0.42)", "rgba(96, 185, 255, 0.14)"],
+        ["rgba(8, 52, 146, 0.46)", "rgba(56, 146, 255, 0.36)", "rgba(175, 225, 255, 0.16)"],
+        ["rgba(18, 80, 190, 0.34)", "rgba(115, 196, 255, 0.24)", "rgba(235, 248, 255, 0.08)"]
       ];
 
       waveGradients = fillConfigs.map((stops) => {
-        const g = ctx.createLinearGradient(0, ch * 0.32, cw, ch * 0.98);
+        const g = ctx.createLinearGradient(0, ch * 0.24, cw, ch * 0.96);
         g.addColorStop(0, stops[0]);
         g.addColorStop(0.55, stops[1]);
         g.addColorStop(1, stops[2]);
@@ -6091,9 +6407,9 @@ const TEACHERS_PDF_DB = [
       });
 
       crestGradients = [
-        "rgba(165, 220, 255, 0.48)",
-        "rgba(225, 245, 255, 0.62)",
-        "rgba(135, 205, 255, 0.34)"
+        "rgba(195, 232, 255, 0.56)",
+        "rgba(240, 250, 255, 0.72)",
+        "rgba(155, 215, 255, 0.38)"
       ];
     }
 
@@ -6112,23 +6428,27 @@ const TEACHERS_PDF_DB = [
     function drawPs4XmbWave(time) {
       ctx.drawImage(bgCacheCanvas, 0, 0);
 
-      const t = time * 0.00052;
+      // Płynna paralaksa fali PS4 reagująca na ruch wstęgi
+      const targetParallax = (navLevel === "FOLDER" ? folderIndex : mainIndex) * 0.14;
+      waveParallaxX += (targetParallax - waveParallaxX) * 0.075;
+
+      const t = time * 0.00044;
       const step = IS_LOW_END_PC ? 22 : 14;
 
       for (let w = 0; w < 3; w++) {
-        const phaseOffset = w * 1.35;
-        const speedMult = 1 - w * 0.16;
-        const baseSlopeStart = ch * (0.92 + w * 0.045);
-        const baseSlopeEnd = ch * (0.34 + w * 0.085);
-        const ribbonThickness = ch * (0.20 - w * 0.032);
+        const phaseOffset = w * 1.45 + waveParallaxX * (0.65 + w * 0.28);
+        const speedMult = 1 - w * 0.15;
+        const baseSlopeStart = ch * (0.86 + w * 0.055);
+        const baseSlopeEnd = ch * (0.24 + w * 0.10);
+        const ribbonThickness = ch * (0.24 - w * 0.036);
 
         ctx.beginPath();
 
         for (let x = 0; x <= cw + step; x += step) {
           const nx = x / cw;
-          const diagY = baseSlopeStart + (baseSlopeEnd - baseSlopeStart) * Math.pow(nx, 1.15);
-          const wave1 = Math.sin(nx * 3.8 - t * speedMult + phaseOffset) * (ch * 0.048);
-          const wave2 = Math.cos(nx * 2.1 + t * 0.72 - phaseOffset) * (ch * 0.026);
+          const diagY = baseSlopeStart + (baseSlopeEnd - baseSlopeStart) * Math.pow(nx, 1.12);
+          const wave1 = Math.sin(nx * 3.4 - t * speedMult + phaseOffset) * (ch * 0.052);
+          const wave2 = Math.cos(nx * 1.9 + t * 0.65 - phaseOffset) * (ch * 0.028);
           const yTop = diagY + wave1 + wave2;
 
           if (x === 0) ctx.moveTo(x, yTop);
@@ -6137,9 +6457,9 @@ const TEACHERS_PDF_DB = [
 
         for (let x = cw + step; x >= 0; x -= step) {
           const nx = x / cw;
-          const diagY = baseSlopeStart + (baseSlopeEnd - baseSlopeStart) * Math.pow(nx, 1.15);
-          const wave1 = Math.sin(nx * 3.2 - t * speedMult * 0.85 + phaseOffset + 0.7) * (ch * 0.042);
-          const twist = (0.55 + 0.45 * Math.sin(nx * 2.6 + t * 0.5 + w)) * ribbonThickness;
+          const diagY = baseSlopeStart + (baseSlopeEnd - baseSlopeStart) * Math.pow(nx, 1.12);
+          const wave1 = Math.sin(nx * 2.9 - t * speedMult * 0.85 + phaseOffset + 0.65) * (ch * 0.044);
+          const twist = (0.55 + 0.45 * Math.sin(nx * 2.3 + t * 0.45 + w)) * ribbonThickness;
           const yBot = diagY + wave1 + twist;
           ctx.lineTo(x, yBot);
         }
@@ -6151,27 +6471,27 @@ const TEACHERS_PDF_DB = [
         ctx.beginPath();
         for (let x = 0; x <= cw + step; x += step) {
           const nx = x / cw;
-          const diagY = baseSlopeStart + (baseSlopeEnd - baseSlopeStart) * Math.pow(nx, 1.15);
-          const wave1 = Math.sin(nx * 3.8 - t * speedMult + phaseOffset) * (ch * 0.048);
-          const wave2 = Math.cos(nx * 2.1 + t * 0.72 - phaseOffset) * (ch * 0.026);
+          const diagY = baseSlopeStart + (baseSlopeEnd - baseSlopeStart) * Math.pow(nx, 1.12);
+          const wave1 = Math.sin(nx * 3.4 - t * speedMult + phaseOffset) * (ch * 0.052);
+          const wave2 = Math.cos(nx * 1.9 + t * 0.65 - phaseOffset) * (ch * 0.028);
           const yTop = diagY + wave1 + wave2;
 
           if (x === 0) ctx.moveTo(x, yTop);
           else ctx.lineTo(x, yTop);
         }
         ctx.strokeStyle = crestGradients[w];
-        ctx.lineWidth = w === 1 ? 1.4 : 0.95;
+        ctx.lineWidth = w === 1 ? 1.55 : 1.0;
         ctx.stroke();
       }
 
-      ctx.fillStyle = "rgba(220, 242, 255, 0.58)";
+      ctx.fillStyle = "rgba(230, 246, 255, 0.52)";
       for (let i = 0; i < xmbSparkles.length; i++) {
         const s = xmbSparkles[i];
         s.x += s.speedX;
         if (s.x > 1.03) s.x = -0.03;
 
         const px = s.x * cw;
-        const py = (s.y - s.x * 0.28 + Math.sin(t * 2.2 + s.phase) * 0.018) * ch;
+        const py = (s.y - s.x * 0.25 + Math.sin(t * 2.0 + s.phase) * 0.016) * ch;
         ctx.beginPath();
         ctx.arc(px, py, s.r, 0, Math.PI * 2);
         ctx.fill();

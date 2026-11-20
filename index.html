@@ -27,11 +27,39 @@
     <div class="sleep-active-app" id="sleep-app-title">Uruchamianie aplikacji...</div>
     <div class="sleep-prompt">Kliknij aby powrócić do systemu</div>
   </div>
+  
+
+  <!-- MODAL AKTYWACJI PŁYTY / KLUCZA LICENCYJNEGO PS4 -->
+  <div class="ps4-disc-modal" id="ps4-disc-modal">
+    <div class="disc-modal-card">
+      <div class="disc-modal-top">
+        <div class="disc-modal-cover" id="disc-modal-cover"></div>
+        <div class="disc-modal-info">
+          <span class="dir-detail-badge">WERSJA PŁYTOWA • WYMAGANY KLUCZ</span>
+          <h2 class="disc-modal-title" id="disc-modal-title">Tytuł gry</h2>
+          <p class="disc-modal-desc">
+            Ta gra wymaga posiadania płyty lub klucza aktywacyjnego. Przejdź do sklepu, aby ją zakupić, a następnie wpisz otrzymany klucz poniżej, aby odblokować uruchamianie.
+          </p>
+        </div>
+      </div>
+
+      <div class="disc-modal-key-box">
+        <input type="text" id="disc-key-input" class="tch-search-input gh-input" placeholder="Wpisz klucz aktywacyjny (np. ZSA-XXXX-XXXX)..." autocomplete="off" />
+        <div class="gh-status-msg" id="disc-key-msg"></div>
+      </div>
+
+      <div class="disc-modal-actions">
+        <button type="button" class="dir-open-original-btn" id="disc-buy-btn">Kup grę / Otwórz sklep</button>
+        <button type="button" class="zsa-refresh-btn" id="disc-activate-btn">Aktywuj klucz i Uruchom</button>
+        <button type="button" class="tt-back-step-btn" id="disc-cancel-btn">Anuluj</button>
+      </div>
+    </div>
+  </div>
 
   <!-- GÓRNY PASEK STATUSU PS4 -->
   <header class="ps4-top-bar">
     <div class="top-left-icons">
-      <a href="https://zsagames.github.io/" target="_self" rel="noopener" class="ps-plus-icon" title="ZSAGames Plus">
+      <a href="#" id="ps-plus-goldhen-btn" class="ps-plus-icon" title="ZSAGames Plus">
   <svg viewBox="0 0 100 34" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <!-- Maska ograniczająca błysk wyłącznie do kształtu łuku ZSA -->
@@ -96,10 +124,18 @@
         </div>
         <span class="user-name">ZSAGames</span>
         <svg class="ps-plus-mini" viewBox="0 0 100 34">
-  <path fill="#f5c418" d="M 11.5 30.5 C 2.8 32.5, -1.4 23.2, 4.8 16.8 C 27.5 3.4, 67.5 -3.4, 99.2 12.8 C 72.5 3.6, 44.5 12.8, 11.5 30.5 Z"/>
-  <path fill="#d49b00" opacity="0.45" d="M 11.5 30.5 C 6.2 31.6, 1.8 28.4, 2.0 24.2 C 31.5 11.2, 65.2 1.6, 99.2 12.8 C 72.5 3.6, 44.5 12.8, 11.5 30.5 Z"/>
-</svg>
+         <path fill="#f5c418" d="M 11.5 30.5 C 2.8 32.5, -1.4 23.2, 4.8 16.8 C 27.5 3.4, 67.5 -3.4, 99.2 12.8 C 72.5 3.6, 44.5 12.8, 11.5 30.5 Z"/>
+         <path fill="#d49b00" opacity="0.45" d="M 11.5 30.5 C 6.2 31.6, 1.8 28.4, 2.0 24.2 C 31.5 11.2, 65.2 1.6, 99.2 12.8 C 72.5 3.6, 44.5 12.8, 11.5 30.5 Z"/>
+        </svg>
       </a>
+
+      <div class="status-trophies">
+        <svg class="trophy-glyph" viewBox="0 0 24 24">
+          <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 0 0 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
+        </svg>
+        <span class="trophy-star">★</span>
+        <span class="trophy-level">5</span>
+      </div>
     </div>
 
     <!-- Zegar 24-godzinny wraz z Dniem, Miesiącem i Rokiem -->
@@ -449,7 +485,7 @@
             <!-- Lewa część: Siatka miesięcznego kalendarza -->
             <div class="cal-board">
               <div class="cal-weekdays">
-                <span>Pon</span><span>Wt</span><span>Śr</span><span>Czw</span><span>Pią</span><span>Sob</span><span>Nie</span>
+                <span>Pon</span><span>Wt</span><span>Śr</span><span>Czw</span><span>Pią</span>
               </div>
               <div class="cal-grid" id="cal-grid"></div>
               <div class="cal-legend-bar">
@@ -552,7 +588,184 @@
             </div>
           </div>
         </div>
-        
+
+        <!-- WIDOK I: GoldHEN (Zintegrowany Panel Administratora Terminarza — Styl Librus) -->
+        <div class="zsa-goldhen-view" id="zsa-goldhen-view">
+          <!-- Ekran 1: Logowanie -->
+          <div class="gh-login-box" id="gh-login-step">
+            <div class="gh-badge-row">
+              <span class="dir-detail-badge" style="margin:0;">GOLDHEN • DOSTĘP ADMINISTRATORA</span>
+              <span class="gh-ver-pill">v2.4b</span>
+            </div>
+            <h2 class="gh-title">Wymagane uwierzytelnienie</h2>
+            <p class="gh-desc">Zaloguj się kontem administratora chmury ZSA, aby zarządzać Dniami Wolnymi i Nieobecnościami Nauczycieli.</p>
+
+            <form class="gh-form" id="gh-login-form">
+              <label class="gh-field">
+                <span>Email administratora</span>
+                <input type="email" id="gh-email" class="tch-search-input gh-input" placeholder="admin@zsa.pl" autocomplete="username" required />
+              </label>
+              <label class="gh-field">
+                <span>Hasło</span>
+                <input type="password" id="gh-password" class="tch-search-input gh-input" placeholder="••••••••" autocomplete="current-password" required />
+              </label>
+              <div class="gh-status-msg" id="gh-status-msg"></div>
+              <div class="gh-btn-row">
+                <button type="submit" class="dir-open-original-btn" id="gh-submit-btn">Zaloguj do chmury</button>
+                <button type="button" class="tt-back-step-btn" id="gh-exit-login-btn">Wyjdź</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Ekran 2: Zalogowany — Terminarz Administratora (wspólne klasy .cal-layout) -->
+          <div class="gh-workspace-box" id="gh-workspace-step" style="display:none;">
+            <div class="tt-top-bar">
+              <div class="tt-breadcrumb">
+                GoldHEN • <strong id="gh-month-title">Listopad 2026</strong>
+                <span class="gh-user-chip" id="gh-user-email">Admin</span>
+              </div>
+              <div class="tt-top-right-group gh-toolbar-btns">
+                <button type="button" class="tt-back-step-btn" id="gh-prev-month" title="Poprzedni miesiąc">◀</button>
+                <button type="button" class="tt-back-step-btn" id="gh-today-btn">Dziś</button>
+                <button type="button" class="tt-back-step-btn" id="gh-next-month" title="Następny miesiąc">▶</button>
+                <button type="button" class="zsa-refresh-btn" id="gh-refresh-btn">Odśwież</button>
+                <button type="button" class="tt-back-step-btn" id="gh-logout-btn">Wyloguj</button>
+                <button type="button" class="tt-back-step-btn" id="gh-exit-workspace-btn">Wyjdź</button>
+              </div>
+            </div>
+
+            <div class="cal-layout">
+              <!-- Lewa część: Kalendarz Pon–Pią (te same klasy co Terminarz) -->
+              <div class="cal-board">
+                <div class="cal-weekdays">
+                  <span>Pon</span><span>Wt</span><span>Śr</span><span>Czw</span><span>Pią</span>
+                </div>
+                <div class="cal-grid" id="gh-cal-grid"></div>
+                <div class="cal-legend-bar">
+                  <span><i class="cal-dot holiday"></i> Dzień wolny</span>
+                  <span><i class="cal-dot absence"></i> Nieobecność</span>
+                  <span><i class="cal-dot today"></i> Dzisiaj</span>
+                </div>
+              </div>
+
+              <!-- Prawa część: Panel dnia (Dodaj / Edytuj / Usuń — styl Librus) -->
+              <div class="cal-details-panel gh-details-panel" id="gh-details-panel">
+                <div class="gh-day-header-row">
+                  <div class="cal-details-header" id="gh-selected-day-label" style="border:none;padding:0;">Wybrany dzień</div>
+                  <div class="gh-scope-tabs">
+                    <button type="button" class="gh-scope-btn active" id="gh-tab-day">Dzień</button>
+                    <button type="button" class="gh-scope-btn" id="gh-tab-all">Wszystkie</button>
+                  </div>
+                </div>
+
+                <div class="gh-quick-actions">
+                  <button type="button" class="gh-quick-btn holiday" id="gh-add-holiday-btn">+ Dzień wolny</button>
+                  <button type="button" class="gh-quick-btn absence" id="gh-add-absence-btn">+ Nieobecność</button>
+                </div>
+
+                <div class="gh-status-msg" id="gh-action-msg"></div>
+
+                <!-- Wspólny zwijany formularz dodawania i edycji -->
+                <div class="gh-editor-panel" id="gh-editor-panel" style="display:none;">
+                  <div class="gh-editor-head">
+                    <span id="gh-editor-title">Dodaj wpis</span>
+                  </div>
+
+                  <form class="gh-editor-form" id="gh-entry-form">
+                    <!-- Pola dla: Dzień wolny -->
+                    <div class="gh-field-group" id="gh-fields-holiday" style="display:none;">
+                      <label class="gh-field">
+                        <span>Nazwa dnia wolnego</span>
+                        <input type="text" id="gh-hol-title" class="tch-search-input gh-input" placeholder="np. Ferie zimowe / Dzień Dyrektorski" />
+                      </label>
+                    </div>
+
+                    <!-- Pola dla: Nieobecność nauczyciela -->
+                    <div class="gh-field-group" id="gh-fields-absence" style="display:none;">
+                      <div class="gh-tp-wrap" id="gh-teacher-picker">
+                        <div class="gh-tp-top-row">
+                          <span class="gh-tp-label">Nauczyciel</span>
+                          <button type="button" class="gh-tp-multi-btn" id="gh-teacher-multi-toggle" title="Zaznacz wielu nauczycieli naraz">+ Wielu</button>
+                        </div>
+
+                        <div class="gh-tp-chips" id="gh-teacher-chips"></div>
+
+                        <div class="gh-tp-search-box">
+                          <input type="text" id="gh-teacher-search" class="tch-search-input gh-input" placeholder="🔍 Szukaj po nazwisku, kodzie, przedmiocie lub klasie..." autocomplete="off" />
+                          <button type="button" class="gh-tp-clear-btn" id="gh-teacher-search-clear" title="Wyczyść">×</button>
+                        </div>
+
+                        <div class="gh-tp-cats" id="gh-teacher-cats">
+                          <button type="button" class="gh-tp-cat active" data-cat="all">Wszyscy</button>
+                          <button type="button" class="gh-tp-cat" data-cat="it">IT / Prog</button>
+                          <button type="button" class="gh-tp-cat" data-cat="lang">Języki</button>
+                          <button type="button" class="gh-tp-cat" data-cat="stem">Mat / Przyr</button>
+                          <button type="button" class="gh-tp-cat" data-cat="tech">Mech / Log</button>
+                          <button type="button" class="gh-tp-cat" data-cat="wf">WF / Bw</button>
+                          <button type="button" class="gh-tp-cat" data-cat="tutor">Wychowawcy</button>
+                        </div>
+
+                        <div class="gh-tp-list" id="gh-teacher-list"></div>
+                      </div>
+
+                      <label class="gh-toggle-row">
+                        <input type="checkbox" id="gh-abs-all-day" checked />
+                        <span>Nieobecny cały dzień</span>
+                      </label>
+
+                      <div class="gh-row-2" id="gh-abs-hours-row" style="display:none;">
+                        <label class="gh-field">
+                          <span>Od godziny</span>
+                          <input type="time" id="gh-abs-time-from" class="tch-search-input gh-input" value="08:00" />
+                        </label>
+                        <label class="gh-field">
+                          <span>Do godziny</span>
+                          <input type="time" id="gh-abs-time-to" class="tch-search-input gh-input" value="12:35" />
+                        </label>
+                        <div class="gh-preset-bar">
+                          <button type="button" class="gh-hour-preset" data-from="08:00" data-to="10:35">1–3 lek.</button>
+                          <button type="button" class="gh-hour-preset" data-from="10:45" data-to="14:15">4–7 lek.</button>
+                          <button type="button" class="gh-hour-preset" data-from="12:40" data-to="16:45">Od 12:40</button>
+                        </div>
+                      </div>
+
+                      <label class="gh-field">
+                        <span>Uwaga / Zastępstwo (opcjonalnie)</span>
+                        <input type="text" id="gh-abs-note" class="tch-search-input gh-input" placeholder="np. Wycieczka / Zastępstwo sala 603" />
+                      </label>
+                    </div>
+
+                    <!-- Wspólny wybór daty (1 dzień lub zakres od – do) -->
+                    <label class="gh-toggle-row">
+                      <input type="checkbox" id="gh-range-toggle" />
+                      <span>Wiele dni (zakres dat od – do)</span>
+                    </label>
+
+                    <div class="gh-row-2">
+                      <label class="gh-field">
+                        <span>Data (od)</span>
+                        <input type="date" id="gh-date-from" class="tch-search-input gh-input" required />
+                      </label>
+                      <label class="gh-field" id="gh-date-to-wrap" style="display:none;">
+                        <span>Data (do)</span>
+                        <input type="date" id="gh-date-to" class="tch-search-input gh-input" />
+                      </label>
+                    </div>
+
+                    <div class="gh-btn-row">
+                      <button type="submit" class="dir-open-original-btn" id="gh-save-entry-btn" style="padding:7px 16px;font-size:0.86rem;">Dodaj wpis</button>
+                      <button type="button" class="tt-back-step-btn" id="gh-cancel-entry-btn">Anuluj</button>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Lista bieżących wpisów (z przyciskami Edytuj i Usuń) -->
+                <div class="cal-details-list" id="gh-entries-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
   </main>
@@ -572,6 +785,7 @@
       <button class="touch-btn" id="btn-down">▼</button>
       <button class="touch-btn" id="btn-right">▶</button>
     </div>
+    <button type="button" class="touch-btn pill mobile-return-menu-btn" id="btn-return-menu">▲ Menu</button>
     <div class="touch-actions">
       <button class="touch-btn pill" id="btn-back">○ Wróć</button>
       <button class="touch-btn pill" id="btn-play">✕ Start</button>
@@ -579,5 +793,6 @@
   </div>
 
    <script src="base.js"></script>
+   <script src="admin.js"></script>
 </body>
 </html>
