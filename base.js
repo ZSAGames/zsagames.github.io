@@ -111,6 +111,29 @@
               </svg>`
       },
       {
+        id: "librus-app",
+        type: "system",
+        isLibrus: true,
+        title: "Szybki Librus",
+        subtitle: "FREKWENCJA, TEMATY LEKCJI I OCENY",
+        url: "https://portal.librus.pl/",
+        cover: "LibrusCover.png",
+        background: "ZSABackground.png",
+        music: "",
+        fallbackBg: "linear-gradient(135deg, #1b5e20, #05213a)",
+        author: "ZSAGames • Librus Synergia API",
+        platform: "Dziennik Elektroniczny Online (Render API)",
+        description: "Szybki podgląd nieobecności (w tym usprawiedliwionych), tematów zrealizowanych na opuszczonych lekcjach oraz ocen pogrupowanych według kategorii.",
+        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="12" y="10" width="40" height="44" rx="4" fill="rgba(255,255,255,0.14)"/>
+                <line x1="20" y1="22" x2="44" y2="22"/>
+                <line x1="20" y1="32" x2="44" y2="32"/>
+                <line x1="20" y1="42" x2="34" y2="42"/>
+                <circle cx="44" cy="44" r="8" fill="#10b981" stroke="#ffffff" stroke-width="2.5"/>
+                <polyline points="41 44 43.2 46.2 47.5 41.8" stroke="#ffffff" stroke-width="2.2"/>
+              </svg>`
+      },
+      {
         id: "timetable-app",
         type: "system",
         isTimetable: true,
@@ -1141,6 +1164,7 @@
         : "Wstrzymano system na czas działania aplikacji";
       document.body.classList.add("state-sleep");
       pauseBackdropVideo();
+      if (window.ZSA_SCHOOL_3D) window.ZSA_SCHOOL_3D.pause();
       syncBackgroundMusic();
     }
 
@@ -1158,6 +1182,7 @@
       if (navLevel === "SUBMENU" && themeVideoEl.classList.contains("visible")) {
         themeVideoEl.play().catch(() => {});
       }
+      if (window.ZSA_SCHOOL_3D) window.ZSA_SCHOOL_3D.resume();
       syncBackgroundMusic();
     }
 
@@ -4866,6 +4891,7 @@ const TEACHERS_PDF_DB = [
       const leftNavLabelEl = document.getElementById("sub-left-nav-label");
       const startBtnEl = document.getElementById("sub-start-btn");
       const startBtnTextEl = document.getElementById("sub-start-btn-text");
+      const zsaLibrusViewEl = document.getElementById("zsa-librus-view");
 
       gameInfoViewEl.style.display = "none";
       zsaNewsViewEl.style.display = "none";
@@ -4876,6 +4902,7 @@ const TEACHERS_PDF_DB = [
       if (zsaCalendarViewEl) zsaCalendarViewEl.style.display = "none";
       if (zsaContactViewEl) zsaContactViewEl.style.display = "none";
       if (zsaGoldHenViewEl) zsaGoldHenViewEl.style.display = "none";
+      if (zsaLibrusViewEl) zsaLibrusViewEl.style.display = "none";
 
       if (item.isWhatsNew) {
         zsaNewsViewEl.style.display = "flex";
@@ -4935,6 +4962,13 @@ const TEACHERS_PDF_DB = [
         if (contactScrollWrapEl) contactScrollWrapEl.scrollTop = 0;
         updateContactFocusUI();
         if (typeof syncInputPromptsUI === "function") syncInputPromptsUI();
+      } else if (item.isLibrus) {
+      if (zsaLibrusViewEl) zsaLibrusViewEl.style.display = "flex";
+      rightLabelEl.textContent = "Frekwencja i Oceny";
+      leftNavLabelEl.textContent = "Szybki Librus";
+      startBtnTextEl.textContent = "Portal Librus";
+      startBtnEl.classList.add("focused");
+      if (typeof window.onOpenSzybkiLibrus === "function") window.onOpenSzybkiLibrus();
       } else if (item.isGoldHen) {
         if (zsaGoldHenViewEl) zsaGoldHenViewEl.style.display = "flex";
         rightLabelEl.textContent = "Moduł Administracyjny";
@@ -5014,6 +5048,11 @@ const TEACHERS_PDF_DB = [
           document.activeElement.blur();
         }
       }
+      if (window.ZSA_SCHOOL_3D) {
+        const activeIdx = navLevel === "FOLDER" ? folderIndex : mainIndex;
+        const activeTotal = navLevel === "FOLDER" ? CUSTOM_GAMES_DATA.length : MAIN_RIBBON_ITEMS.length;
+        window.ZSA_SCHOOL_3D.setRibbonPosition(activeIdx, activeTotal, navLevel);
+      }
       syncBackgroundMusic();
     }
 
@@ -5024,7 +5063,7 @@ const TEACHERS_PDF_DB = [
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
 
-        if (activeItem?.isGoldHen) return;
+        if (activeItem?.isGoldHen || activeItem?.isLibrus) return;
 
         if (activeItem?.isContact) {
           if (contactFocusIdx > 0) contactFocusIdx--;
@@ -5157,7 +5196,7 @@ const TEACHERS_PDF_DB = [
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
 
-        if (activeItem?.isGoldHen) return;
+        if (activeItem?.isGoldHen || activeItem?.isLibrus) return;
 
         if (activeItem?.isContact) {
           const maxIdx = contactCardsEls().length - 1;
@@ -5288,7 +5327,7 @@ const TEACHERS_PDF_DB = [
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
 
-        if (activeItem?.isGoldHen) return;
+        if (activeItem?.isGoldHen || activeItem?.isLibrus) return;
 
         if (activeItem?.isContact) {
           if (contactFocusIdx === -1) {
@@ -5446,7 +5485,7 @@ const TEACHERS_PDF_DB = [
         const activeItem = getActiveGameItem();
 
         if (activeItem?.isGoldHen) {
-          if (!isBackButton) return;
+          if (activeItem?.isLibrus && !isBackButton) return;
           if (typeof window.isGoldHenEditorOpen === "function" && window.isGoldHenEditorOpen()) {
             window.closeGoldHenEditor();
             return;
@@ -5645,7 +5684,7 @@ const TEACHERS_PDF_DB = [
     }
 
     function launchActiveItem() {
-      if (isSystemSleeping || isDiscModalOpen() || performance.now() < wakeUpCooldownUntil) return;
+      if (isSystemSleeping || isDiscModalOpen() || curr.isLibrus || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
 
       if (navLevel === "MAIN") {
@@ -5955,7 +5994,7 @@ const TEACHERS_PDF_DB = [
       const activeEl = document.activeElement;
       const activeTag = activeEl ? activeEl.tagName : "";
 
-      if (activeEl && activeEl.closest && activeEl.closest("#zsa-goldhen-view")) {
+      if (activeEl && activeEl.closest && (activeEl.closest("#zsa-goldhen-view") || activeEl.closest("#zsa-librus-view"))) {
         if (activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT") {
           if (e.key === "Escape") {
             e.preventDefault();
@@ -6002,7 +6041,7 @@ const TEACHERS_PDF_DB = [
 
       if (navLevel === "SUBMENU") {
         const scrollable = e.target.closest(
-          ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid, .cal-board, .cal-details-panel, .contact-scroll-wrap, .gh-empty-workspace"
+          ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid, .cal-board, .cal-details-panel, .contact-scroll-wrap, .gh-empty-workspace, .lib-scroll-body"
         );
         if (scrollable) {
           return;
@@ -6016,7 +6055,8 @@ const TEACHERS_PDF_DB = [
           activeItem?.isDocs ||
           activeItem?.isCalendar ||
           activeItem?.isContact ||
-          activeItem?.isGoldHen
+          activeItem?.isGoldHen ||
+          activeItem?.isLibrus
         ) {
           return;
         }
@@ -6353,7 +6393,8 @@ const TEACHERS_PDF_DB = [
        9. ULEPSZONE TŁO XMB / PS4 SILK WAVE (ZOPTYMALIZOWANE POD LOW-END PC)
        ============================================================================ */
     const canvas = document.getElementById("ps4-wave-canvas");
-    const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
+    const allowWaveAlpha = !IS_LOW_END_PC && !document.body.classList.contains("is-mobile");
+    const ctx = canvas.getContext("2d", { alpha: allowWaveAlpha, desynchronized: true });
     const bgCacheCanvas = document.createElement("canvas");
     const bgCacheCtx = bgCacheCanvas.getContext("2d", { alpha: false });
 
@@ -6426,7 +6467,11 @@ const TEACHERS_PDF_DB = [
     window.addEventListener("resize", resizeCanvas);
 
     function drawPs4XmbWave(time) {
-      ctx.drawImage(bgCacheCanvas, 0, 0);
+      if (window.ZSA_SCHOOL_3D && window.ZSA_SCHOOL_3D.isActive()) {
+        ctx.clearRect(0, 0, cw, ch);
+      } else {
+        ctx.drawImage(bgCacheCanvas, 0, 0);
+      }
 
       // Płynna paralaksa fali PS4 reagująca na ruch wstęgi
       const targetParallax = (navLevel === "FOLDER" ? folderIndex : mainIndex) * 0.14;

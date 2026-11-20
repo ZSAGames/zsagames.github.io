@@ -10,6 +10,7 @@
 <body>
 
   <!-- TŁO FAL XMB/PS4 + WARSTWA CUSTOM TŁA GRY (OBRAZ / GIF / WIDEO BEZ DŹWIĘKU) -->
+  <canvas id="school-3d-canvas"></canvas>
   <canvas id="ps4-wave-canvas"></canvas>
   <div class="game-theme-backdrop" id="game-theme-backdrop">
     <video class="game-theme-video" id="game-theme-video" muted loop playsinline preload="metadata"></video>
@@ -766,6 +767,192 @@
           </div>
         </div>
 
+        <!-- WIDOK APLIKACJI: SZYBKI LIBRUS (NATIVE PS4 ORBIS OS) -->
+        <div class="zsa-librus-view" id="zsa-librus-view">
+
+          <!-- KROK 1: EKRAN LOGOWANIA PSN / ORBIS OS -->
+          <div id="lib-login-step" class="lib-login-step">
+            <div class="lib-login-shell">
+              <div class="lib-login-header-row">
+                <span class="dir-detail-badge" style="margin:0;">SZYBKI LIBRUS • SYNERGIA</span>
+                <div class="lib-status-pills-row">
+                  <span class="lib-server-pill" id="lib-server-pill" title="Kliknij, aby ponownie sprawdzić serwer">
+                    <i class="lib-server-dot"></i>
+                    <span id="lib-server-text">Sprawdzanie API...</span>
+                  </span>
+                  <span class="lib-server-pill" id="lib-portal-pill" title="Status portalu portal.librus.pl">
+                    <i class="lib-server-dot"></i>
+                    <span id="lib-portal-text">Librus: ...</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Baner przerwy technicznej Librusa (pokazuje się automatycznie gdy wykryto przerwę) -->
+              <div id="lib-maint-banner" class="lib-maint-banner" style="display:none;">
+                <div class="lib-maint-icon">!</div>
+                <div class="lib-maint-body">
+                  <strong id="lib-maint-title">Przerwa techniczna w systemie Librus</strong>
+                  <p id="lib-maint-text"></p>
+                  <a href="https://portal.librus.pl/rodzina/synergia/loguj" target="_blank" rel="noopener noreferrer" class="lib-maint-link">
+                    Sprawdź oficjalną stronę Librus Synergia ↗
+                  </a>
+                </div>
+              </div>
+
+              <div class="lib-login-grid">
+                <div class="lib-login-intro">
+                  <h2 class="lib-login-title">Dziennik Elektroniczny</h2>
+                  <p class="lib-login-desc">
+                    Szybki, przejrzysty podgląd Twojej frekwencji, tematów zrealizowanych na opuszczonych lekcjach oraz ocen posegregowanych według przedmiotów i kategorii.
+                  </p>
+                  <ul class="lib-login-perks">
+                    <li>Rozdzielone nieobecności nieusprawiedliwione i usprawiedliwione</li>
+                    <li>Pełny podgląd tematu zajęć bez otwierania dziesiątek kart</li>
+                    <li>Widok ocen wzorowany na systemie Trofeów PS4</li>
+                  </ul>
+                </div>
+
+                <form id="lib-login-form" class="lib-login-form">
+                  <label class="lib-field">
+                    <span>Login Librus Synergia</span>
+                    <input type="text" id="lib-login-input" class="tch-search-input lib-input" placeholder="np. 11104552u" autocomplete="username" required />
+                  </label>
+
+                  <label class="lib-field">
+                    <span>Hasło</span>
+                    <input type="password" id="lib-pass-input" class="tch-search-input lib-input" placeholder="••••••••" autocomplete="current-password" required />
+                  </label>
+
+                  <div class="lib-loader-bar" id="lib-loader-bar" style="display:none;">
+                    <div class="lib-loader-fill"></div>
+                  </div>
+                  <div id="lib-status-msg" class="lib-status-msg" style="display:none;"></div>
+
+                  <button type="submit" class="dir-open-original-btn lib-submit-full" id="lib-submit-btn">
+                    Zaloguj do Synergii
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- KROK 2: ZALOGOWANY — NATYWNA APLIKACJA PS4 (MASTER-DETAIL) -->
+          <div id="lib-data-step" class="lib-data-step" style="display:none;">
+
+            <!-- Jednolity górny pasek aplikacji (Profil + Zakładki + Akcje = brak straty wysokości) -->
+            <div class="lib-app-topbar">
+              <div class="lib-profile-strip">
+                <span class="lib-avatar-badge" id="lib-user-initials">ZSA</span>
+                <div class="lib-profile-text">
+                  <strong id="lib-user-name">Uczeń ZSA</strong>
+                  <span id="lib-user-meta" class="lib-user-meta">Librus Synergia</span>
+                </div>
+                <span class="lib-lucky-pill" id="lib-lucky-pill" style="display:none;">★ <strong id="lib-lucky-num">–</strong></span>
+              </div>
+
+              <div class="lib-nav-tabs" role="tablist">
+                <button type="button" class="lib-tab-btn active" data-lib-tab="grades">
+                  Oceny <span class="lib-tab-count" id="lib-count-grades">0</span>
+                </button>
+                <button type="button" class="lib-tab-btn" data-lib-tab="attendance">
+                  Frekwencja <span class="lib-tab-count" id="lib-count-att">0</span>
+                </button>
+                <button type="button" class="lib-tab-btn" data-lib-tab="topics">
+                  Tematy <span class="lib-tab-count" id="lib-count-topics">0</span>
+                </button>
+              </div>
+
+              <div class="lib-top-actions">
+                <button type="button" class="zsa-refresh-btn lib-compact-btn" id="lib-refresh-btn">Odśwież</button>
+                <button type="button" class="tt-back-step-btn lib-compact-btn" id="lib-logout-btn">Wyloguj</button>
+              </div>
+            </div>
+
+            <!-- ZAKŁADKA 1: OCENY (STYL TROFEÓW PS4 — LISTA PRZEDMIOTÓW + PANEL SZCZEGÓŁÓW) -->
+            <div class="lib-panel active" id="lib-panel-grades">
+              <div class="lib-split-layout lib-grades-split">
+                <!-- Lewa lista przedmiotów -->
+                <aside class="lib-master-pane">
+                  <div class="lib-pane-head">
+                    <span>Przedmioty z ocenami</span>
+                    <span class="lib-pane-badge" id="lib-grade-subj-count">0</span>
+                  </div>
+                  <div class="lib-pane-scroll" id="lib-grade-subjects-list"></div>
+                </aside>
+
+                <!-- Prawy panel wybranego przedmiotu -->
+                <section class="lib-detail-pane">
+                  <div class="lib-detail-toolbar">
+                    <div class="lib-detail-heading">
+                      <h3 id="lib-grade-active-subject">Wybierz przedmiot</h3>
+                      <span id="lib-grade-active-avg" class="lib-avg-gold"></span>
+                    </div>
+                    <div class="lib-detail-controls">
+                      <select id="lib-grade-cat-filter" class="lib-select">
+                        <option value="ALL">Wszystkie kategorie</option>
+                      </select>
+                      <select id="lib-grade-sort" class="lib-select">
+                        <option value="category">Wg kategorii</option>
+                        <option value="date">Najnowsze</option>
+                        <option value="weight">Wg wagi</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Pasek szybkiego podglądu wszystkich ocen w 1 rzędzie -->
+                  <div class="lib-grade-strip" id="lib-grade-quick-strip"></div>
+
+                  <!-- Posegregowane oceny w zwartej siatce -->
+                  <div class="lib-pane-scroll lib-detail-scroll" id="lib-grades-detail-body"></div>
+                </section>
+              </div>
+            </div>
+
+            <!-- ZAKŁADKA 2: FREKWENCJA (STYL POWIADOMIEŃ PS4 — LISTA + INSPEKTOR LEKCJI) -->
+            <div class="lib-panel" id="lib-panel-attendance">
+              <div class="lib-att-strip">
+                <div class="lib-stat-pills" id="lib-att-stats"></div>
+                <input type="text" id="lib-att-search" class="tch-search-input lib-inline-search" placeholder="🔍 Szukaj tematu, przedmiotu, daty..." autocomplete="off" />
+              </div>
+
+              <div class="lib-split-layout lib-att-split">
+                <!-- Lewa zwarta lista wpisów -->
+                <aside class="lib-master-pane">
+                  <div class="lib-pane-scroll" id="lib-att-list"></div>
+                </aside>
+
+                <!-- Prawy inspektor wybranej nieobecności i tematu -->
+                <section class="lib-detail-pane lib-att-inspector" id="lib-att-inspector"></section>
+              </div>
+            </div>
+
+            <!-- ZAKŁADKA 3: TEMATY WG PRZEDMIOTÓW (STYL BIBLIOTEKI PS4) -->
+            <div class="lib-panel" id="lib-panel-topics">
+              <div class="lib-split-layout lib-topics-split">
+                <aside class="lib-master-pane">
+                  <div class="lib-pane-head">
+                    <span>Przedmioty</span>
+                    <span class="lib-pane-badge" id="lib-topic-subj-count">0</span>
+                  </div>
+                  <div class="lib-pane-scroll" id="lib-topic-subjects-list"></div>
+                </aside>
+
+                <section class="lib-detail-pane">
+                  <div class="lib-detail-toolbar">
+                    <div class="lib-detail-heading">
+                      <h3 id="lib-topic-active-subject">Tematy zajęć</h3>
+                      <span id="lib-topic-active-count" class="lib-pane-badge">0</span>
+                    </div>
+                    <input type="text" id="lib-topics-search" class="tch-search-input lib-inline-search" placeholder="🔍 Filtruj tematy..." autocomplete="off" />
+                  </div>
+                  <div class="lib-pane-scroll lib-detail-scroll" id="lib-topics-detail-body"></div>
+                </section>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </section>
   </main>
@@ -794,5 +981,7 @@
 
    <script src="base.js"></script>
    <script src="admin.js"></script>
+   <script src="librus.js"></script>
+   <script src="school-bg-3d.js"></script>
 </body>
 </html>
