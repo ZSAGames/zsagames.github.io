@@ -141,6 +141,8 @@
 
     <!-- Zegar 24-godzinny wraz z Dniem, Miesiącem i Rokiem -->
     <div class="top-right-clock" id="ps4-clock">
+      <button type="button" class="clock-myclass-chip" id="ps4-clock-myclass" style="display:none;" title="Kliknij, aby otworzyć swój plan lekcji"></button>
+      <span class="clock-bell-chip" id="ps4-clock-bell" style="display:none;"></span>
       <span class="clock-date-part" id="ps4-clock-date">13.11.2026</span>
       <span class="clock-time-part" id="ps4-clock-time">17:00</span>
     </div>
@@ -256,6 +258,19 @@
               </div>
               <div class="tt-school-count">✕ Wybierz (12 oddziałów: 1A – 5C AT)</div>
             </div>
+          </div>
+
+          <!-- Szybki podgląd: Gdzie teraz ma lekcję klasa X + skrót Moja Klasa -->
+          <div class="tt-where-now-box" id="tt-where-now-box">
+            <div class="tt-where-head">
+              <span class="tt-legend-title" style="margin:0;">Gdzie teraz ma klasa? (Live)</span>
+              <div class="tt-where-controls">
+                <select id="tt-where-select" class="lib-select"></select>
+                <button type="button" class="dir-open-original-btn lib-compact-btn" id="tt-where-open-btn">Otwórz plan</button>
+                <button type="button" class="zsa-refresh-btn lib-compact-btn" id="tt-myclass-jump-btn" style="display:none;"></button>
+              </div>
+            </div>
+            <div class="tt-where-result" id="tt-where-result"></div>
           </div>
 
           <!-- Krok 2: Wybór Klasy -->
@@ -468,13 +483,15 @@
           </div>
         </div>
 
-        <!-- WIDOK G: Globalny Terminarz (Kalendarz Dni Wolnych i Nieobecności Nauczycieli) -->
+       <!-- WIDOK G: Globalny Terminarz (Kalendarz Dni Wolnych i Nieobecności Nauczycieli) -->
         <div class="zsa-calendar-view" id="zsa-calendar-view">
           <div class="tt-top-bar">
             <div class="tt-breadcrumb" id="cal-breadcrumb">
               Globalny Terminarz ZSA — <strong id="cal-month-title">Listopad 2026</strong>
             </div>
             <div class="tt-top-right-group">
+              <button type="button" class="tt-back-step-btn active" id="cal-mode-cal-btn">Kalendarz</button>
+              <button type="button" class="tt-back-step-btn" id="cal-mode-exams-btn">Egzaminy</button>
               <button type="button" class="tt-back-step-btn" id="cal-prev-month">◀ Poprzedni</button>
               <button type="button" class="tt-back-step-btn" id="cal-today-btn">Dziś</button>
               <button type="button" class="tt-back-step-btn" id="cal-next-month">Następny ▶</button>
@@ -500,6 +517,14 @@
             <div class="cal-details-panel" id="cal-details-panel">
               <div class="cal-details-header" id="cal-selected-date-label">Wybierz dzień w kalendarzu</div>
               <div class="cal-details-list" id="cal-details-list"></div>
+            </div>
+          </div>
+
+          <!-- Zakładka 2 Terminarza: Odliczanie do Egzaminów (Matura & Zawodowe ZSA) -->
+          <div class="cal-exams-view" id="cal-exams-view" style="display:none;">
+            <div class="cal-exams-grid" id="cal-exams-grid"></div>
+            <div class="cal-exams-note">
+              Daty orientacyjne wg harmonogramu roku szkolnego 2026/2027 (CKE / woj. podlaskie). Zaktualizuj dokładne dni w <code>ZSA_EXAMS_COUNTDOWN</code> w <code>base.js</code> po ogłoszeniu oficjalnych terminów szkolnych.
             </div>
           </div>
         </div>
@@ -860,6 +885,9 @@
                 <button type="button" class="lib-tab-btn" data-lib-tab="topics">
                   Tematy <span class="lib-tab-count" id="lib-count-topics">0</span>
                 </button>
+                <button type="button" class="lib-tab-btn" data-lib-tab="stats">
+                  Wykaz % <span class="lib-tab-count" id="lib-count-stats">—</span>
+                </button>
               </div>
 
               <div class="lib-top-actions">
@@ -950,6 +978,423 @@
               </div>
             </div>
 
+            <!-- ZAKŁADKA 4: WYKAZ UCZĘSZCZANIA (% FREKWENCJI — LIBRUS PRO API) -->
+            <div class="lib-panel" id="lib-panel-stats">
+              <div class="lib-stats-kpis" id="lib-stats-kpis"></div>
+
+              <div class="lib-detail-pane" style="flex:1;">
+                <div class="lib-detail-toolbar">
+                  <div class="lib-detail-heading">
+                    <h3>Wykaz uczęszczania wg przedmiotów</h3>
+                    <span class="lib-muted" id="lib-stats-note"></span>
+                  </div>
+                  <div class="lib-detail-controls">
+                    <select id="lib-stats-sort" class="lib-select">
+                      <option value="percent-asc">Od najniższej % (zagrożenia)</option>
+                      <option value="percent-desc">Od najwyższej %</option>
+                      <option value="absences-desc">Najwięcej nieobecności</option>
+                      <option value="alpha">Alfabetycznie</option>
+                    </select>
+                    <button type="button" class="zsa-refresh-btn lib-compact-btn" id="lib-goto-calc-att-btn">Kalkulator % →</button>
+                    <button type="button" class="dir-open-original-btn lib-compact-btn" id="lib-goto-calc-beh-btn">Zachowanie →</button>
+                  </div>
+                </div>
+                <div class="lib-pane-scroll" style="padding:0;">
+                  <table class="calc-scale-table">
+                    <thead>
+                      <tr>
+                        <th>Przedmiot</th>
+                        <th>Nauczyciel</th>
+                        <th style="text-align:center;">Obecności</th>
+                        <th style="text-align:center;">Nieob. (nb/u)</th>
+                        <th style="text-align:center;">Razem</th>
+                        <th>Frekwencja i zapas do 50%</th>
+                      </tr>
+                    </thead>
+                    <tbody id="lib-stats-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- WIDOK APLIKACJI: KALKULATOR OCEN (ŚREDNIA + LIBRUS SYNC + PROGI PUNKTOWE %) -->
+        <div class="zsa-calculator-view" id="zsa-calculator-view">
+          <div class="lib-app-topbar calc-topbar">
+            <div class="lib-nav-tabs" role="tablist">
+              <button type="button" class="lib-tab-btn calc-tab-btn active" data-calc-tab="avg">
+                Średnia i Wyciąganie Oceny
+              </button>
+              <button type="button" class="lib-tab-btn calc-tab-btn" data-calc-tab="points">
+                Ocena z Punktów (%)
+              </button>
+              <button type="button" class="lib-tab-btn calc-tab-btn" data-calc-tab="attendance">
+                Bezpieczna Frekwencja
+              </button>
+              <button type="button" class="lib-tab-btn calc-tab-btn" data-calc-tab="behavior">
+                Zachowanie (Statut ZSA)
+              </button>
+            </div>
+
+            <div class="calc-rule-wrap">
+              <span class="lib-muted">Wartość +/-:</span>
+              <select id="calc-pm-rule" class="lib-select">
+                <option value="zsa" selected>Statut ZSA (+0,50 / −0,20)</option>
+                <option value="classic">Klasyczna (+0,50 / −0,25)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- ZAKŁADKA 1: KALKULATOR ŚREDNIEJ I CELU -->
+          <div class="calc-panel active" id="calc-panel-avg">
+            <!-- Pasek integracji z Szybkim Librusem -->
+            <div class="calc-librus-bar" id="calc-librus-bar"></div>
+            <div class="calc-import-note" id="calc-import-note" style="display:none;"></div>
+
+            <div class="calc-split">
+              <!-- LEWA KOLUMNA: Dodawanie ocen i lista -->
+              <aside class="calc-pane">
+                <div class="lib-pane-head">
+                  <span>Dodaj ocenę ręcznie</span>
+                  <button type="button" class="calc-clear-link" id="calc-clear-grades-btn">Wyczyść listę</button>
+                </div>
+
+                <div class="calc-scroll-pane">
+                  <div class="calc-picker-block">
+                    <span class="calc-sub-label">1. Wybierz ocenę</span>
+                    <div class="calc-quick-grades" id="calc-quick-grades"></div>
+                  </div>
+
+                  <div class="calc-picker-block">
+                    <span class="calc-sub-label">2. Wybierz wagę (1=Akt/PD • 2=Test • 3=Kartkówka • 6=Sprawdzian)</span>
+                    <div class="calc-quick-weights" id="calc-quick-weights"></div>
+                  </div>
+
+                  <div class="calc-add-row">
+                    <input type="text" id="calc-note-input" class="tch-search-input calc-note-input" placeholder="Opis (opcjonalnie, np. Sprawdzian)" autocomplete="off" />
+                    <button type="button" class="dir-open-original-btn lib-compact-btn" id="calc-add-grade-btn">+ Dodaj</button>
+                  </div>
+
+                  <div class="calc-list-head">
+                    <span>Twoje oceny</span>
+                    <span class="lib-pane-badge" id="calc-grades-count">0</span>
+                  </div>
+                  <div class="calc-grades-items" id="calc-grades-items"></div>
+                </div>
+              </aside>
+
+              <!-- PRAWA KOLUMNA: Wynik średniej + Symulator celu -->
+              <section class="calc-pane">
+                <div class="lib-pane-head">
+                  <span>Wynik średniej i symulator celu</span>
+                  <span class="lib-pane-badge" id="calc-est-grade">Dodaj oceny</span>
+                </div>
+
+                <div class="calc-scroll-pane">
+                  <div class="calc-hero-stats">
+                    <div class="calc-hero-box main">
+                      <span class="calc-sub-label">Średnia ważona</span>
+                      <strong class="calc-big-avg" id="calc-weighted-avg">—</strong>
+                    </div>
+                    <div class="calc-hero-box">
+                      <span class="calc-sub-label">Średnia zwykła</span>
+                      <strong class="calc-mid-val" id="calc-simple-avg">—</strong>
+                    </div>
+                    <div class="calc-hero-box">
+                      <span class="calc-sub-label">Suma wag</span>
+                      <strong class="calc-mid-val" id="calc-sum-weights">0</strong>
+                    </div>
+                  </div>
+
+                  <!-- Symulator wyciągania średniej -->
+                  <div class="calc-goal-card">
+                    <div class="calc-goal-title">Jaką ocenę muszę dostać, żeby wyciągnąć średnią?</div>
+
+                    <div class="calc-goal-presets" id="calc-goal-presets">
+                      <button type="button" class="calc-preset-btn" data-goal="2.00">Zdana (2.00)</button>
+                      <button type="button" class="calc-preset-btn" data-goal="2.75">Na 3 (2.75)</button>
+                      <button type="button" class="calc-preset-btn" data-goal="3.75">Na 4 (3.75)</button>
+                      <button type="button" class="calc-preset-btn active" data-goal="4.75">Pasek / 5 (4.75)</button>
+                      <button type="button" class="calc-preset-btn" data-goal="5.50">Na 6 (5.50)</button>
+                    </div>
+
+                    <div class="calc-goal-inputs-row">
+                      <label class="calc-inline-field">
+                        <span>Własny cel:</span>
+                        <input type="number" id="calc-goal-input" class="tch-search-input calc-num-input" value="4.75" min="1" max="6" step="0.05" />
+                      </label>
+                      <div class="calc-goal-weights" id="calc-goal-weights"></div>
+                    </div>
+
+                    <div id="calc-goal-output"></div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <!-- ZAKŁADKA 2: OCENA Z PUNKTÓW (%) -->
+          <div class="calc-panel" id="calc-panel-points">
+            <div class="calc-split calc-points-split">
+              <!-- LEWA KOLUMNA: Wpisywanie punktów i wynik -->
+              <section class="calc-pane">
+                <div class="lib-pane-head">
+                  <span>Przelicznik punktów na ocenę</span>
+                  <span class="lib-pane-badge">Skala 15-stopniowa</span>
+                </div>
+
+                <div class="calc-scroll-pane">
+                  <div class="calc-pts-form">
+                    <label class="lib-field">
+                      <span>Zdobyte punkty</span>
+                      <input type="number" id="calc-pts-scored" class="tch-search-input lib-input" placeholder="np. 17" min="0" step="0.5" />
+                    </label>
+                    <label class="lib-field">
+                      <span>Maksymalna liczba punktów</span>
+                      <input type="number" id="calc-pts-max" class="tch-search-input lib-input" placeholder="np. 20" min="1" step="0.5" />
+                    </label>
+                  </div>
+
+                  <div class="calc-pts-result-wrap" id="calc-pts-result"></div>
+                </div>
+              </section>
+
+              <!-- PRAWA KOLUMNA: Pełna tabela progów % -->
+              <aside class="calc-pane">
+                <div class="lib-pane-head">
+                  <span>Progi procentowe i punktowe</span>
+                  <span class="lib-pane-badge">100% – 0%</span>
+                </div>
+                <div class="calc-scroll-pane" style="padding:0;">
+                  <table class="calc-scale-table">
+                    <thead>
+                      <tr>
+                        <th>%</th>
+                        <th>Ocena</th>
+                        <th>Zakres pkt</th>
+                      </tr>
+                    </thead>
+                    <tbody id="calc-pts-scale-tbody"></tbody>
+                  </table>
+                </div>
+              </aside>
+            </div>
+          </div>
+
+          <!-- ZAKŁADKA 3: BEZPIECZNA FREKWENCJA (STATUT ZSA §46 & §47) -->
+          <div class="calc-panel" id="calc-panel-attendance">
+            <div class="calc-librus-bar" id="calc-att-librus-bar"></div>
+            <div class="calc-split calc-points-split">
+              <section class="calc-pane">
+                <div class="lib-pane-head">
+                  <span>Symulator frekwencji (progi 50% i 80%)</span>
+                  <span class="lib-pane-badge" id="calc-att-badge">—</span>
+                </div>
+                <div class="calc-scroll-pane">
+                  <div class="calc-pts-form">
+                    <label class="lib-field">
+                      <span>Liczba obecności (ob + spóźnienia)</span>
+                      <input type="number" id="calc-att-present" class="tch-search-input lib-input" value="85" min="0" step="1" />
+                    </label>
+                    <label class="lib-field">
+                      <span>Liczba nieobecności razem (nb + uspr.)</span>
+                      <input type="number" id="calc-att-absent" class="tch-search-input lib-input" value="15" min="0" step="1" />
+                    </label>
+                  </div>
+                  <div id="calc-att-output" style="display:flex;flex-direction:column;gap:10px;"></div>
+                </div>
+              </section>
+
+              <aside class="calc-pane">
+                <div class="lib-pane-head">
+                  <span>Twoje przedmioty (od najbardziej zagrożonych)</span>
+                  <span class="lib-pane-badge">Librus Sync</span>
+                </div>
+                <div class="calc-scroll-pane" style="padding:0;">
+                  <table class="calc-scale-table">
+                    <thead>
+                      <tr>
+                        <th>Przedmiot</th>
+                        <th>Ob/Razem</th>
+                        <th>%</th>
+                        <th>Zapas do 50%</th>
+                      </tr>
+                    </thead>
+                    <tbody id="calc-att-subjects-tbody"></tbody>
+                  </table>
+                </div>
+              </aside>
+            </div>
+          </div>
+
+          <!-- ZAKŁADKA 4: KALKULATOR ZACHOWANIA (STATUT ZSA §59) -->
+          <div class="calc-panel" id="calc-panel-behavior">
+            <div class="calc-librus-bar" id="calc-beh-librus-bar"></div>
+            <div class="calc-split">
+              <aside class="calc-pane">
+                <div class="lib-pane-head">
+                  <span>Punkty dodatnie i ujemne (Statut ZSA)</span>
+                  <button type="button" class="calc-clear-link" id="calc-beh-reset-btn">Zeruj</button>
+                </div>
+                <div class="calc-scroll-pane">
+                  <span class="calc-sub-label" style="color:#4ef2a8;">Punkty dodatnie (+)</span>
+                  <div class="calc-beh-list" id="calc-beh-plus-list"></div>
+
+                  <span class="calc-sub-label" style="color:#ff8e99;margin-top:6px;">Punkty ujemne (−) i kary</span>
+                  <div class="calc-beh-list" id="calc-beh-minus-list"></div>
+
+                  <div class="calc-pts-form" style="margin-top:6px;">
+                    <label class="lib-field">
+                      <span>Inne punkty dodatnie (+)</span>
+                      <input type="number" id="calc-beh-custom-plus" class="tch-search-input lib-input" value="0" min="0" />
+                    </label>
+                    <label class="lib-field">
+                      <span>Inne punkty ujemne (−)</span>
+                      <input type="number" id="calc-beh-custom-minus" class="tch-search-input lib-input" value="0" min="0" />
+                    </label>
+                  </div>
+                </div>
+              </aside>
+
+              <section class="calc-pane">
+                <div class="lib-pane-head">
+                  <span>Wynik zachowania wg Statutu ZSA §59</span>
+                  <span class="lib-pane-badge" id="calc-beh-badge">+35 pkt • Dobre</span>
+                </div>
+                <div class="calc-scroll-pane">
+                  <div id="calc-beh-summary" style="display:flex;flex-direction:column;gap:12px;"></div>
+                  <div class="calc-goal-box">
+                    <div class="calc-goal-main" style="font-size:0.88rem;">Progi ocen zachowania w ZSA (§59)</div>
+                    <div class="calc-goal-sub">
+                      <strong>Wzorowe:</strong> +100 pkt i więcej • <strong>Bardzo dobre:</strong> 61–99 pkt • <strong>Dobre:</strong> 15–60 pkt (start: +35 pkt)<br/>
+                      <strong>Poprawne:</strong> −25 do +14 pkt • <strong>Nieodpowiednie:</strong> −249 do −26 pkt • <strong>Naganne:</strong> poniżej −250 pkt lub ponad 40 godz. nieusprawiedliwionych.
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- WIDOK APLIKACJI: USTAWIENIA (MOTYWY, FALE, 3D, AUDIO I SYSTEM) -->
+        <div class="zsa-settings-view" id="zsa-settings-view">
+          <div class="set-split-layout">
+            <!-- Lewa kolumna: Kategorie Ustawień (styl PS4 System Settings) -->
+            <aside class="lib-master-pane set-cat-pane">
+              <div class="lib-pane-head">
+                <span>Kategorie ustawień</span>
+                <span class="lib-pane-badge">PS4 OS</span>
+              </div>
+              <div class="set-cat-list">
+                <button type="button" class="lib-master-item set-cat-item active" data-set-cat="themes">
+                  <div class="lib-master-top">
+                    <span class="lib-master-name">🎨 Motywy i kolory</span>
+                    <span class="lib-master-count">7</span>
+                  </div>
+                  <span class="set-cat-sub">Klasyczny PS4, Ciemny OLED, ZSA, własny kolor</span>
+                </button>
+
+                <button type="button" class="lib-master-item set-cat-item" data-set-cat="display">
+                  <div class="lib-master-top">
+                    <span class="lib-master-name">🌊 Tło, fale i 3D</span>
+                  </div>
+                  <span class="set-cat-sub">Fale XMB, cząsteczki, budynek 3D, tryb oszczędny</span>
+                </button>
+
+                <button type="button" class="lib-master-item set-cat-item" data-set-cat="audio">
+                  <div class="lib-master-top">
+                    <span class="lib-master-name">🔊 Dźwięk i muzyka</span>
+                  </div>
+                  <span class="set-cat-sub">Dźwięki nawigacji menu (.wav) i muzyka (.mp3)</span>
+                </button>
+
+                <button type="button" class="lib-master-item set-cat-item" data-set-cat="system">
+                  <div class="lib-master-top">
+                    <span class="lib-master-name">⚙ Interfejs i system</span>
+                  </div>
+                  <span class="set-cat-sub">Licznik dzwonka, karty, reset ustawień i cache</span>
+                </button>
+              </div>
+            </aside>
+
+            <!-- Prawa kolumna: Aktywna kategoria ustawień -->
+            <section class="lib-detail-pane set-detail-pane">
+              <div class="lib-pane-head">
+                <span id="set-detail-title">Motywy i Kolory Systemu</span>
+                <span class="lib-pane-badge" id="set-detail-badge">Klasyczny PS4</span>
+              </div>
+              <div class="set-scroll-pane" id="set-detail-body"></div>
+            </section>
+          </div>
+        </div>
+
+        <!-- WIDOK APLIKACJI: AUTORZY I INFORMACJE O PROJEKCIE (KLASA 4D AT) -->
+        <div class="zsa-authors-view" id="zsa-authors-view">
+          <div class="authors-scroll-wrap" id="authors-scroll-wrap">
+            <!-- Baner tytułowy -->
+            <div class="dir-detail-hero authors-hero">
+              <span class="dir-detail-badge">INFORMACJE O PROJEKCIE • SPOŁECZNOŚĆ ZSA W ŁOMŻY</span>
+              <h2 class="dir-detail-title">ZSAGames — Stworzone przez uczniów klasy 4D AT</h2>
+              <p class="dir-detail-lead">
+                Niekomercyjny projekt uczniowski powstały z myślą o społeczności <strong>Zespołu Szkół Akademickich w Łomży</strong>, aby ułatwić codzienną organizację nauki oraz połączyć praktyczne narzędzia szkolne z pasją do programowania.
+              </p>
+            </div>
+
+            <!-- Główne informacje i intencje projektu -->
+            <div class="authors-grid">
+              <article class="dir-info-card authors-card">
+                <div class="dir-info-card-head">
+                  <span class="dir-info-card-title">Cel projektu — pomoc uczniom ZSA</span>
+                  <span class="dir-info-card-code">NARZĘDZIE SZKOLNE</span>
+                </div>
+                <p class="dir-info-card-desc">
+                  Projekt powstał jako szybsza, czytelniejsza i wygodniejsza alternatywa wspierająca uczniów ZSA w codziennym sprawdzaniu planu lekcji, godzin dzwonków, planu nauczycieli, dokumentów szkolnych, kalkulatora ocen oraz szybkiego podglądu ocen i tematów lekcji — szczególnie wtedy, gdy standardowy dziennik Librus działa wolno, jest mało intuicyjny lub chwilowo niedostępny.
+                </p>
+              </article>
+
+              <article class="dir-info-card authors-card">
+                <div class="dir-info-card-head">
+                  <span class="dir-info-card-title">Życzliwa parodia i gry na przerwę</span>
+                  <span class="dir-info-card-code">SZACUNEK &amp; PASJA</span>
+                </div>
+                <p class="dir-info-card-desc">
+                  Nazwa <strong>ZSAGames</strong> ma charakter lekkiej, życzliwej parodii nawiązującej do naszej szkoły oraz interfejsu konsolowego. Projekt <strong>nie ma w żadnym stopniu na celu nikogo obrażać, ośmieszać ani upokarzać</strong> — ani szkoły, ani Dyrekcji, ani Nauczycieli, ani uczniów. Sekcja gier zawiera autorskie projekty uczniowskie, które mają zapewnić chwilę rozrywki w czasie wolnym lub gdy ktoś po prostu nie ma w co zagrać.
+                </p>
+              </article>
+            </div>
+
+            <!-- Informacja dla Pani Dyrektor, Nauczycieli i Pracowników Szkoły -->
+            <div class="authors-contact-banner">
+              <div class="authors-contact-head">
+                <span class="dir-detail-badge" style="margin:0;">INFORMACJA DLA DYREKCJI, NAUCZYCIELI I PRACOWNIKÓW ZSA</span>
+                <span class="lib-pane-badge">Klasa 4D AT</span>
+              </div>
+              <p class="authors-contact-text">
+                Szanowna Pani Dyrektor, Szanowni Nauczyciele oraz Pracownicy Zespołu Szkół Akademickich w Łomży — cały serwis został stworzony wyłącznie w dobrej wierze, dla wygody i wsparcia uczniów naszej szkoły. Jeżeli jakikolwiek element strony budzi Państwa wątpliwości, wymaga poprawki, aktualizacji lub usunięcia, <strong>serdecznie prosimy o kontakt z uczniami klasy 4D AT</strong>. Chętnie wysłuchamy wszelkich uwag i niezwłocznie wprowadzimy wskazane zmiany.
+              </p>
+            </div>
+
+            <!-- Prawa autorskie i zastrzeżenia (Sony / PS4 / Non-profit) -->
+            <div class="dir-highlights-box authors-legal-box">
+              <div class="dir-highlights-title">Prawa autorskie, źródła i zastrzeżenia (Credits &amp; Legal)</div>
+              <ul class="dir-highlights-list authors-legal-list">
+                <li>
+                  <span><strong>PlayStation®4 / Orbis OS:</strong> Układ wizualny menu jest niekomercyjnym hołdem fanowskim. <em>All rights to the PlayStation 4 system menu design, visual identity, and trademarks belong to Sony Interactive Entertainment Inc.</em></span>
+                </li>
+                <li>
+                  <span><strong>Autorstwo i charakter:</strong> Kod aplikacji, narzędzi szkolnych i autorskich gier przygotowali uczniowie <strong>klasy 4D AT (ZSA w Łomży)</strong> w celach edukacyjnych i hobbystycznych (projekt w 100% niekomercyjny / non-profit).</span>
+                </li>
+                <li>
+                  <span><strong>Materiały ZSA:</strong> Plany lekcji, regulaminy, statuty i aktualności pochodzą z publicznych źródeł <strong>ZSA MANS w Łomży</strong> (zsa.mans.edu.pl) i służą wyłącznie ułatwieniu dostępu uczniom.</span>
+                </li>
+                <li>
+                  <span><strong>Prywatność:</strong> Dane logowania w Szybkim Librusie nie są nigdzie zapisywane ani przechowywane przez twórców — służą wyłącznie do jednorazowego odczytu danych użytkownika.</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -982,6 +1427,8 @@
    <script src="base.js"></script>
    <script src="admin.js"></script>
    <script src="librus.js"></script>
+   <script src="calculator.js"></script>
+   <script src="settings.js"></script>
    <script src="school-bg-3d.js"></script>
 </body>
 </html>

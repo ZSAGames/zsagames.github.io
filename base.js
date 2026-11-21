@@ -1,7 +1,19 @@
  /* ============================================================================
        0. USTAWIENIA OTWIERANIA APLIKACJI (_blank vs _self), SLEEP DELAY I AUDIO
        ============================================================================ */
-    const OPEN_APPS_IN_NEW_TAB = true;
+    let OPEN_APPS_IN_NEW_TAB = true;
+    const runtimeSystemSettings = {
+      wavesEnabled: true,
+      sparklesEnabled: true,
+      sfxEnabled: true,
+      sfxVolume: 0.75,
+      musicEnabled: true,
+      musicVolume: 1.0,
+      showBellInTopBar: true,
+      openInNewTab: true,
+      reducedMotion: false
+    };
+    let activeCanvasTheme = null;
     const SLEEP_BEFORE_LAUNCH_DELAY_MS = 300; // Zmniejszony delay po wejściu w Sleep Mode przed otwarciem karty
     const NEWS_IMAGE_DWELL_MS = 380;          // Czas zatrzymania się na wpisie ZSA (w ms), po którym płynnie rozwija się zdjęcie
 
@@ -131,6 +143,31 @@
                 <line x1="20" y1="42" x2="34" y2="42"/>
                 <circle cx="44" cy="44" r="8" fill="#10b981" stroke="#ffffff" stroke-width="2.5"/>
                 <polyline points="41 44 43.2 46.2 47.5 41.8" stroke="#ffffff" stroke-width="2.2"/>
+              </svg>`
+      },
+      {
+        id: "calculator-app",
+        type: "system",
+        isCalculator: true,
+        title: "Kalkulator Ocen",
+        subtitle: "ŚREDNIA WAŻONA, WYCIĄGANIE OCENY I PROGI %",
+        url: "",
+        cover: "ZSACover.png",
+        background: "ZSABackground.png",
+        music: "",
+        fallbackBg: "linear-gradient(135deg, #0d4b8c, #041736)",
+        author: "ZSAGames • Statut ZSA w Łomży",
+        platform: "Kalkulator Średniej (Librus Sync) + Progi Punktowe",
+        description: "Policz swoją średnią ważoną (ręcznie lub wczytując oceny prosto z Szybkiego Librusa), sprawdź jaką ocenę musisz dostać na pasek lub zdaną oraz przelicz punkty ze sprawdzianu na ocenę.",
+        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="13" y="8" width="38" height="48" rx="4" fill="rgba(255,255,255,0.14)"/>
+                <rect x="20" y="15" width="24" height="10" rx="2" fill="rgba(126,200,255,0.28)"/>
+                <circle cx="23" cy="34" r="2.2" fill="#ffffff" stroke="none"/>
+                <circle cx="32" cy="34" r="2.2" fill="#ffffff" stroke="none"/>
+                <circle cx="41" cy="34" r="2.2" fill="#f5c418" stroke="none"/>
+                <circle cx="23" cy="43" r="2.2" fill="#ffffff" stroke="none"/>
+                <circle cx="32" cy="43" r="2.2" fill="#ffffff" stroke="none"/>
+                <circle cx="41" cy="43" r="2.2" fill="#4ef2a8" stroke="none"/>
               </svg>`
       },
       {
@@ -294,6 +331,48 @@
                 <line x1="12" y1="45" x2="25" y2="32"/>
                 <line x1="52" y1="45" x2="39" y2="32"/>
               </svg>`
+      },
+      {
+        id: "settings-app",
+        type: "system",
+        isSettings: true,
+        title: "Ustawienia",
+        subtitle: "MOTYWY, FALE, 3D, DŹWIĘK I SYSTEM",
+        url: "",
+        cover: "ZSACover.png",
+        background: "ZSABackground.png",
+        music: "",
+        fallbackBg: "linear-gradient(135deg, #0b418c, #041534)",
+        author: "ZSAGames Orbis OS",
+        platform: "Konfiguracja Systemu i Motywów",
+        description: "Zmień motyw kolorystyczny i fale w tle, dostosuj model 3D szkoły, włącz lub wyłącz dźwięki menu i muzykę oraz skonfiguruj interfejs.",
+        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="32" cy="32" r="9" fill="rgba(255,255,255,0.16)"/>
+                <path d="M32 10v6M32 48v6M10 32h6M48 32h6M16.4 16.4l4.3 4.3M43.3 43.3l4.3 4.3M47.6 16.4l-4.3 4.3M20.7 43.3l-4.3 4.3"/>
+                <circle cx="32" cy="32" r="18" stroke-dasharray="6 6"/>
+              </svg>`
+      },
+      {
+        id: "authors-app",
+        type: "system",
+        isAuthors: true,
+        title: "Autorzy",
+        subtitle: "INFORMACJE O PROJEKCIE • KLASA 4D AT",
+        url: "",
+        cover: "ZSACover.png",
+        background: "ZSABackground.png",
+        music: "",
+        fallbackBg: "linear-gradient(135deg, #103a7d, #04122b)",
+        author: "Uczniowie klasy 4D AT — ZSA w Łomży",
+        platform: "Projekt uczniowski (Non-Profit / Edukacyjny)",
+        description: "Informacje o twórcach projektu ZSAGames, jego pomocniczym celu dla uczniów ZSA w Łomży, prawach autorskich Sony (PS4) oraz kontakcie dla Dyrekcji i Nauczycieli.",
+        svg: `<svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="32" cy="21" r="8" fill="rgba(255,255,255,0.16)"/>
+                <path d="M17 48c0-8.3 6.7-14 15-14s15 5.7 15 14" fill="rgba(255,255,255,0.12)"/>
+                <circle cx="15" cy="26" r="5" opacity="0.75"/>
+                <circle cx="49" cy="26" r="5" opacity="0.75"/>
+                <path d="M7 46c0-5 3.6-8.5 8-8.5M57 46c0-5-3.6-8.5-8-8.5" opacity="0.75"/>
+              </svg>`
       }
     ];
 
@@ -303,7 +382,7 @@
       type: "system",
       isGoldHen: true,
       isDisc: false,
-      title: "GoldHEN",
+      title: "PANEL",
       subtitle: "ADMIN • PANEL SYSTEMOWY",
       url: "",
       cover: "ZSACover.png",
@@ -312,7 +391,7 @@
       fallbackBg: "linear-gradient(135deg, #4f3a05, #140f02)",
       author: "ZSAGames System Admin",
       platform: "Moduł Administracyjny Orbis OS",
-      description: "Chroniony panel administratora GoldHEN. Wymaga zalogowania kontem Supabase."
+      description: "Chroniony panel administratora. Wymaga zalogowania kontem."
     };
 
     /* ============================================================================
@@ -927,12 +1006,14 @@
     });
 
     function playCustomWav(type = "move", forcePlay = false) {
+      if (!runtimeSystemSettings.sfxEnabled) return;
       if (isSystemSleeping && !forcePlay) return;
       try {
         const ch = sfxChannels[type];
         if (!ch) return;
         const player = ch.players[ch.index];
         ch.index = (ch.index + 1) % ch.players.length;
+        player.volume = Math.max(0, Math.min(1, runtimeSystemSettings.sfxVolume ?? 0.75));
         player.currentTime = 0;
         player.play().catch(() => {});
       } catch (_) {}
@@ -1018,7 +1099,7 @@
           this.primary.loop = true;
         }
 
-        const effectiveMaster = this.fadeFactor * this.maxVolume;
+        const effectiveMaster = this.fadeFactor * this.maxVolume * Math.max(0, Math.min(1, runtimeSystemSettings.musicVolume ?? 1));
         if (this.isCrossfadingLoop) {
           this.primary.volume = Math.max(0, Math.min(1, effectiveMaster * (1 - this.loopMix)));
           this.secondary.volume = Math.max(0, Math.min(1, effectiveMaster * this.loopMix));
@@ -1068,7 +1149,7 @@
     }
 
     function syncBackgroundMusic() {
-      if (isSystemSleeping) {
+      if (isSystemSleeping || !runtimeSystemSettings.musicEnabled) {
         trackRegistry.forEach((track) => track.fadeOut());
         return;
       }
@@ -3550,10 +3631,12 @@ const TEACHERS_PDF_DB = [
           tchFocusIdx = Math.max(0, filtered.length - 1);
         }
 
+        const nowForCards = new Date();
         tchListStepEl.innerHTML = filtered.map((t, idx) => {
           const stats = getTeacherMetaStats(t);
           const mainRooms = stats.rooms.slice(0, 5).join(", ");
           const todayAbs = getTeacherAbsencesOnDate(t.code);
+          const liveInfo = getTeacherLiveStatus(t, nowForCards);
           const absBadgeHtml = todayAbs.length
             ? todayAbs.map((a) => `
                 <div class="tch-absent-badge">
@@ -3562,16 +3645,23 @@ const TEACHERS_PDF_DB = [
               `).join("")
             : "";
 
+          const liveBoxHtml = buildTeacherLiveCardMarkup(liveInfo);
+
           return `
-            <div class="tch-card ${todayAbs.length ? "is-absent-today" : ""}" data-tcode="${t.code}" data-tidx="${idx}">
-              <div class="tch-card-top">
-                <span class="tch-card-code">${t.code}</span>
-                <span class="tch-card-hours">${stats.totalLessons} lek./tyg.</span>
+            <div class="tch-card ${todayAbs.length ? "is-absent-today" : ""} ${liveInfo?.state === "LIVE" ? "has-live-lesson" : ""}" data-tcode="${t.code}" data-tidx="${idx}">
+              <div class="tch-card-main">
+                <div class="tch-card-top">
+                  <span class="tch-card-code">${t.code}</span>
+                  <span class="tch-card-hours">${stats.totalLessons} lek./tyg.</span>
+                </div>
+                <div class="tch-card-name">${t.name}</div>
+                <div class="tch-card-subjects">${t.role}</div>
+                <div class="tch-card-rooms">🚪 Sale: <strong>${mainRooms || "wg planu"}</strong></div>
+                ${absBadgeHtml}
               </div>
-              <div class="tch-card-name">${t.name}</div>
-              <div class="tch-card-subjects">${t.role}</div>
-              <div class="tch-card-rooms">🚪 Sale: <strong>${mainRooms || "wg planu"}</strong></div>
-              ${absBadgeHtml}
+              <div class="tch-card-live-side" data-live-tcode="${t.code}">
+                ${liveBoxHtml}
+              </div>
             </div>
           `;
         }).join("");
@@ -3614,6 +3704,16 @@ const TEACHERS_PDF_DB = [
             <span class="tch-stat-pill">Uczone klasy: <strong>${stats.classes.join(", ")}</strong></span>
           </div>
         `;
+
+        const teacherLiveNow = getTeacherLiveStatus(teacher, new Date());
+        if (teacherLiveNow && teacherLiveNow.state === "LIVE") {
+          tchSummaryBannerEl.innerHTML += `
+            <div class="tch-live-banner-pill" data-live-banner-tcode="${teacher.code}">
+              <span class="tch-live-dot"></span>
+              <span>${teacherLiveNow.text}</span>
+            </div>
+          `;
+        }
 
         const teacherTodayAbs = getTeacherAbsencesOnDate(teacher.code);
         if (teacherTodayAbs.length > 0) {
@@ -4818,6 +4918,10 @@ const TEACHERS_PDF_DB = [
             clickedItem.isDocs ||
             clickedItem.isCalendar ||
             clickedItem.isContact ||
+            clickedItem.isLibrus ||
+            clickedItem.isCalculator ||
+            clickedItem.isSettings ||
+            clickedItem.isAuthors ||
             clickedItem.isGoldHen
           ) {
             navigateDown();
@@ -4892,6 +4996,9 @@ const TEACHERS_PDF_DB = [
       const startBtnEl = document.getElementById("sub-start-btn");
       const startBtnTextEl = document.getElementById("sub-start-btn-text");
       const zsaLibrusViewEl = document.getElementById("zsa-librus-view");
+      const zsaCalcViewEl = document.getElementById("zsa-calculator-view");
+      const zsaSettingsViewEl = document.getElementById("zsa-settings-view");
+      const zsaAuthorsViewEl = document.getElementById("zsa-authors-view");
 
       gameInfoViewEl.style.display = "none";
       zsaNewsViewEl.style.display = "none";
@@ -4903,6 +5010,9 @@ const TEACHERS_PDF_DB = [
       if (zsaContactViewEl) zsaContactViewEl.style.display = "none";
       if (zsaGoldHenViewEl) zsaGoldHenViewEl.style.display = "none";
       if (zsaLibrusViewEl) zsaLibrusViewEl.style.display = "none";
+      if (zsaCalcViewEl) zsaCalcViewEl.style.display = "none";
+      if (zsaSettingsViewEl) zsaSettingsViewEl.style.display = "none";
+      if (zsaAuthorsViewEl) zsaAuthorsViewEl.style.display = "none";
 
       if (item.isWhatsNew) {
         zsaNewsViewEl.style.display = "flex";
@@ -4963,12 +5073,34 @@ const TEACHERS_PDF_DB = [
         updateContactFocusUI();
         if (typeof syncInputPromptsUI === "function") syncInputPromptsUI();
       } else if (item.isLibrus) {
-      if (zsaLibrusViewEl) zsaLibrusViewEl.style.display = "flex";
-      rightLabelEl.textContent = "Frekwencja i Oceny";
-      leftNavLabelEl.textContent = "Szybki Librus";
-      startBtnTextEl.textContent = "Portal Librus";
-      startBtnEl.classList.add("focused");
-      if (typeof window.onOpenSzybkiLibrus === "function") window.onOpenSzybkiLibrus();
+        if (zsaLibrusViewEl) zsaLibrusViewEl.style.display = "flex";
+        rightLabelEl.textContent = "Frekwencja i Oceny";
+        leftNavLabelEl.textContent = "Szybki Librus";
+        startBtnTextEl.textContent = "Portal Librus";
+        startBtnEl.classList.add("focused");
+        if (typeof window.onOpenSzybkiLibrus === "function") window.onOpenSzybkiLibrus();
+      } else if (item.isCalculator) {
+        if (zsaCalcViewEl) zsaCalcViewEl.style.display = "flex";
+        rightLabelEl.textContent = "Średnia i Progi Punktowe";
+        leftNavLabelEl.textContent = "Kalkulator Ocen";
+        startBtnTextEl.textContent = "Szybki Librus";
+        startBtnEl.classList.add("focused");
+        if (typeof window.onOpenZsaCalculator === "function") window.onOpenZsaCalculator();
+      } else if (item.isSettings) {
+        if (zsaSettingsViewEl) zsaSettingsViewEl.style.display = "flex";
+        rightLabelEl.textContent = "Personalizacja i System";
+        leftNavLabelEl.textContent = "Ustawienia Systemu";
+        startBtnTextEl.textContent = "Zastosuj i Wróć";
+        startBtnEl.classList.add("focused");
+        if (typeof window.onOpenZsaSettings === "function") window.onOpenZsaSettings();
+      } else if (item.isAuthors) {
+        if (zsaAuthorsViewEl) zsaAuthorsViewEl.style.display = "flex";
+        rightLabelEl.textContent = "O projekcie • 4D AT";
+        leftNavLabelEl.textContent = "Autorzy i Informacje";
+        startBtnTextEl.textContent = "Kontakt ZSA";
+        startBtnEl.classList.add("focused");
+        const authorsScroll = document.getElementById("authors-scroll-wrap");
+        if (authorsScroll) authorsScroll.scrollTop = 0;
       } else if (item.isGoldHen) {
         if (zsaGoldHenViewEl) zsaGoldHenViewEl.style.display = "flex";
         rightLabelEl.textContent = "Moduł Administracyjny";
@@ -5037,6 +5169,7 @@ const TEACHERS_PDF_DB = [
       document.body.classList.toggle("state-folder", navLevel === "FOLDER");
       document.body.classList.toggle("state-submenu", navLevel === "SUBMENU");
       document.body.classList.toggle("from-folder", navLevel === "SUBMENU" && enteredSubmenuFromFolder);
+      document.body.classList.toggle("settings-live-bg", navLevel === "SUBMENU" && Boolean(getActiveGameItem()?.isSettings));
 
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
@@ -5063,7 +5196,7 @@ const TEACHERS_PDF_DB = [
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
 
-        if (activeItem?.isGoldHen || activeItem?.isLibrus) return;
+        if (activeItem?.isGoldHen || activeItem?.isLibrus || activeItem?.isCalculator || activeItem?.isSettings) return;
 
         if (activeItem?.isContact) {
           if (contactFocusIdx > 0) contactFocusIdx--;
@@ -5196,7 +5329,7 @@ const TEACHERS_PDF_DB = [
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
 
-        if (activeItem?.isGoldHen || activeItem?.isLibrus) return;
+        if (activeItem?.isGoldHen || activeItem?.isLibrus || activeItem?.isCalculator || activeItem?.isSettings) return;
 
         if (activeItem?.isContact) {
           const maxIdx = contactCardsEls().length - 1;
@@ -5327,7 +5460,7 @@ const TEACHERS_PDF_DB = [
       if (navLevel === "SUBMENU") {
         const activeItem = getActiveGameItem();
 
-        if (activeItem?.isGoldHen || activeItem?.isLibrus) return;
+        if (activeItem?.isGoldHen || activeItem?.isLibrus || activeItem?.isCalculator || activeItem?.isSettings) return;
 
         if (activeItem?.isContact) {
           if (contactFocusIdx === -1) {
@@ -5336,6 +5469,15 @@ const TEACHERS_PDF_DB = [
             updateContactFocusUI();
           } else if (contactScrollWrapEl) {
             contactScrollWrapEl.scrollBy({ top: 150, behavior: "smooth" });
+            playCustomWav("move");
+          }
+          return;
+        }
+
+        if (activeItem?.isAuthors) {
+          const aw = document.getElementById("authors-scroll-wrap");
+          if (aw) {
+            aw.scrollBy({ top: 160, behavior: "smooth" });
             playCustomWav("move");
           }
           return;
@@ -5485,9 +5627,22 @@ const TEACHERS_PDF_DB = [
         const activeItem = getActiveGameItem();
 
         if (activeItem?.isGoldHen) {
-          if (activeItem?.isLibrus && !isBackButton) return;
+          if (!isBackButton) return;
           if (typeof window.isGoldHenEditorOpen === "function" && window.isGoldHenEditorOpen()) {
             window.closeGoldHenEditor();
+            return;
+          }
+        }
+
+        if ((activeItem?.isLibrus || activeItem?.isCalculator || activeItem?.isSettings) && !isBackButton) {
+          return;
+        }
+
+        if (activeItem?.isAuthors && !isBackButton) {
+          const aw = document.getElementById("authors-scroll-wrap");
+          if (aw && aw.scrollTop > 10) {
+            aw.scrollBy({ top: -160, behavior: "smooth" });
+            playCustomWav("move");
             return;
           }
         }
@@ -5684,7 +5839,7 @@ const TEACHERS_PDF_DB = [
     }
 
     function launchActiveItem() {
-      if (isSystemSleeping || isDiscModalOpen() || curr.isLibrus || performance.now() < wakeUpCooldownUntil) return;
+      if (isSystemSleeping || isDiscModalOpen() || performance.now() < wakeUpCooldownUntil) return;
       unlockAudioOnInteraction();
 
       if (navLevel === "MAIN") {
@@ -5692,6 +5847,10 @@ const TEACHERS_PDF_DB = [
         if (
           curr.type === "folder" ||
           curr.isWhatsNew ||
+          curr.isLibrus ||
+          curr.isCalculator ||
+          curr.isSettings ||
+          curr.isAuthors ||
           curr.isTimetable ||
           curr.isDirections ||
           curr.isTeachers ||
@@ -5707,8 +5866,13 @@ const TEACHERS_PDF_DB = [
 
       const item = getActiveGameItem();
 
-      if (navLevel === "SUBMENU" && item?.isGoldHen) {
+      if (navLevel === "SUBMENU" && (item?.isGoldHen || item?.isSettings)) {
         navigateUp(true);
+        return;
+      }
+      if (navLevel === "SUBMENU" && item?.isAuthors) {
+        triggerPressAnimation();
+        if (typeof window.openZsaAppById === "function") window.openZsaAppById("contact-app");
         return;
       }
 
@@ -5901,6 +6065,20 @@ const TEACHERS_PDF_DB = [
         navigateUp(true);
         return;
       }
+      if (item?.isCalculator) {
+        triggerPressAnimation();
+        if (typeof window.openZsaAppById === "function") window.openZsaAppById("librus-app");
+        return;
+      }
+      if (item?.isSettings) {
+        navigateUp(true);
+        return;
+      }
+      if (item?.isAuthors) {
+        triggerPressAnimation();
+        if (typeof window.openZsaAppById === "function") window.openZsaAppById("contact-app");
+        return;
+      }
       if (item?.isCalendar) {
         triggerPressAnimation();
         playCustomWav("select");
@@ -5994,7 +6172,7 @@ const TEACHERS_PDF_DB = [
       const activeEl = document.activeElement;
       const activeTag = activeEl ? activeEl.tagName : "";
 
-      if (activeEl && activeEl.closest && (activeEl.closest("#zsa-goldhen-view") || activeEl.closest("#zsa-librus-view"))) {
+      if (activeEl && activeEl.closest && (activeEl.closest("#zsa-goldhen-view") || activeEl.closest("#zsa-librus-view") || activeEl.closest("#zsa-calculator-view") || activeEl.closest("#zsa-settings-view"))) {
         if (activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT") {
           if (e.key === "Escape") {
             e.preventDefault();
@@ -6041,7 +6219,7 @@ const TEACHERS_PDF_DB = [
 
       if (navLevel === "SUBMENU") {
         const scrollable = e.target.closest(
-          ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid, .cal-board, .cal-details-panel, .contact-scroll-wrap, .gh-empty-workspace, .lib-scroll-body"
+          ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid, .cal-board, .cal-details-panel, .contact-scroll-wrap, .gh-empty-workspace, .lib-scroll-body, .lib-pane-scroll, .lib-att-inspector, .calc-scroll-pane, .set-scroll-pane, .authors-scroll-wrap"
         );
         if (scrollable) {
           return;
@@ -6056,7 +6234,10 @@ const TEACHERS_PDF_DB = [
           activeItem?.isCalendar ||
           activeItem?.isContact ||
           activeItem?.isGoldHen ||
-          activeItem?.isLibrus
+          activeItem?.isLibrus ||
+          activeItem?.isCalculator ||
+          activeItem?.isSettings ||
+          activeItem?.isAuthors
         ) {
           return;
         }
@@ -6103,7 +6284,7 @@ const TEACHERS_PDF_DB = [
       touchStartY = touchLastY = e.touches[0].clientY;
 
       const scrollable = e.target.closest(
-        ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid, .cal-board, .cal-details-panel, .contact-scroll-wrap, .cal-layout"
+        ".zsa-news-list, .tt-class-grid, .tt-schedule-wrap, .dir-columns, .dir-detail-wrap, .tch-grid, .cal-board, .cal-details-panel, .contact-scroll-wrap, .cal-layout, .lib-pane-scroll, .lib-att-inspector, .calc-scroll-pane, .set-scroll-pane, .authors-scroll-wrap"
       );
       touchMovedInScrollable = Boolean(
         scrollable && (scrollable.scrollHeight > scrollable.clientHeight || scrollable.scrollWidth > scrollable.clientWidth)
@@ -6339,6 +6520,7 @@ const TEACHERS_PDF_DB = [
        ============================================================================ */
     const clockDateEl = document.getElementById("ps4-clock-date");
     const clockTimeEl = document.getElementById("ps4-clock-time");
+    const clockBellEl = document.getElementById("ps4-clock-bell");
     const ttClockTimeEl = document.getElementById("tt-clock-time");
     const ttClockStatusEl = document.getElementById("tt-clock-status");
 
@@ -6347,25 +6529,242 @@ const TEACHERS_PDF_DB = [
       return h * 60 + m;
     }
 
-    function getCurrentSchoolBellStatus(totalMinutes) {
+    function formatMinutesLeftLabel(remSec) {
+      if (remSec <= 0) return "0 min";
+      if (remSec < 60) return `${remSec} s`;
+      return `${Math.ceil(remSec / 60)} min`;
+    }
+
+    function getSchoolBellInfo(dateObj = new Date()) {
+      const dow = dateObj.getDay();
+      if (dow === 0 || dow === 6) {
+        return { phase: "NONE", fullText: "", shortText: "" };
+      }
+
+      const nowSec = dateObj.getHours() * 3600 + dateObj.getMinutes() * 60 + dateObj.getSeconds();
+      const nowMin = dateObj.getHours() * 60 + dateObj.getMinutes();
+
       for (let i = 0; i < LESSON_HOURS.length; i++) {
         const [startStr, endStr] = LESSON_HOURS[i].split("-");
-        const s = parseHmToMinutes(startStr);
-        const e = parseHmToMinutes(endStr);
-        if (totalMinutes >= s && totalMinutes < e) {
-          return `• Trwa ${i + 1}. lekcja (do ${endStr.trim()})`;
+        const sMin = parseHmToMinutes(startStr);
+        const eMin = parseHmToMinutes(endStr);
+        if (nowSec >= sMin * 60 && nowSec < eMin * 60) {
+          const remSec = eMin * 60 - nowSec;
+          const remMin = Math.max(1, Math.ceil(remSec / 60));
+          const remLabel = remSec < 60 ? `${remSec} s` : `${remMin} min`;
+          return {
+            phase: "LESSON",
+            lessonNr: i + 1,
+            endStr: endStr.trim(),
+            remainingMin: remMin,
+            remainingSec: remSec,
+            fullText: `• Trwa ${i + 1}. lekcja (do ${endStr.trim()} • ${remLabel} pozostało)`,
+            shortText: `🔔 ${i + 1}. lek. • ${remLabel} do dzwonka`
+          };
         }
       }
+
       for (let i = 0; i < BREAK_HOURS.length; i++) {
         const [startStr, endStr] = BREAK_HOURS[i].time.split("-");
-        const s = parseHmToMinutes(startStr);
-        const e = parseHmToMinutes(endStr);
-        if (totalMinutes >= s && totalMinutes < e) {
-          return `• Trwa ${BREAK_HOURS[i].nr}. przerwa (do ${endStr.trim()})`;
+        const sMin = parseHmToMinutes(startStr);
+        const eMin = parseHmToMinutes(endStr);
+        if (nowSec >= sMin * 60 && nowSec < eMin * 60) {
+          const remSec = eMin * 60 - nowSec;
+          const remMin = Math.max(1, Math.ceil(remSec / 60));
+          const remLabel = remSec < 60 ? `${remSec} s` : `${remMin} min`;
+          return {
+            phase: "BREAK",
+            breakNr: BREAK_HOURS[i].nr,
+            nextLessonNr: BREAK_HOURS[i].nr + 1,
+            endStr: endStr.trim(),
+            remainingMin: remMin,
+            remainingSec: remSec,
+            fullText: `• Trwa ${BREAK_HOURS[i].nr}. przerwa (do ${endStr.trim()} • ${remLabel} do dzwonka)`,
+            shortText: `🔔 Przerwa ${BREAK_HOURS[i].nr}. • ${remLabel} do dzwonka`
+          };
         }
+      }
+
+      const firstStartMin = parseHmToMinutes(LESSON_HOURS[0].split("-")[0]);
+      if (nowMin >= firstStartMin - 60 && nowSec < firstStartMin * 60) {
+        const remSec = firstStartMin * 60 - nowSec;
+        const remMin = Math.max(1, Math.ceil(remSec / 60));
+        const remLabel = remSec < 60 ? `${remSec} s` : `${remMin} min`;
+        return {
+          phase: "BEFORE",
+          nextLessonNr: 1,
+          remainingMin: remMin,
+          remainingSec: remSec,
+          fullText: `• Do 1. dzwonka (8:00) • ${remLabel} pozostało`,
+          shortText: `🔔 Do 1. lekcji • ${remLabel}`
+        };
+      }
+
+      return { phase: "NONE", fullText: "", shortText: "" };
+    }
+
+    function getCurrentSchoolBellStatus(dateOrMinutes) {
+      if (dateOrMinutes instanceof Date) {
+        return getSchoolBellInfo(dateOrMinutes).fullText;
+      }
+      const d = new Date();
+      return getSchoolBellInfo(d).fullText;
+    }
+
+    /* Tytułowanie nauczycieli (Pan / Pani) + wykrywanie aktualnej lekcji na żywo */
+    const KNOWN_MALE_TEACHER_CODES = new Set([
+      "RBućkowski", "RChodorowski", "PDuchnowski", "MFilipkowski", "PFilipkowski",
+      "KJaskółka", "PKodzis", "RKowalczyk", "KKrzemiński", "ALutrzykowski",
+      "AMakowski", "JNarewski", "APiotrowski", "ŁPolkowski", "MiSakowski",
+      "ASkołozdrzy", "DZawojski", "AZwierciadłowski", "EŻebrowski", "WŻelechowski"
+    ]);
+
+    const KNOWN_FEMALE_TEACHER_CODES = new Set([
+      "BBorawska", "JBućkowska", "IDudzińska", "ADzbeńska", "BDzięgielewska",
+      "MJankowska", "BJasińska", "AKarwowska", "EKownacka", "ŻMucharska",
+      "BNarewska", "PNiecikowska", "MPawłowska", "EPiotrowska", "EPowichrowska",
+      "MRadlińska", "MRosińska", "MSalomońska", "ESobotka", "ASzulcW",
+      "ATchórzewska", "ATrepanowska", "BWiśniewska", "AZambrzycka"
+    ]);
+
+    function formatTeacherHonorific(teacher) {
+      if (!teacher || !teacher.name) return "";
+      const parts = teacher.name.trim().split(/\s+/);
+      const surname = parts[parts.length - 1] || teacher.name;
+
+      if (KNOWN_MALE_TEACHER_CODES.has(teacher.code)) return `Pan ${surname}`;
+      if (KNOWN_FEMALE_TEACHER_CODES.has(teacher.code)) return `Pani ${surname}`;
+
+      const first = parts[0] || "";
+      if (first.length > 2 && !first.endsWith(".")) {
+        return first.toLowerCase().endsWith("a") ? `Pani ${surname}` : `Pan ${surname}`;
+      }
+      if (/(ska|cka|dzka)$/i.test(surname)) return `Pani ${surname}`;
+      if (/(ski|cki|dzki)$/i.test(surname)) return `Pan ${surname}`;
+      return teacher.name;
+    }
+
+    function getTeacherLiveStatus(teacher, nowDate = new Date()) {
+      if (!teacher || !teacher.days) return null;
+      const dayKeys = ["Nd", "Pn", "Wt", "Sr", "Czw", "Pi", "Sb"];
+      const dayKey = dayKeys[nowDate.getDay()];
+      if (!["Pn", "Wt", "Sr", "Czw", "Pi"].includes(dayKey)) return null;
+
+      const bell = getSchoolBellInfo(nowDate);
+      const honorific = formatTeacherHonorific(teacher);
+      const todayAbs = getTeacherAbsencesOnDate(teacher.code, formatIsoLocal(nowDate));
+
+      if (bell.phase === "LESSON") {
+        const entries = (teacher.days[dayKey] || []).filter((e) => e[0] === bell.lessonNr);
+        if (entries.length === 0) return null;
+
+        const hourRange = LESSON_HOURS[bell.lessonNr - 1];
+        const isBlocked = todayAbs.some((a) => doesLessonOverlapAbsence(hourRange, a));
+        if (isBlocked) return null;
+
+        const classes = [...new Set(entries.map((e) => e[2]).filter(Boolean))].join(", ");
+        const rooms = [...new Set(entries.map((e) => e[3]).filter((r) => r && r !== "—"))].join(", ");
+        const subject = [...new Set(entries.map((e) => e[1]).filter(Boolean))].join(" / ");
+        const remLabel = formatMinutesLeftLabel(bell.remainingSec);
+        const roomPart = rooms ? `w Sali ${rooms}` : "w trakcie zajęć";
+
+        return {
+          state: "LIVE",
+          text: `${honorific} – Lekcja ${roomPart} (klasa ${classes}), kończy za ${remLabel}`,
+          room: rooms || "—",
+          classes,
+          subject,
+          remainingLabel: remLabel
+        };
+      }
+
+      if (bell.phase === "BREAK" || bell.phase === "BEFORE") {
+        const nextNr = bell.nextLessonNr;
+        const entries = (teacher.days[dayKey] || []).filter((e) => e[0] === nextNr);
+        if (entries.length === 0) return null;
+
+        const hourRange = LESSON_HOURS[nextNr - 1];
+        const isBlocked = todayAbs.some((a) => doesLessonOverlapAbsence(hourRange, a));
+        if (isBlocked) return null;
+
+        const classes = [...new Set(entries.map((e) => e[2]).filter(Boolean))].join(", ");
+        const rooms = [...new Set(entries.map((e) => e[3]).filter((r) => r && r !== "—"))].join(", ");
+        const remLabel = formatMinutesLeftLabel(bell.remainingSec);
+        const roomPart = rooms ? `Sala ${rooms}` : "wg planu";
+
+        return {
+          state: "NEXT",
+          text: `${honorific} – Następna za ${remLabel}: ${roomPart} (${classes})`
+        };
+      }
+
+      return null;
+    }
+
+    function buildTeacherLiveCardMarkup(liveInfo) {
+      if (!liveInfo) return "";
+      if (liveInfo.state === "LIVE") {
+        return `
+          <div class="tch-live-pill is-live">
+            <span class="tch-live-dot"></span>
+            <span class="tch-live-text">${liveInfo.text}</span>
+          </div>
+        `;
+      }
+      if (liveInfo.state === "NEXT") {
+        return `
+          <div class="tch-live-pill is-next">
+            <span class="tch-next-dot"></span>
+            <span class="tch-live-text">${liveInfo.text}</span>
+          </div>
+        `;
       }
       return "";
     }
+
+    function refreshLiveTeacherCards(nowDate) {
+      if (navLevel !== "SUBMENU" || !getActiveGameItem()?.isTeachers) return;
+
+      if (tchStep === "LIST" && tchListStepEl) {
+        tchListStepEl.querySelectorAll(".tch-card-live-side[data-live-tcode]").forEach((slotEl) => {
+          const code = slotEl.getAttribute("data-live-tcode");
+          const teacher = TEACHERS_PDF_DB.find((t) => t.code === code);
+          if (!teacher) return;
+          const liveInfo = getTeacherLiveStatus(teacher, nowDate);
+          const cardEl = slotEl.closest(".tch-card");
+          if (cardEl) cardEl.classList.toggle("has-live-lesson", liveInfo?.state === "LIVE");
+          const nextHtml = buildTeacherLiveCardMarkup(liveInfo);
+          if (slotEl.innerHTML !== nextHtml) {
+            slotEl.innerHTML = nextHtml;
+          }
+        });
+      } else if (tchStep === "SCHEDULE" && tchSummaryBannerEl) {
+        const bannerEl = tchSummaryBannerEl.querySelector("[data-live-banner-tcode]");
+        if (bannerEl) {
+          const code = bannerEl.getAttribute("data-live-banner-tcode");
+          const teacher = TEACHERS_PDF_DB.find((t) => t.code === code);
+          const liveInfo = teacher ? getTeacherLiveStatus(teacher, nowDate) : null;
+          if (liveInfo && liveInfo.state === "LIVE") {
+            const span = bannerEl.querySelector("span:last-child");
+            if (span) span.textContent = liveInfo.text;
+          } else {
+            bannerEl.remove();
+          }
+        }
+      }
+    }
+
+    /* Pomocnik do szybkiego przejścia do konkretnej aplikacji na wstędze (np. z Kalkulatora do Szybkiego Librusa) */
+    window.openZsaAppById = function (appId) {
+      const targetIdx = MAIN_RIBBON_ITEMS.findIndex((item) => item.id === appId);
+      if (targetIdx === -1) return;
+      isGoldHenOpen = false;
+      enteredSubmenuFromFolder = false;
+      mainIndex = targetIdx;
+      navLevel = "SUBMENU";
+      playCustomWav("select");
+      syncUiState();
+    };
 
     function updateClock() {
       const d = new Date();
@@ -6375,16 +6774,29 @@ const TEACHERS_PDF_DB = [
       const hours24 = String(d.getHours()).padStart(2, "0");
       const mins = String(d.getMinutes()).padStart(2, "0");
       const secs = String(d.getSeconds()).padStart(2, "0");
+      const bell = getSchoolBellInfo(d);
 
       clockDateEl.textContent = `${day}.${month}.${year}`;
       clockTimeEl.textContent = `${hours24}:${mins}`;
+
+      if (clockBellEl) {
+        if (bell.shortText && runtimeSystemSettings.showBellInTopBar) {
+          clockBellEl.textContent = bell.shortText;
+          clockBellEl.style.display = "inline-flex";
+          clockBellEl.classList.toggle("is-break", bell.phase === "BREAK" || bell.phase === "BEFORE");
+        } else {
+          clockBellEl.style.display = "none";
+        }
+      }
 
       if (ttClockTimeEl) {
         ttClockTimeEl.textContent = `${hours24}:${mins}:${secs}`;
       }
       if (ttClockStatusEl) {
-        ttClockStatusEl.textContent = getCurrentSchoolBellStatus(d.getHours() * 60 + d.getMinutes());
+        ttClockStatusEl.textContent = bell.fullText;
       }
+
+      refreshLiveTeacherCards(d);
     }
     updateClock();
     setInterval(updateClock, 1000);
@@ -6417,23 +6829,27 @@ const TEACHERS_PDF_DB = [
       bgCacheCanvas.width = cw;
       bgCacheCanvas.height = ch;
 
-      /* Klasyczny kobaltowy gradient tła PS4 Orbis OS */
+      const theme = activeCanvasTheme;
+      const bgStops = theme?.bgStops || ["#0039a6", "#0046bf", "#002b82", "#001852"];
+      const glowStops = theme?.glow || ["rgba(110, 195, 255, 0.34)", "rgba(38, 124, 240, 0.16)", "rgba(0, 32, 96, 0)"];
+
+      /* Gradient tła PS4 Orbis OS (zgodny z aktywnym motywem z Ustawień) */
       const bgGrad = bgCacheCtx.createLinearGradient(0, 0, cw * 0.85, ch);
-      bgGrad.addColorStop(0, "#0039a6");
-      bgGrad.addColorStop(0.38, "#0046bf");
-      bgGrad.addColorStop(0.72, "#002b82");
-      bgGrad.addColorStop(1, "#001852");
+      bgGrad.addColorStop(0, bgStops[0]);
+      bgGrad.addColorStop(0.38, bgStops[1]);
+      bgGrad.addColorStop(0.72, bgStops[2]);
+      bgGrad.addColorStop(1, bgStops[3]);
       bgCacheCtx.fillStyle = bgGrad;
       bgCacheCtx.fillRect(0, 0, cw, ch);
 
       const glow = bgCacheCtx.createRadialGradient(cw * 0.52, ch * 0.32, cw * 0.05, cw * 0.52, ch * 0.32, cw * 0.68);
-      glow.addColorStop(0, "rgba(110, 195, 255, 0.34)");
-      glow.addColorStop(0.5, "rgba(38, 124, 240, 0.16)");
-      glow.addColorStop(1, "rgba(0, 32, 96, 0)");
+      glow.addColorStop(0, glowStops[0]);
+      glow.addColorStop(0.5, glowStops[1]);
+      glow.addColorStop(1, glowStops[2]);
       bgCacheCtx.fillStyle = glow;
       bgCacheCtx.fillRect(0, 0, cw, ch);
 
-      const fillConfigs = [
+      const fillConfigs = theme?.waves || [
         ["rgba(0, 26, 94, 0.52)", "rgba(24, 102, 224, 0.42)", "rgba(96, 185, 255, 0.14)"],
         ["rgba(8, 52, 146, 0.46)", "rgba(56, 146, 255, 0.36)", "rgba(175, 225, 255, 0.16)"],
         ["rgba(18, 80, 190, 0.34)", "rgba(115, 196, 255, 0.24)", "rgba(235, 248, 255, 0.08)"]
@@ -6447,12 +6863,28 @@ const TEACHERS_PDF_DB = [
         return g;
       });
 
-      crestGradients = [
+      crestGradients = theme?.crests || [
         "rgba(195, 232, 255, 0.56)",
         "rgba(240, 250, 255, 0.72)",
         "rgba(155, 215, 255, 0.38)"
       ];
     }
+
+    window.applyZsaSystemSettings = function (settings, theme) {
+      if (settings) {
+        Object.assign(runtimeSystemSettings, settings);
+        OPEN_APPS_IN_NEW_TAB = Boolean(runtimeSystemSettings.openInNewTab);
+      }
+      if (theme) {
+        activeCanvasTheme = theme;
+      }
+      if (cw > 0 && ch > 0) {
+        rebuildCanvasCache();
+        drawPs4XmbWave(performance.now());
+      }
+      syncBackgroundMusic();
+      updateClock();
+    };
 
     function resizeCanvas() {
       cw = Math.max(320, Math.floor(window.innerWidth * RENDER_SCALE));
@@ -6471,6 +6903,10 @@ const TEACHERS_PDF_DB = [
         ctx.clearRect(0, 0, cw, ch);
       } else {
         ctx.drawImage(bgCacheCanvas, 0, 0);
+      }
+
+      if (!runtimeSystemSettings.wavesEnabled) {
+        return;
       }
 
       // Płynna paralaksa fali PS4 reagująca na ruch wstęgi
@@ -6529,7 +6965,8 @@ const TEACHERS_PDF_DB = [
         ctx.stroke();
       }
 
-      ctx.fillStyle = "rgba(230, 246, 255, 0.52)";
+      if (!runtimeSystemSettings.sparklesEnabled) return;
+      ctx.fillStyle = activeCanvasTheme?.sparkle || "rgba(230, 246, 255, 0.52)";
       for (let i = 0; i < xmbSparkles.length; i++) {
         const s = xmbSparkles[i];
         s.x += s.speedX;
@@ -6557,8 +6994,10 @@ const TEACHERS_PDF_DB = [
 
       if (!document.hidden) {
         pollGamepad(now);
-        if (!isSystemSleeping && navLevel !== "SUBMENU") {
-          if (!IS_LOW_END_PC || now - lastCanvasFrameTime >= 15.5) {
+        const inSettingsPreview = (navLevel === "SUBMENU" && document.body.classList.contains("settings-live-bg"));
+        if (!isSystemSleeping && (navLevel !== "SUBMENU" || inSettingsPreview)) {
+          const throttleMs = (IS_LOW_END_PC || runtimeSystemSettings.reducedMotion) ? 32 : 0;
+          if (!throttleMs || now - lastCanvasFrameTime >= throttleMs) {
             lastCanvasFrameTime = now;
             drawPs4XmbWave(now);
           }
@@ -6577,9 +7016,244 @@ const TEACHERS_PDF_DB = [
     document.addEventListener("visibilitychange", restoreScreenAfterTabOrSleep);
     window.addEventListener("focus", restoreScreenAfterTabOrSleep);
     window.addEventListener("pageshow", restoreScreenAfterTabOrSleep);
+    
+
+    /* ============================================================================
+       11. TRYB CZYSTA SZKOŁA, "GDZIE TERAZ MA KLASA?", MOJA KLASA I EGZAMINY ZSA
+       ============================================================================ */
+    const ZSA_EXAMS_COUNTDOWN = [
+      { title: "Egzaminy zawodowe — sesja zimowa", tag: "TECHNIKUM • INF.02 / INF.03 / INF.04 / SPL / MEC", date: "2027-01-12", note: "Część pisemna i praktyczna (styczeń 2027)" },
+      { title: "Ferie zimowe (woj. podlaskie)", tag: "PRZERWA ZIMOWA • ZSA ŁOMŻA", date: "2027-01-25", note: "Dwutygodniowy wypoczynek zimowy" },
+      { title: "Matura 2027 — start egzaminów", tag: "LICEUM & TECHNIKUM • CKE", date: "2027-05-04", note: "Język polski, Matematyka, Język angielski (poziom podstawowy)" },
+      { title: "Egzaminy zawodowe — sesja letnia", tag: "TECHNIKUM • KWALIFIKACJE", date: "2027-06-07", note: "Sesja letnia dla oddziałów Technikum" },
+      { title: "Zakończenie roku szkolnego / Wakacje", tag: "WAKACJE 2027", date: "2027-06-25", note: "Rozdanie świadectw i początek wakacji" }
+    ];
+
+    const ALL_RIBBON_ITEMS_MASTER = MAIN_RIBBON_ITEMS.slice();
+    let lastCleanSchoolMode = false;
+
+    window.getZsaAllClassIds = function () {
+      return [
+        ...(DEFAULT_TIMETABLE_DB.ALO || []).map((c) => c.id),
+        ...(DEFAULT_TIMETABLE_DB.AT || []).map((c) => c.id)
+      ];
+    };
+
+    function findClassEntryById(classId) {
+      for (const schoolKey of ["ALO", "AT"]) {
+        const idx = (DEFAULT_TIMETABLE_DB[schoolKey] || []).findIndex((c) => c.id === classId);
+        if (idx !== -1) return { schoolKey, idx, obj: DEFAULT_TIMETABLE_DB[schoolKey][idx] };
+      }
+      return null;
+    }
+
+    function getClassLiveStatus(classObj, nowDate = new Date()) {
+      if (!classObj || !classObj.days) return null;
+      const dayKeys = ["Nd", "Pn", "Wt", "Sr", "Czw", "Pi", "Sb"];
+      const dayKey = dayKeys[nowDate.getDay()];
+      if (!["Pn", "Wt", "Sr", "Czw", "Pi"].includes(dayKey)) return null;
+
+      const bell = getSchoolBellInfo(nowDate);
+      const dayLessons = classObj.days[dayKey] || [];
+
+      if (bell.phase === "LESSON") {
+        const slot = (dayLessons[bell.lessonNr - 1] || "").trim();
+        const rem = formatMinutesLeftLabel(bell.remainingSec);
+        if (!slot) return { state: "FREE", text: `Okienko / brak lekcji (${bell.lessonNr}. godz.)` };
+        return { state: "LIVE", text: `Teraz: ${slot} • ${rem}`, short: `${slot} (${rem})` };
+      }
+      if (bell.phase === "BREAK" || bell.phase === "BEFORE") {
+        const slot = (dayLessons[bell.nextLessonNr - 1] || "").trim();
+        const rem = formatMinutesLeftLabel(bell.remainingSec);
+        if (!slot) return { state: "FREE", text: `Następna (${bell.nextLessonNr}. godz.): brak zajęć` };
+        return { state: "NEXT", text: `Za ${rem}: ${slot}`, short: `Za ${rem}: ${slot}` };
+      }
+      return null;
+    }
+
+    function openSpecificClassSchedule(classId) {
+      const found = findClassEntryById(classId);
+      if (!found) return;
+      if (typeof window.openZsaAppById === "function") window.openZsaAppById("timetable-app");
+      ttSchoolKey = found.schoolKey;
+      ttClassFocusIdx = found.idx;
+      ttStep = "SCHEDULE";
+      ttFocusArea = "MAIN";
+      renderTimetableUI();
+    }
+
+    function refreshWhereNowBox(nowDate = new Date()) {
+      const selEl = document.getElementById("tt-where-select");
+      const resEl = document.getElementById("tt-where-result");
+      const jumpBtn = document.getElementById("tt-myclass-jump-btn");
+      const boxEl = document.getElementById("tt-where-now-box");
+      if (!selEl || !resEl) return;
+
+      if (boxEl) boxEl.style.display = ttStep === "SCHOOL" ? "flex" : "none";
+
+      if (selEl.options.length === 0) {
+        selEl.innerHTML = window.getZsaAllClassIds()
+          .map((id) => `<option value="${id}">${id}</option>`)
+          .join("");
+        selEl.value = runtimeSystemSettings.pinnedClass || "4D AT";
+      }
+
+      if (jumpBtn) {
+        if (runtimeSystemSettings.pinnedClass) {
+          jumpBtn.style.display = "inline-flex";
+          jumpBtn.textContent = `Mój plan (${runtimeSystemSettings.pinnedClass}) →`;
+        } else {
+          jumpBtn.style.display = "none";
+        }
+      }
+
+      const chosen = findClassEntryById(selEl.value);
+      if (!chosen) return;
+      const live = getClassLiveStatus(chosen.obj, nowDate);
+      if (!live) {
+        resEl.innerHTML = `<span class="lib-muted">Klasa <strong>${chosen.obj.id}</strong> (wych. ${chosen.obj.tutor}) — obecnie poza godzinami lekcyjnymi (Pn–Pt 8:00–16:45).</span>`;
+      } else if (live.state === "LIVE") {
+        resEl.innerHTML = `<span class="tch-live-pill is-live" style="width:auto;"><span class="tch-live-dot"></span><span><strong>${chosen.obj.id}</strong> • ${live.text}</span></span>`;
+      } else {
+        resEl.innerHTML = `<span class="tch-live-pill is-next" style="width:auto;"><span class="tch-next-dot"></span><span><strong>${chosen.obj.id}</strong> • ${live.text}</span></span>`;
+      }
+    }
+
+    function updateMyClassTopBarChip(nowDate = new Date()) {
+      const chip = document.getElementById("ps4-clock-myclass");
+      if (!chip) return;
+      const pinned = runtimeSystemSettings.pinnedClass;
+      if (!pinned) {
+        chip.style.display = "none";
+        return;
+      }
+      const found = findClassEntryById(pinned);
+      const live = found ? getClassLiveStatus(found.obj, nowDate) : null;
+      chip.style.display = "inline-flex";
+      chip.textContent = live && live.short ? `${pinned} • ${live.short}` : `Plan: ${pinned}`;
+    }
+
+    const whereSelectEl = document.getElementById("tt-where-select");
+    if (whereSelectEl) {
+      whereSelectEl.addEventListener("change", () => refreshWhereNowBox());
+      whereSelectEl.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          whereSelectEl.blur();
+        }
+        e.stopPropagation();
+      });
+    }
+
+    document.getElementById("tt-where-open-btn")?.addEventListener("click", () => {
+      const val = document.getElementById("tt-where-select")?.value;
+      if (val) openSpecificClassSchedule(val);
+    });
+    document.getElementById("tt-myclass-jump-btn")?.addEventListener("click", () => {
+      if (runtimeSystemSettings.pinnedClass) openSpecificClassSchedule(runtimeSystemSettings.pinnedClass);
+    });
+    document.getElementById("ps4-clock-myclass")?.addEventListener("click", () => {
+      if (runtimeSystemSettings.pinnedClass) openSpecificClassSchedule(runtimeSystemSettings.pinnedClass);
+    });
+
+    // Rozszerzenie renderTimetableUI o live badge na kartach klas i pasek "Gdzie teraz ma klasa?"
+    const _origRenderTimetableUI = renderTimetableUI;
+    renderTimetableUI = function () {
+      _origRenderTimetableUI();
+      refreshWhereNowBox(new Date());
+      if (ttStep === "CLASS") {
+        const now = new Date();
+        const classes = DEFAULT_TIMETABLE_DB[ttSchoolKey] || [];
+        Array.from(ttClassStepEl.querySelectorAll(".tt-class-card")).forEach((card, idx) => {
+          const live = getClassLiveStatus(classes[idx], now);
+          if (live && live.state !== "FREE") {
+            const pill = document.createElement("div");
+            pill.className = `tt-class-live-mini ${live.state === "LIVE" ? "is-live" : "is-next"}`;
+            pill.textContent = live.state === "LIVE" ? `● ${live.short}` : `◷ ${live.short}`;
+            card.appendChild(pill);
+          }
+        });
+      }
+    };
+
+    // Zakładka Egzaminy wewnątrz Terminarza
+    function renderExamsCountdown() {
+      const grid = document.getElementById("cal-exams-grid");
+      if (!grid) return;
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+
+      grid.innerHTML = ZSA_EXAMS_COUNTDOWN.map((ex) => {
+        const target = new Date(ex.date + "T00:00:00");
+        const diffDays = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+        const daysLabel = diffDays > 0 ? `za ${diffDays} dni` : diffDays === 0 ? "DZIŚ!" : `${Math.abs(diffDays)} dni temu`;
+        const tone = diffDays <= 14 && diffDays >= 0 ? "is-soon" : diffDays < 0 ? "is-past" : "";
+        const [y, m, d] = ex.date.split("-");
+        return `
+          <div class="cal-exam-card ${tone}">
+            <div class="cal-exam-top">
+              <span class="dir-link-tag">${ex.tag}</span>
+              <span class="cal-exam-days">${daysLabel}</span>
+            </div>
+            <div class="cal-exam-title">${ex.title}</div>
+            <div class="cal-exam-date">Data: <strong>${d}.${m}.${y}</strong> • ${ex.note}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function setCalendarSubMode(mode) {
+      const isExams = mode === "exams";
+      const calLayout = document.querySelector("#zsa-calendar-view .cal-layout");
+      const examsView = document.getElementById("cal-exams-view");
+      if (calLayout) calLayout.style.display = isExams ? "none" : "grid";
+      if (examsView) examsView.style.display = isExams ? "flex" : "none";
+      document.getElementById("cal-mode-cal-btn")?.classList.toggle("active", !isExams);
+      document.getElementById("cal-mode-exams-btn")?.classList.toggle("active", isExams);
+      if (isExams) renderExamsCountdown();
+    }
+
+    document.getElementById("cal-mode-cal-btn")?.addEventListener("click", () => { playCustomWav("move"); setCalendarSubMode("cal"); });
+    document.getElementById("cal-mode-exams-btn")?.addEventListener("click", () => { playCustomWav("move"); setCalendarSubMode("exams"); });
+    ["cal-prev-month", "cal-next-month", "cal-today-btn"].forEach((id) => {
+      document.getElementById(id)?.addEventListener("click", () => setCalendarSubMode("cal"));
+    });
+
+    // Podpięcie Trybu Czysta Szkoła oraz Mojej Klasy do applyZsaSystemSettings
+    const _origApplySettings = window.applyZsaSystemSettings;
+    window.applyZsaSystemSettings = function (settings, theme) {
+      const prevClean = lastCleanSchoolMode;
+      const nextClean = Boolean(settings?.cleanSchoolMode);
+      if (nextClean !== prevClean) {
+        const activeId = MAIN_RIBBON_ITEMS[mainIndex]?.id;
+        MAIN_RIBBON_ITEMS.length = 0;
+        ALL_RIBBON_ITEMS_MASTER.forEach((item) => {
+          if (nextClean && (item.id === "folder-games" || item.id === "leaderboards-tv")) return;
+          MAIN_RIBBON_ITEMS.push(item);
+        });
+        lastCleanSchoolMode = nextClean;
+        const foundIdx = MAIN_RIBBON_ITEMS.findIndex((i) => i.id === activeId);
+        mainIndex = foundIdx >= 0 ? foundIdx : 0;
+        if (navLevel === "FOLDER" && nextClean) navLevel = "MAIN";
+        buildRibbons();
+      }
+      _origApplySettings(settings, theme);
+      updateMyClassTopBarChip(new Date());
+      refreshWhereNowBox(new Date());
+    };
+
+    // Ciągłe odświeżanie plakietki Moja Klasa oraz podglądu "Gdzie teraz ma klasa?"
+    setInterval(() => {
+      const now = new Date();
+      updateMyClassTopBarChip(now);
+      if (navLevel === "SUBMENU" && getActiveGameItem()?.isTimetable && ttStep === "SCHOOL") {
+        refreshWhereNowBox(now);
+      }
+    }, 1000);
 
     buildRibbons();
     resizeCanvas();
+    updateMyClassTopBarChip(new Date());
     fetchLatestZsaNews2026();
     fetchCloudScheduleData();
     requestAnimationFrame(mainLoop);

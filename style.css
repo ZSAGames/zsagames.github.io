@@ -389,8 +389,8 @@ a {
 /* Gradient PS4 Orbis OS na tle, gdy model 3D jest aktywny pod przezroczystymi falami */
 body.has-3d-school {
   background:
-    radial-gradient(circle at 52% 32%, rgba(110, 195, 255, 0.34) 0%, rgba(38, 124, 240, 0.16) 50%, rgba(0, 32, 96, 0) 70%),
-    linear-gradient(135deg, #0039a6 0%, #0046bf 38%, #002b82 72%, #001852 100%);
+    radial-gradient(circle at 52% 32%, var(--theme-glow-0, rgba(110, 195, 255, 0.34)) 0%, var(--theme-glow-1, rgba(38, 124, 240, 0.16)) 50%, var(--theme-glow-2, rgba(0, 32, 96, 0)) 70%),
+    linear-gradient(135deg, var(--theme-bg-0, #0039a6) 0%, var(--theme-bg-1, #0046bf) 38%, var(--theme-bg-2, #002b82) 72%, var(--theme-bg-3, #001852) 100%);
 }
 
 #school-3d-canvas {
@@ -5258,4 +5258,1330 @@ body.is-mobile.is-portrait .lib-grades-grid {
 
 body.is-mobile.is-portrait .lib-master-pane {
   max-height: 195px;
+}
+
+/* ============================================================================
+   LICZNIK DZWONKA W PASKU GÓRNYM + LIVE STATUS NAUCZYCIELI + KALKULATOR OCEN
+   ============================================================================ */
+
+/* --- 1. Plakietka dzwonka obok zegara w górnym pasku PS4 --- */
+.clock-bell-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: #a7f3d0;
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(78, 242, 168, 0.55);
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.clock-bell-chip.is-break {
+  color: #fde68a;
+  background: rgba(245, 196, 24, 0.16);
+  border-color: rgba(245, 196, 24, 0.6);
+}
+
+/* --- 2. Rozszerzony kafelek nauczyciela z prawym panelem "Lekcja teraz" --- */
+.tch-grid {
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+}
+
+.tch-card {
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tch-card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tch-card-live-side {
+  width: 178px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.tch-card-live-side:empty {
+  display: none;
+}
+
+.tch-card.has-live-lesson {
+  border-color: rgba(78, 242, 168, 0.62);
+  box-shadow: inset 3px 0 0 var(--ps4-ok), var(--glow-idle);
+}
+
+.tch-live-pill {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 3px;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 0.74rem;
+  line-height: 1.38;
+  font-weight: 500;
+}
+
+.tch-live-pill.is-live {
+  background: rgba(8, 54, 42, 0.76);
+  border: 1px solid rgba(78, 242, 168, 0.65);
+  color: #d1fae5;
+}
+
+.tch-live-pill.is-next {
+  background: rgba(68, 52, 10, 0.56);
+  border: 1px solid rgba(245, 196, 24, 0.45);
+  color: #fef08a;
+}
+
+.tch-live-dot,
+.tch-next-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.tch-live-dot {
+  background: var(--ps4-ok);
+  box-shadow: 0 0 8px var(--ps4-ok);
+}
+
+.tch-next-dot {
+  background: var(--ps4-plus-gold);
+  box-shadow: 0 0 6px var(--ps4-plus-gold);
+}
+
+.tch-live-banner-pill {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: rgba(8, 54, 42, 0.78);
+  border: 1px solid rgba(78, 242, 168, 0.68);
+  border-radius: 3px;
+  color: #d1fae5;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+/* --- 3. APLIKACJA "KALKULATOR OCEN" (NATIVE PS4 ORBIS OS) --- */
+.zsa-calculator-view {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  animation: orbisSubViewIn 0.42s var(--orbis-ease-ps4) both;
+}
+
+.calc-topbar {
+  flex-wrap: wrap;
+}
+
+.calc-rule-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calc-panel {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  animation: orbisSubViewIn 0.28s var(--orbis-ease-ps4) both;
+}
+
+.calc-panel.active {
+  display: flex;
+}
+
+/* Pasek synchronizacji z Szybkim Librusem */
+.calc-librus-bar {
+  flex-shrink: 0;
+  padding: 9px 14px;
+  background: rgba(6, 20, 48, 0.88);
+  border: 1px solid rgba(102, 190, 255, 0.3);
+}
+
+.calc-lib-offline,
+.calc-lib-online {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: rgba(215, 235, 255, 0.88);
+}
+
+.calc-lib-info,
+.calc-lib-connected,
+.calc-lib-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.calc-lib-tag {
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(58, 166, 255, 0.2);
+  border: 1px solid rgba(102, 190, 255, 0.55);
+  color: #8fd3ff;
+  border-radius: 2px;
+}
+
+.calc-online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ps4-ok);
+  box-shadow: 0 0 8px var(--ps4-ok);
+}
+
+.calc-lib-connected {
+  color: #a7f3d0;
+  font-weight: 600;
+}
+
+.calc-lib-select {
+  min-width: 240px;
+}
+
+.calc-import-note {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  color: #a7f3d0;
+  background: rgba(8, 54, 42, 0.62);
+  border-left: 3px solid var(--ps4-ok);
+}
+
+/* Dwukolumnowy układ Split-Pane */
+.calc-split {
+  display: grid;
+  grid-template-columns: 1fr 1.12fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.calc-points-split {
+  grid-template-columns: 1.05fr 1fr;
+}
+
+.calc-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: rgba(5, 16, 40, 0.88);
+  border: 1px solid rgba(102, 190, 255, 0.28);
+}
+
+.calc-scroll-pane {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+
+.calc-scroll-pane::-webkit-scrollbar { width: 5px; }
+.calc-scroll-pane::-webkit-scrollbar-thumb {
+  background: rgba(126, 200, 255, 0.42);
+  border-radius: 3px;
+}
+
+.calc-clear-link {
+  background: transparent;
+  border: 1px solid rgba(255, 107, 122, 0.55);
+  color: #ffb8c0;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  border-radius: 2px;
+}
+
+.calc-clear-link:hover {
+  background: rgba(220, 38, 62, 0.78);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.calc-picker-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calc-sub-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: rgba(185, 218, 255, 0.78);
+  font-weight: 600;
+}
+
+.calc-quick-grades {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+
+.calc-q-grade {
+  padding: 6px 4px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border-radius: 3px;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  opacity: 0.78;
+  transition: transform 0.16s ease, opacity 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.calc-q-grade:hover,
+.calc-q-grade.active {
+  opacity: 1;
+  border-color: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+  transform: translate3d(0, -1px, 0);
+}
+
+.calc-quick-weights,
+.calc-goal-weights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.calc-w-btn,
+.calc-preset-btn {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #d6ebff;
+  background: rgba(10, 30, 72, 0.82);
+  border: 1px solid rgba(102, 190, 255, 0.35);
+  border-radius: 3px;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.calc-w-btn:hover,
+.calc-w-btn.active,
+.calc-preset-btn:hover,
+.calc-preset-btn.active {
+  background: rgba(28, 92, 204, 0.92);
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(96, 196, 255, 0.4);
+}
+
+.calc-add-row {
+  display: flex;
+  gap: 8px;
+}
+
+.calc-note-input {
+  min-width: 0;
+  flex: 1;
+  padding: 6px 10px !important;
+  font-size: 0.82rem !important;
+}
+
+.calc-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--ps4-focus-cyan);
+  padding-top: 6px;
+  border-top: 1px solid rgba(102, 190, 255, 0.18);
+}
+
+.calc-grades-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 6px;
+}
+
+.calc-grade-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: rgba(10, 28, 68, 0.76);
+  border: 1px solid rgba(102, 190, 255, 0.22);
+}
+
+.calc-chip-val {
+  min-width: 32px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.96rem;
+  font-weight: 700;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+.calc-chip-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  line-height: 1.2;
+}
+
+.calc-chip-meta strong { font-size: 0.75rem; color: var(--ps4-plus-gold); }
+.calc-chip-meta span {
+  font-size: 0.72rem;
+  color: rgba(205, 228, 255, 0.76);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calc-chip-del {
+  width: 22px;
+  height: 22px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 0.9rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.calc-chip-del:hover {
+  background: var(--ps4-danger);
+  border-color: #ffffff;
+}
+
+.calc-empty-mini {
+  padding: 18px 14px;
+  text-align: center;
+  font-size: 0.84rem;
+  color: rgba(200, 224, 255, 0.72);
+  background: rgba(8, 22, 52, 0.55);
+  border: 1px dashed rgba(102, 190, 255, 0.28);
+  grid-column: 1 / -1;
+}
+
+/* Prawy panel: statystyki średniej + symulator celu */
+.calc-hero-stats {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 0.85fr;
+  gap: 8px;
+}
+
+.calc-hero-box {
+  padding: 11px 14px;
+  background: rgba(9, 26, 62, 0.82);
+  border: 1px solid rgba(102, 190, 255, 0.24);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.calc-hero-box.main {
+  border-color: var(--ps4-plus-gold);
+  border-left: 4px solid var(--ps4-plus-gold);
+  background: linear-gradient(135deg, rgba(16, 48, 108, 0.9), rgba(7, 22, 54, 0.92));
+}
+
+.calc-big-avg {
+  font-size: 1.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.05;
+}
+
+.calc-mid-val {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #9ed4ff;
+  line-height: 1.15;
+}
+
+.calc-goal-card {
+  padding: 14px;
+  background: rgba(7, 22, 54, 0.86);
+  border: 1px solid rgba(102, 190, 255, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calc-goal-title {
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.calc-goal-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.calc-goal-inputs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.calc-inline-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  color: #bfe0ff;
+}
+
+.calc-num-input {
+  min-width: 0 !important;
+  width: 82px;
+  padding: 5px 8px !important;
+  text-align: center;
+  font-weight: 700;
+}
+
+.calc-goal-box {
+  padding: 12px 14px;
+  background: rgba(4, 14, 34, 0.84);
+  border: 1px solid rgba(102, 190, 255, 0.35);
+  border-left: 4px solid var(--ps4-focus-cyan);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.calc-goal-box.ok    { border-left-color: var(--ps4-ok); background: rgba(8, 52, 40, 0.65); }
+.calc-goal-box.reach { border-left-color: var(--ps4-plus-gold); }
+.calc-goal-box.warn  { border-left-color: var(--ps4-danger); background: rgba(68, 16, 30, 0.55); }
+
+.calc-goal-main {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.calc-goal-badge {
+  padding: 2px 10px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  border-radius: 3px;
+  border: 1.5px solid transparent;
+}
+
+.calc-goal-sub {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: rgba(220, 238, 255, 0.9);
+}
+
+.calc-sim-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.calc-sim-pill {
+  padding: 6px 8px;
+  background: rgba(10, 28, 66, 0.78);
+  border: 1px solid rgba(102, 190, 255, 0.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.74rem;
+  color: rgba(205, 228, 255, 0.84);
+}
+
+.calc-sim-pill strong:last-child {
+  font-size: 0.96rem;
+  color: #ffffff;
+}
+
+.calc-sim-pill.hits {
+  border-color: var(--ps4-ok);
+  background: rgba(12, 64, 48, 0.72);
+}
+
+.calc-sim-pill.hits strong:last-child {
+  color: #a7f3d0;
+}
+
+/* --- Zakładka 2: Ocena z punktów (%) --- */
+.calc-pts-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.calc-pts-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(10, 34, 82, 0.92), rgba(4, 14, 34, 0.95));
+  border: 1.5px solid rgba(102, 190, 255, 0.45);
+}
+
+.calc-pts-big-badge {
+  width: 74px;
+  height: 74px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.05rem;
+  font-weight: 800;
+  border-radius: 4px;
+  border: 2px solid transparent;
+}
+
+.calc-pts-hero-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calc-pts-grade-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: capitalize;
+}
+
+.calc-pts-pct-line {
+  font-size: 0.92rem;
+  color: #d8ecff;
+}
+
+.calc-pts-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.calc-pts-bar-fill {
+  height: 100%;
+  transition: width 0.25s var(--orbis-ease-ps4);
+}
+
+.calc-pts-next {
+  font-size: 0.8rem;
+  color: var(--ps4-plus-gold);
+}
+
+.calc-pts-next.ok {
+  color: var(--ps4-ok);
+  font-weight: 600;
+}
+
+.calc-pts-push-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(102, 190, 255, 0.18);
+}
+
+.calc-pts-push-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.calc-push-msg {
+  padding: 7px 10px;
+  font-size: 0.8rem;
+  color: #a7f3d0;
+  background: rgba(8, 54, 42, 0.7);
+  border-left: 3px solid var(--ps4-ok);
+}
+
+/* Tabela progów 15-stopniowych */
+.calc-scale-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.calc-scale-table th,
+.calc-scale-table td {
+  padding: 6px 11px;
+  border-bottom: 1px solid rgba(102, 190, 255, 0.14);
+  text-align: left;
+}
+
+.calc-scale-table thead th {
+  position: sticky;
+  top: 0;
+  background: #092458;
+  color: #9cd8ff;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.6px;
+  border-bottom: 1.5px solid #66beff;
+}
+
+.calc-scale-table tr.is-hit td {
+  background: rgba(28, 92, 204, 0.68);
+  color: #ffffff;
+  font-weight: 700;
+  border-top: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+}
+
+.calc-scale-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  padding: 1px 6px;
+  margin-right: 6px;
+  border-radius: 2px;
+  font-weight: 700;
+  font-size: 0.76rem;
+  border: 1px solid transparent;
+}
+
+.calc-pts-col {
+  color: var(--ps4-plus-gold);
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* Responsywność */
+@media (max-width: 1100px) {
+  .tch-grid,
+  .calc-split,
+  .calc-points-split {
+    grid-template-columns: 1fr;
+  }
+  .calc-hero-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.is-mobile .calc-scroll-pane {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+body.is-mobile.is-portrait .tch-card {
+  flex-direction: column;
+}
+
+body.is-mobile.is-portrait .tch-card-live-side {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+body.is-mobile.is-portrait .calc-sim-row {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* ============================================================================
+   MOTYWY DYNAMICZNE, TRYB OSZCZĘDNY, USTAWIENIA I AUTORZY (PS4 ORBIS OS)
+   ============================================================================ */
+
+/* Dynamiczny gradient pod budynkiem 3D (synchronizowany z motywem z Ustawień) */
+body.has-3d-school {
+  background:
+    radial-gradient(circle at 52% 32%, var(--theme-glow-0, rgba(110, 195, 255, 0.34)) 0%, var(--theme-glow-1, rgba(38, 124, 240, 0.16)) 50%, var(--theme-glow-2, rgba(0, 32, 96, 0)) 70%),
+    linear-gradient(135deg, var(--theme-bg-0, #0039a6) 0%, var(--theme-bg-1, #0046bf) 38%, var(--theme-bg-2, #002b82) 72%, var(--theme-bg-3, #001852) 100%);
+}
+
+/* Podgląd tła, fal i 3D na żywo, gdy otwarte są Ustawienia */
+body.settings-live-bg .game-theme-backdrop {
+  opacity: 0.24;
+}
+
+body.settings-live-bg #school-3d-canvas.ready {
+  opacity: 0.72;
+}
+
+/* Tryb oszczędny / Mniej animacji */
+body.zsa-reduced-motion .ps4-tile.active,
+body.zsa-reduced-motion .submenu-start-row.focused,
+body.zsa-reduced-motion .ps4-tile.active .ps4-tile-inner::after {
+  animation: none !important;
+}
+
+body.zsa-reduced-motion * {
+  scroll-behavior: auto !important;
+}
+
+/* --- APLIKACJA: USTAWIENIA --- */
+.zsa-settings-view {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  animation: orbisSubViewIn 0.38s var(--orbis-ease-ps4) both;
+}
+
+.set-split-layout {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.set-cat-pane,
+.set-detail-pane {
+  background: rgba(5, 16, 40, 0.84);
+}
+
+.set-cat-list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.set-cat-sub {
+  font-size: 0.72rem;
+  color: rgba(195, 222, 255, 0.72);
+  line-height: 1.3;
+}
+
+.set-scroll-pane {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.set-scroll-pane::-webkit-scrollbar,
+.authors-scroll-wrap::-webkit-scrollbar {
+  width: 6px;
+}
+
+.set-scroll-pane::-webkit-scrollbar-thumb,
+.authors-scroll-wrap::-webkit-scrollbar-thumb {
+  background: rgba(126, 200, 255, 0.42);
+  border-radius: 3px;
+}
+
+.set-section-lead {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: rgba(215, 234, 255, 0.86);
+  padding: 9px 12px;
+  background: rgba(8, 24, 58, 0.65);
+  border-left: 3px solid var(--ps4-focus-cyan);
+}
+
+.set-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.set-theme-card {
+  text-align: left;
+  background: rgba(8, 24, 56, 0.82);
+  border: 1.5px solid rgba(102, 190, 255, 0.28);
+  color: #ffffff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s var(--orbis-ease-ps4), border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.set-theme-card:hover {
+  border-color: rgba(255, 255, 255, 0.78);
+  transform: translate3d(0, -2px, 0);
+}
+
+.set-theme-card.active {
+  border-color: var(--ps4-plus-gold);
+  box-shadow: 0 0 16px rgba(245, 196, 24, 0.35);
+}
+
+.set-theme-swatch {
+  position: relative;
+  height: 54px;
+  width: 100%;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.set-theme-wave-line {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: 14px;
+  height: 3px;
+  opacity: 0.78;
+  transform: rotate(-6deg);
+  box-shadow: 0 0 10px currentColor;
+}
+
+.set-theme-check {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  padding: 2px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(4, 14, 34, 0.85);
+  border: 1px solid var(--ps4-plus-gold);
+  color: var(--ps4-plus-gold);
+  border-radius: 2px;
+}
+
+.set-theme-meta {
+  padding: 9px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.set-theme-meta strong {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.set-theme-meta span {
+  font-size: 0.74rem;
+  color: rgba(205, 228, 255, 0.76);
+  line-height: 1.35;
+}
+
+.set-custom-card {
+  padding: 13px 15px;
+  background: rgba(8, 24, 56, 0.84);
+  border: 1.5px solid rgba(102, 190, 255, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.set-custom-card.active {
+  border-color: var(--ps4-plus-gold);
+}
+
+.set-custom-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.set-custom-head strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #ffffff;
+}
+
+.set-custom-head span {
+  font-size: 0.76rem;
+  color: rgba(205, 228, 255, 0.76);
+}
+
+.set-color-pickers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.set-color-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(4, 14, 34, 0.76);
+  border: 1px solid rgba(102, 190, 255, 0.25);
+  font-size: 0.8rem;
+  color: #dbeeff;
+}
+
+.set-color-field input[type="color"] {
+  width: 44px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: transparent;
+  cursor: pointer;
+}
+
+.set-rows-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(10, 28, 66, 0.76);
+  border: 1px solid rgba(102, 190, 255, 0.22);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.set-row:hover:not(.is-disabled) {
+  background: rgba(16, 44, 102, 0.88);
+  border-color: rgba(165, 220, 255, 0.65);
+}
+
+.set-row.is-disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.set-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 210px;
+}
+
+.set-row-info strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.set-row-info span {
+  font-size: 0.76rem;
+  color: rgba(200, 224, 255, 0.78);
+  line-height: 1.38;
+}
+
+/* Przełącznik ON/OFF w stylu PS4 */
+.set-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.set-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.set-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1.5px solid rgba(126, 200, 255, 0.45);
+  border-radius: 14px;
+  transition: background-color 0.22s ease, border-color 0.22s ease;
+}
+
+.set-slider::before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.22s var(--orbis-spring);
+}
+
+.set-switch input:checked + .set-slider {
+  background: rgba(28, 118, 232, 0.9);
+  border-color: #ffffff;
+  box-shadow: 0 0 12px rgba(96, 196, 255, 0.48);
+}
+
+.set-switch input:checked + .set-slider::before {
+  transform: translate(22px, -50%);
+}
+
+.set-range-wrap,
+.set-mode-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.set-range-wrap input[type="range"] {
+  width: 150px;
+  accent-color: var(--ps4-plus-gold);
+  cursor: pointer;
+}
+
+/* --- APLIKACJA: AUTORZY --- */
+.zsa-authors-view {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  animation: orbisSubViewIn 0.38s var(--orbis-ease-ps4) both;
+}
+
+.authors-scroll-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding: 2px 10px 18px 2px;
+  scroll-behavior: smooth;
+}
+
+.authors-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.authors-card .dir-info-card-desc {
+  font-size: 0.9rem;
+  line-height: 1.56;
+}
+
+.authors-contact-banner {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(66, 52, 8, 0.52) 0%, rgba(10, 26, 58, 0.9) 100%);
+  border: 1.5px solid rgba(245, 196, 24, 0.72);
+  border-left: 5px solid var(--ps4-plus-gold);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.authors-contact-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.authors-contact-text {
+  font-size: 0.92rem;
+  line-height: 1.58;
+  color: #fff6d6;
+}
+
+.authors-legal-list {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 18px;
+}
+
+/* Responsywność dla Ustawień i Autorów */
+@media (max-width: 1100px) {
+  .set-split-layout,
+  .authors-grid,
+  .authors-legal-list,
+  .set-color-pickers {
+    grid-template-columns: 1fr;
+  }
+
+  .set-cat-pane {
+    max-height: 185px;
+  }
+}
+
+body.is-mobile .set-scroll-pane,
+body.is-mobile .authors-scroll-wrap {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+
+/* ============================================================================
+   WYKAZ FREKWENCJI %, KALKULATOR ZACHOWANIA ZSA, GDZIE JEST KLASA I EGZAMINY
+   ============================================================================ */
+.clock-myclass-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(24, 92, 204, 0.45);
+  border: 1px solid rgba(126, 200, 255, 0.7);
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.clock-myclass-chip:hover {
+  background: rgba(42, 126, 240, 0.82);
+  border-color: #ffffff;
+}
+
+/* Gdzie teraz ma klasa? (Plan Lekcji) */
+.tt-where-now-box {
+  margin-top: 8px;
+  padding: 12px 16px;
+  background: rgba(6, 20, 48, 0.88);
+  border: 1px solid rgba(102, 190, 255, 0.35);
+  border-left: 4px solid var(--ps4-ok);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tt-where-head, .tt-where-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tt-where-result {
+  font-size: 0.86rem;
+}
+.tt-class-live-mini {
+  margin-top: 4px;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tt-class-live-mini.is-live { background: rgba(8, 54, 42, 0.8); border: 1px solid rgba(78, 242, 168, 0.6); color: #a7f3d0; }
+.tt-class-live-mini.is-next { background: rgba(68, 52, 10, 0.62); border: 1px solid rgba(245, 196, 24, 0.45); color: #fde68a; }
+
+/* Szybki Librus — Wykaz % (LibrusPro) */
+.lib-stats-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  flex-shrink: 0;
+}
+.lib-stat-kpi {
+  padding: 10px 13px;
+  background: rgba(6, 20, 48, 0.88);
+  border: 1px solid rgba(102, 190, 255, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.lib-stat-kpi.main { border-left: 4px solid var(--ps4-focus-cyan); }
+.lib-stat-kpi.ok { border-left-color: var(--ps4-ok); }
+.lib-stat-kpi.danger { border-left-color: var(--ps4-danger); }
+.lib-stat-kpi.warn { border-left: 4px solid var(--ps4-plus-gold); }
+.lib-stat-kpi span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(185, 218, 255, 0.78); }
+.lib-stat-kpi strong { font-size: 1.38rem; color: #ffffff; line-height: 1.1; }
+.lib-stat-kpi small { font-size: 0.74rem; color: rgba(205, 228, 255, 0.76); }
+
+.lib-pct-cell { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lib-mini-bar { width: 72px; height: 6px; background: rgba(255, 255, 255, 0.12); border-radius: 2px; overflow: hidden; }
+.lib-mini-bar-fill { height: 100%; }
+.lib-margin-ok { font-size: 0.75rem; color: #a7f3d0; }
+.lib-margin-danger { font-size: 0.75rem; color: #ff8e99; }
+tr.is-danger-row td { background: rgba(110, 18, 34, 0.45); }
+tr.is-warn-row td { background: rgba(82, 62, 10, 0.3); }
+tr.calc-att-pick-row { cursor: pointer; }
+tr.calc-att-pick-row:hover td { background: rgba(34, 96, 200, 0.35); }
+
+/* Kalkulator Zachowania (Statut ZSA) */
+.calc-beh-list { display: flex; flex-direction: column; gap: 5px; }
+.calc-beh-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  background: rgba(10, 28, 66, 0.72);
+  border: 1px solid rgba(102, 190, 255, 0.2);
+}
+.calc-beh-row.has-val { border-color: rgba(245, 196, 24, 0.65); background: rgba(18, 44, 98, 0.88); }
+.calc-beh-info { display: flex; flex-direction: column; gap: 2px; }
+.calc-beh-info strong { font-size: 0.82rem; color: #ffffff; }
+.calc-beh-info span { font-size: 0.72rem; color: rgba(200, 224, 255, 0.78); }
+.calc-beh-stepper { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.calc-step-btn {
+  width: 26px; height: 26px;
+  background: rgba(28, 92, 204, 0.55);
+  border: 1px solid rgba(150, 215, 255, 0.65);
+  color: #ffffff; font-weight: 700; border-radius: 3px;
+}
+.calc-step-btn:hover { background: rgba(46, 130, 245, 0.9); border-color: #ffffff; }
+.calc-step-val { min-width: 22px; text-align: center; font-weight: 700; font-size: 0.86rem; }
+
+/* Terminarz — Egzaminy i Ważne Daty */
+.cal-exams-view { flex-direction: column; gap: 12px; flex: 1; min-height: 0; overflow-y: auto; padding: 2px 6px 14px 2px; }
+.cal-exams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+.cal-exam-card {
+  padding: 15px 18px;
+  background: rgba(7, 22, 54, 0.9);
+  border: 1.5px solid rgba(102, 190, 255, 0.35);
+  border-left: 4px solid var(--ps4-focus-cyan);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.cal-exam-card.is-soon { border-left-color: var(--ps4-plus-gold); background: rgba(58, 45, 10, 0.45); }
+.cal-exam-card.is-past { opacity: 0.62; }
+.cal-exam-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cal-exam-days { padding: 2px 9px; font-size: 0.78rem; font-weight: 700; background: rgba(245, 196, 24, 0.18); border: 1px solid var(--ps4-plus-gold); color: var(--ps4-plus-gold); border-radius: 3px; white-space: nowrap; }
+.cal-exam-title { font-size: 1.06rem; font-weight: 600; color: #ffffff; }
+.cal-exam-date { font-size: 0.8rem; color: rgba(210, 232, 255, 0.84); line-height: 1.4; }
+.cal-exams-note { font-size: 0.78rem; color: rgba(190, 218, 255, 0.72); padding: 8px 12px; background: rgba(5, 16, 40, 0.75); border: 1px solid rgba(102, 190, 255, 0.2); }
+
+@media (max-width: 1100px) {
+  .lib-stats-kpis { grid-template-columns: repeat(2, 1fr); }
 }

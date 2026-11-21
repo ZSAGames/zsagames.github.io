@@ -702,6 +702,133 @@
       .join("");
   }
 
+
+  /* ==================== ZAKŁADKA 4: WYKAZ UCZĘSZCZANIA (% FREKWENCJI — LIBRUS PRO API) ==================== */
+  function computeMarginForThreshold(presences, total, thresholdRatio) {
+    if (!total || total <= 0) return { ok: true, canSkip: 0, mustAttend: 0 };
+    const ratio = presences / total;
+    if (ratio >= thresholdRatio) {
+      // Ile kolejnych lekcji można opuścić, żeby utrzymać presences / (total + x) >= thresholdRatio
+      const canSkip = Math.max(0, Math.floor(presences / thresholdRatio - total));
+      return { ok: true, canSkip, mustAttend: 0 };
+    } else {
+      // Ile kolejnych obecności potrzeba, żeby (presences + x) / (total + x) >= thresholdRatio
+      const mustAttend = Math.max(1, Math.ceil((thresholdRatio * total - presences) / (1 - thresholdRatio)));
+      return { ok: false, canSkip: 0, mustAttend };
+    }
+  }
+
+  function percentToneClass(pct) {
+    if (pct === null || pct === undefined || Number.isNaN(pct)) return "lib-g-neutral";
+    if (pct >= 80) return "lib-g-high";
+    if (pct >= 60) return "lib-g-good";
+    if (pct >= 50) return "lib-g-mid";
+    return "lib-g-low";
+  }
+
+  function renderAttendanceStatsView() {
+    const kpiEl = $("lib-stats-kpis");
+    const tbodyEl = $("lib-stats-tbody");
+    const noteEl = $("lib-stats-note");
+    const countBadgeEl = $("lib-count-stats");
+
+    const summary = librusData?.attendanceSummary || null;
+    if (countBadgeEl) {
+      countBadgeEl.textContent =
+        summary && summary.overallPercent !== null && summary.overallPercent !== undefined
+          ? `${summary.overallPercent.toFixed(1)}%`
+          : "—";
+    }
+
+    if (!kpiEl || !tbodyEl) return;
+
+    if (!summary || !summary.available) {
+      kpiEl.innerHTML = `
+        <div class="lib-stat-kpi warn" style="grid-column: 1 / -1;">
+          <span>Pełny wykaz frekwencji (obecności + %)</span>
+          <strong>Niedostępny w tej sesji</strong>
+          <small>Serwer nie otrzymał danych z bramki Synergia Gateway API 2.0 (zaktualizuj server.js na Renderze lub odśwież sesję). Podstawowa liczba nieobecności została jednak przekazana do Kalkulatora.</small>
+        </div>
+      `;
+      tbodyEl.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:22px;color:rgba(200,224,255,0.75);">Brak szczegółowego wykazu wg przedmiotów.</td></tr>`;
+      if (noteEl) noteEl.textContent = "Źródło: tryb awaryjny (tylko nieobecności).";
+      return;
+    }
+
+    const overallPct = summary.overallPercent ?? 0;
+    const m50 = computeMarginForThreshold(summary.presences, summary.total, 0.5);
+    const m80 = computeMarginForThreshold(summary.presences, summary.total, 0.8);
+    const perfectCount = Array.isArray(summary.perfectMonths) ? summary.perfectMonths.length : 0;
+
+    kpiEl.innerHTML = `
+      <div class="lib-stat-kpi main ${overallPct < 50 ? "danger" : overallPct >= 80 ? "ok" : ""}">
+        <span>Ogólna frekwencja</span>
+        <strong>${overallPct.toFixed(2)}%</strong>
+        <small>${m80.ok ? `Zapas do 80%: ${m80.canSkip} lek.` : `Do 80% brakuje: ${m80.mustAttend} ob.`}</small>
+      </div>
+      <div class="lib-stat-kpi">
+        <span>Obecności (ob + s)</span>
+        <strong style="color:#4ef2a8;">${summary.presences}</strong>
+        <small>z ${summary.total} wpisanych lekcji</small>
+      </div>
+      <div class="lib-stat-kpi">
+        <span>Nieobecności (nb / uspr.)</span>
+        <strong style="color:#ff8e99;">${summary.absencesTotal}</strong>
+        <small>nb: ${summary.nb} • uspr.: ${summary.u}</small>
+      </div>
+      <div class="lib-stat-kpi">
+        <span>Spóźnienia • 100% mies.</span>
+        <strong style="color:#f5c418;">${summary.s} sp. • ${perfectCount} m.</strong>
+        <small>${m50.ok ? `Zapas do 50%: ${m50.canSkip} lek.` : `UWAGA: poniżej 50%!`}</small>
+      </div>
+    `;
+
+    const sortMode = $("lib-stats-sort")?.value || "percent-asc";
+    const rows = (summary.bySubject || []).slice();
+    rows.sort((a, b) => {
+      if (sortMode === "percent-asc") return a.percent - b.percent;
+      if (sortMode === "percent-desc") return b.percent - a.percent;
+      if (sortMode === "absences-desc") return b.absences - a.absences;
+      return a.subject.localeCompare(b.subject, "pl");
+    });
+
+    if (rows.length === 0) {
+      tbodyEl.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:22px;color:rgba(200,224,255,0.75);">Brak wpisów lekcji w dzienniku.</td></tr>`;
+    } else {
+      tbodyEl.innerHTML = rows
+        .map((r) => {
+          const margin50 = computeMarginForThreshold(r.presences, r.total, 0.5);
+          const marginText = margin50.ok
+            ? `<span class="lib-margin-ok">Możesz opuścić: <strong>${margin50.canSkip}</strong></span>`
+            : `<span class="lib-margin-danger">Zagrożenie! Przyjdź na <strong>${margin50.mustAttend}</strong></span>`;
+          const barW = Math.max(0, Math.min(100, r.percent));
+          const tone = percentToneClass(r.percent);
+
+          return `
+            <tr class="${r.percent < 50 ? "is-danger-row" : r.percent < 60 ? "is-warn-row" : ""}">
+              <td><strong>${escapeHtml(r.subject)}</strong></td>
+              <td class="lib-muted">${escapeHtml(r.teacher || "—")}</td>
+              <td style="text-align:center;color:#a7f3d0;font-weight:600;">${r.presences}</td>
+              <td style="text-align:center;color:#ff9aa4;font-weight:700;">${r.absences}${r.nb || r.u ? ` <span class="lib-muted">(${r.nb}/${r.u})</span>` : ""}</td>
+              <td style="text-align:center;">${r.total}</td>
+              <td>
+                <div class="lib-pct-cell">
+                  <span class="calc-scale-badge ${tone}">${r.percent.toFixed(1)}%</span>
+                  <div class="lib-mini-bar"><div class="lib-mini-bar-fill ${tone}" style="width:${barW}%"></div></div>
+                  ${marginText}
+                </div>
+              </td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    if (noteEl) {
+      noteEl.textContent = `Dane pobrane z Synergia Gateway API 2.0 (${rows.length} przedmiotów • zwolnienia zw: ${summary.zw}).`;
+    }
+  }
+
   /* ==================== WYPEŁNIENIE PANELU PO ZALOGOWANIU ==================== */
   function populateDashboard() {
     const absences = librusData?.absences || [];
@@ -757,6 +884,8 @@
     renderGradesView();
     renderAttendanceView();
     renderTopicsView();
+    renderAttendanceStatsView();
+    window.dispatchEvent(new CustomEvent("zsa-librus-updated"));
   }
 
   /* ==================== LOGOWANIE I OBSŁUGA BŁĘDÓW / PRZERWY TECHNICZNEJ ==================== */
@@ -883,6 +1012,16 @@
     setLibrusStatus("", false, false);
     sfx("back");
     syncServerWatcher();
+    window.dispatchEvent(new CustomEvent("zsa-librus-updated"));
+  };
+
+  window.ZSA_LIBRUS_STORE = {
+    isLoggedIn: () => Boolean(librusData),
+    getAccountInfo: () => librusData?.accountInfo || null,
+    getSubjects: () => extractNormalizedSubjects(librusData?.grades || []),
+    getAbsences: () => librusData?.absences || [],
+    getAttendanceSummary: () => librusData?.attendanceSummary || null,
+    getRawData: () => librusData
   };
 
   function initLibrusEvents() {
@@ -951,6 +1090,15 @@
     });
 
     $("lib-topics-search")?.addEventListener("input", renderTopicsView);
+    $("lib-stats-sort")?.addEventListener("change", renderAttendanceStatsView);
+    $("lib-goto-calc-att-btn")?.addEventListener("click", () => {
+      if (typeof window.openZsaCalculatorTab === "function") window.openZsaCalculatorTab("attendance");
+      else if (typeof window.openZsaAppById === "function") window.openZsaAppById("calculator-app");
+    });
+    $("lib-goto-calc-beh-btn")?.addEventListener("click", () => {
+      if (typeof window.openZsaCalculatorTab === "function") window.openZsaCalculatorTab("behavior");
+      else if (typeof window.openZsaAppById === "function") window.openZsaAppById("calculator-app");
+    });
 
     // Automatyczne sprawdzanie statusu po wyświetleniu widoku
     const viewEl = $("zsa-librus-view");

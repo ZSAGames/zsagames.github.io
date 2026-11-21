@@ -17,26 +17,26 @@
     // "hologram"  -> półprzezroczyste granatowe szkło + siatka wireframe
     renderMode: "wireframe",
     wireframeColor: 0x7ec8ff,     // Kolor linii (błękit PS4)
-    wireframeOpacity: 0.95,       // Przezroczystość linii (0.0 – 1.0)
+    wireframeOpacity: 0.999,       // Przezroczystość linii (0.0 – 1.0)
     fillColor: 0x062364,          // Kolor delikatnego wypełnienia dla "edges" i "hologram"
     fillOpacity: 0.76,            // Przezroczystość wypełnienia (0 = samo szkło/linie)
     edgeThresholdDeg: 1500,         // Kąt wykrywania krawędzi w trybie "edges" (im mniej, tym więcej detali)
 
     // === POZYCJA, OBRÓT (W STOPNIACH) I SKALA ===
     modelScale: 1.7,
-    modelOffsetX: 0.85,           // Lewo (-) / Prawo (+)
-    modelOffsetY: -0.15,          // Dół (-) / Góra (+)
+    modelOffsetX: 0.5,           // Lewo (-) / Prawo (+)
+    modelOffsetY: 0,          // Dół (-) / Góra (+)
     modelOffsetZ: -0.5,            // Dalej (-) / Bliżej (+)
-    rotationXDeg: -10,
-    rotationYDeg: -25,            // Obrót poziomy fasady (np. 0, 90, 180, -30)
-    rotationZDeg: -2.5,
+    rotationXDeg: 0,
+    rotationYDeg: -55,            // Obrót poziomy fasady (np. 0, 90, 180, -30)
+    rotationZDeg: -0,
 
     // === KAMERA I PARALAKSA ===
-    cameraFov: 60,
-    cameraDistance: 7.4,
-    cameraHeight: 1.55,
-    lookAtY: 0.1,
-    panStrength: 1.15,            // Zakres przesuwania w bok przy przewijaniu menu
+    cameraFov: 35,
+    cameraDistance: 8.4,
+    cameraHeight: 0.25,
+    lookAtY: 0.05,
+    panStrength: 4.5,            // Zakres przesuwania w bok przy przewijaniu menu
     yawStrength: 0.16,            // Zakres obrotu kamery (radiany)
     smoothness: 4.8,              // Płynność ruchu (niezależna od 60Hz/144Hz)
     idleBreathStrength: 0.4,
@@ -48,6 +48,8 @@
   const DEG2RAD = Math.PI / 180;
 
   let THREE_LIB = null;
+  let isSupportedDesktop = false;
+  let userEnabled3D = true;
   let isModelReady = false;
   let isPausedBySleep = false;
   let isPausedBySubmenu = false;
@@ -228,10 +230,11 @@
 
   /* ================= 3. KONTROLA PĘTLI RENDEROWANIA ================= */
   function shouldRenderNow() {
-    if (!isModelReady || !renderer || !scene || !camera) return false;
+    if (!userEnabled3D || !isModelReady || !renderer || !scene || !camera) return false;
     if (document.hidden) return false;
     if (isPausedBySleep || document.body.classList.contains("state-sleep")) return false;
-    if (isPausedBySubmenu || document.body.classList.contains("state-submenu")) return false;
+    const inSettingsPreview = document.body.classList.contains("settings-live-bg");
+    if ((isPausedBySubmenu || document.body.classList.contains("state-submenu")) && !inSettingsPreview) return false;
     return true;
   }
 
@@ -300,7 +303,38 @@
   /* ================= 4. PUBLICZNE API (base.js + KONSOLA DEVTOOLS) ================= */
   window.ZSA_SCHOOL_3D = {
     config: SCHOOL_3D_CONFIG,
-    isActive: () => isModelReady,
+    isSupported: () => isSupportedDesktop,
+    isActive: () => isModelReady && userEnabled3D,
+
+    setEnabled(enabled) {
+      userEnabled3D = Boolean(enabled);
+      if (canvasEl) {
+        canvasEl.style.display = userEnabled3D ? "" : "none";
+      }
+      document.body.classList.toggle("has-3d-school", isModelReady && userEnabled3D);
+      if (userEnabled3D) {
+        syncRenderLoop();
+      } else {
+        stopLoop();
+      }
+    },
+
+    applyTheme(theme, renderMode) {
+      if (!theme) return;
+      if (typeof theme.wireframeColor === "number") SCHOOL_3D_CONFIG.wireframeColor = theme.wireframeColor;
+      if (typeof theme.fillColor === "number") SCHOOL_3D_CONFIG.fillColor = theme.fillColor;
+      if (renderMode) SCHOOL_3D_CONFIG.renderMode = renderMode;
+
+      if (scene && scene.fog && typeof theme.fogColor === "number") {
+        scene.fog.color.setHex(theme.fogColor);
+      }
+      if (isModelReady) {
+        applyRenderMode(SCHOOL_3D_CONFIG.renderMode);
+        if (shouldRenderNow()) {
+          renderer.render(scene, camera);
+        }
+      }
+    },
 
     setRibbonPosition(index, totalCount, navLevel) {
       const safeTotal = Math.max(2, Number(totalCount) || 2);
@@ -363,9 +397,18 @@
     canvasEl = document.getElementById("school-3d-canvas");
     if (!canvasEl) return;
 
-    if (!isCapableDesktopPC()) {
+    isSupportedDesktop = isCapableDesktopPC();
+    if (!isSupportedDesktop) {
       canvasEl.remove();
       return;
+    }
+    if (window.ZSA_SETTINGS_MANAGER) {
+      const st = window.ZSA_SETTINGS_MANAGER.get();
+      const th = window.ZSA_SETTINGS_MANAGER.getTheme();
+      userEnabled3D = Boolean(st.school3dEnabled);
+      if (st.school3dMode) SCHOOL_3D_CONFIG.renderMode = st.school3dMode;
+      if (th && typeof th.wireframeColor === "number") SCHOOL_3D_CONFIG.wireframeColor = th.wireframeColor;
+      if (th && typeof th.fillColor === "number") SCHOOL_3D_CONFIG.fillColor = th.fillColor;
     }
 
     try {
@@ -447,7 +490,14 @@
 
           isModelReady = true;
           currentNormX = targetNormX;
-          document.body.classList.add("has-3d-school");
+          if (window.ZSA_SETTINGS_MANAGER) {
+            const st = window.ZSA_SETTINGS_MANAGER.get();
+            const th = window.ZSA_SETTINGS_MANAGER.getTheme();
+            userEnabled3D = Boolean(st.school3dEnabled);
+            window.ZSA_SCHOOL_3D.applyTheme(th, st.school3dMode);
+          }
+          if (canvasEl) canvasEl.style.display = userEnabled3D ? "" : "none";
+          document.body.classList.toggle("has-3d-school", userEnabled3D);
           canvasEl.classList.add("ready");
 
           canvasEl.addEventListener("webglcontextlost", (e) => {
